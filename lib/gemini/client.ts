@@ -70,8 +70,8 @@ export class AcademicIntelligenceEngine {
       
       // Sort: prioritized first, then others
       const sorted = [
-        ...prioritized.filter(m => models.includes(m)),
-        ...models.filter(m => !prioritized.includes(m))
+        ...prioritized.filter((m: string) => models.includes(m)),
+        ...models.filter((m: string) => !prioritized.includes(m))
       ];
       
       console.log("Available models (filtered):", sorted);
