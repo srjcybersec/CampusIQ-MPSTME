@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - users can read/write their own document
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+      // Allow creating user profile on first login
+      allow create: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Users can read/write their own Google Calendar tokens
+    match /googleCalendarTokens/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to read schedules
+    match /schedule/{scheduleId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read/write assignments
+    match /assignments/{assignmentId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read/write notes
+    match /notes/{noteId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow all authenticated users to read PYQs
+    match /pyqs/{pyqId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Update this for admin-only later
+    }
+    
+    // Allow all authenticated users to read/write events
+    match /events/{eventId} {
+      allow read: if true; // Public read
+      allow write: if request.auth != null;
+    }
+    
+    // Allow all authenticated users to read/write confessions
+    match /confessions/{confessionId} {
+      allow read: if true; // Public read
+      allow write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read/write rooms
+    match /rooms/{roomId} {
+      allow read: if true; // Public read
+      allow write: if request.auth != null;
+    }
+  }
+}
