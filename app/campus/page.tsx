@@ -66,12 +66,12 @@ function CampusPageContent() {
                 Daily Canteen Menu
               </CardTitle>
               <CardDescription>
-                Today's thaali and platter options
+                Today&apos;s thaali and platter options
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-neutral-600 mb-4">
-                View today's menu with daily updates on available meals.
+                View today&apos;s menu with daily updates on available meals.
               </p>
               <div className="space-y-2">
                 <div className="p-3 bg-neutral-50 rounded border border-neutral-200">

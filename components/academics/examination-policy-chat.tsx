@@ -122,7 +122,7 @@ export function ExaminationPolicyChat() {
           Examination Policy Assistant
         </CardTitle>
         <CardDescription>
-          Ask questions about MPSTME college's Examination Policy
+          Ask questions about MPSTME college&apos;s Examination Policy
         </CardDescription>
       </CardHeader>
       <CardContent>

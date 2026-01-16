@@ -55,12 +55,12 @@ function CommunityPageContent() {
               <div className="space-y-2 mb-4">
                 <div className="p-3 bg-neutral-50 rounded border border-neutral-200">
                   <p className="text-sm text-neutral-700">
-                    "The library is so peaceful during exam season. Best study spot!"
+                    &quot;The library is so peaceful during exam season. Best study spot!&quot;
                   </p>
                 </div>
                 <div className="p-3 bg-neutral-50 rounded border border-neutral-200">
                   <p className="text-sm text-neutral-700">
-                    "Anyone else struggling with the Data Structures assignment? Let's form a study group!"
+                    &quot;Anyone else struggling with the Data Structures assignment? Let&apos;s form a study group!&quot;
                   </p>
                 </div>
               </div>

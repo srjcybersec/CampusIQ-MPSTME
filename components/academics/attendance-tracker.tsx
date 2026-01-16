@@ -411,7 +411,7 @@ export function AttendanceTracker() {
                   )}
                   {result.isEligible && result.canMissMore === 0 && (
                     <div className="mt-2 p-2 bg-amber-100 rounded text-sm text-amber-800">
-                      ⚠️ You've reached the maximum missable hours. No more absences allowed.
+                      ⚠️ You&apos;ve reached the maximum missable hours. No more absences allowed.
                     </div>
                   )}
                 </div>

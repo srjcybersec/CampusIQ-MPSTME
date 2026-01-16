@@ -44,7 +44,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
             <CardDescription>
-              You don't have permission to access this page. This page is only available for: {allowedRoles.join(", ")}.
+              You don&apos;t have permission to access this page. This page is only available for: {allowedRoles.join(", ")}.
             </CardDescription>
           </CardHeader>
         </Card>

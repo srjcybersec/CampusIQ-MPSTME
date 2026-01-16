@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Calendar, CheckCircle, XCircle, RefreshCw, Unlink } from "lucide-react";
@@ -121,7 +121,7 @@ export function GoogleCalendarSync() {
     }
   }, [user, router]);
 
-  const checkConnection = async () => {
+  const checkConnection = useCallback(async () => {
     if (!user?.uid) return;
     
     try {
@@ -132,7 +132,7 @@ export function GoogleCalendarSync() {
       console.error("Error checking connection:", error);
       setIsConnected(false);
     }
-  };
+  }, [user?.uid]);
 
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -323,7 +323,7 @@ export function GoogleCalendarSync() {
     if (user?.uid) {
       checkConnection();
     }
-  }, [user]);
+  }, [user, checkConnection]);
 
   return (
     <Card className="shadow-premium border-2 border-green-100">
@@ -433,7 +433,7 @@ export function GoogleCalendarSync() {
                     )}
                     {syncStatus.success && !syncStatus.eventsCreated && (
                       <p className="text-xs text-green-700 mt-2">
-                        Click "Sync Timetable to Calendar" below to add your classes.
+                        Click &quot;Sync Timetable to Calendar&quot; below to add your classes.
                       </p>
                     )}
                   </div>
