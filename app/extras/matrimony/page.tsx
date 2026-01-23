@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { MatrimonyProfileForm } from "@/components/extras/matrimony-profile-form";
@@ -20,13 +20,7 @@ function MatrimonyPageContent() {
   const [activeTab, setActiveTab] = useState<"profile" | "matches" | "my-matches">("profile");
   const [profileDetails, setProfileDetails] = useState<Record<string, MatrimonyProfile>>({});
 
-  useEffect(() => {
-    if (user) {
-      loadProfile();
-    }
-  }, [user]);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     if (!user) return;
     setIsLoading(true);
     try {
@@ -41,7 +35,13 @@ function MatrimonyPageContent() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user, loadProfile]);
 
   const loadMyMatches = async () => {
     if (!user) return;
@@ -236,7 +236,7 @@ function MatrimonyPageContent() {
                     <Sparkles className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
                     <p className="text-neutral-500 mb-2">No matches yet</p>
                     <p className="text-sm text-neutral-400">
-                      Click "Find My Matches" to discover compatible connections!
+                      Click &quot;Find My Matches&quot; to discover compatible connections!
                     </p>
                   </CardContent>
                 </Card>
@@ -274,7 +274,7 @@ function MatrimonyPageContent() {
                     <MessageCircle className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
                     <p className="text-neutral-500 mb-2">No accepted matches yet</p>
                     <p className="text-sm text-neutral-400">
-                      Accept matches from the "Find Matches" tab to start chatting!
+                      Accept matches from the &quot;Find Matches&quot; tab to start chatting!
                     </p>
                   </CardContent>
                 </Card>

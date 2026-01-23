@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SurvivalKitCard } from "@/components/resources/survival-kit-card";
@@ -58,11 +58,7 @@ function SurvivalKitsPageContent() {
     loadKits();
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [kits, searchQuery, subject, semester, examType]);
-
-  const loadKits = async () => {
+  const loadKits = useCallback(async () => {
     setIsLoading(true);
     try {
       const fetchedKits = await getSurvivalKits();
@@ -72,9 +68,13 @@ function SurvivalKitsPageContent() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const applyFilters = () => {
+  useEffect(() => {
+    loadKits();
+  }, [loadKits]);
+
+  const applyFilters = useCallback(() => {
     let filtered = [...kits];
 
     // Apply search query
@@ -107,7 +107,11 @@ function SurvivalKitsPageContent() {
     });
 
     setFilteredKits(filtered);
-  };
+  }, [kits, searchQuery, subject, semester, examType]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const clearFilters = () => {
     setSearchQuery("");

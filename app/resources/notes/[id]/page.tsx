@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -38,21 +38,7 @@ function NoteDetailContent() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  useEffect(() => {
-    if (noteId) {
-      loadNote();
-    }
-  }, [noteId]);
-
-  useEffect(() => {
-    if (note && user) {
-      loadUserRating();
-      // Increment views
-      incrementNoteViews(note.id).catch(console.error);
-    }
-  }, [note, user]);
-
-  const loadNote = async () => {
+  const loadNote = useCallback(async () => {
     setIsLoading(true);
     try {
       const fetchedNote = await getNote(noteId);
@@ -75,9 +61,15 @@ function NoteDetailContent() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [noteId, router]);
 
-  const loadUserRating = async () => {
+  useEffect(() => {
+    if (noteId) {
+      loadNote();
+    }
+  }, [noteId, loadNote]);
+
+  const loadUserRating = useCallback(async () => {
     if (!user || !note) return;
     try {
       const rating = await getUserRating(note.id, user.uid);
@@ -88,7 +80,15 @@ function NoteDetailContent() {
     } catch (error) {
       console.error("Error loading user rating:", error);
     }
-  };
+  }, [user, note]);
+
+  useEffect(() => {
+    if (note && user) {
+      loadUserRating();
+      // Increment views
+      incrementNoteViews(note.id).catch(console.error);
+    }
+  }, [note, user, loadUserRating]);
 
   const handleRating = async (rating: number) => {
     if (!user) {

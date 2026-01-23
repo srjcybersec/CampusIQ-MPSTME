@@ -163,7 +163,7 @@ export function MatrimonyMatchCard({ match, otherUserProfile, onUpdate, onChat }
               </div>
               {otherUserProfile.bio && (
                 <div className="mt-3 pt-3 border-t border-neutral-200">
-                  <p className="text-sm text-neutral-700 italic">"{otherUserProfile.bio}"</p>
+                  <p className="text-sm text-neutral-700 italic">&quot;{otherUserProfile.bio}&quot;</p>
                 </div>
               )}
             </div>

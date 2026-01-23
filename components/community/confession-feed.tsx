@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ConfessionCard } from "./confession-card";
 import { Confession, ConfessionCategory } from "@/lib/types/confession";
 import { getConfessions } from "@/lib/firebase/confessions";
@@ -30,11 +30,11 @@ export function ConfessionFeed() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedCategory]);
 
   useEffect(() => {
     loadConfessions();
-  }, [selectedCategory]);
+  }, [loadConfessions]);
 
   const handleUpdate = () => {
     loadConfessions();

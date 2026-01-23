@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Confession, CONFESSION_CATEGORIES, REPORT_REASONS } from "@/lib/types/confession";
@@ -25,13 +25,7 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
 
   const categoryInfo = CONFESSION_CATEGORIES[confession.category];
 
-  useEffect(() => {
-    if (user) {
-      checkLikeStatus();
-    }
-  }, [user, confession.id]);
-
-  const checkLikeStatus = async () => {
+  const checkLikeStatus = useCallback(async () => {
     if (!user) return;
     try {
       const liked = await hasUserLiked(confession.id, user.uid);

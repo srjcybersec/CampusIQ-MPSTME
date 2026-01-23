@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { NoteUploadForm } from "@/components/resources/note-upload-form";
@@ -74,26 +74,7 @@ function NotesPageContent() {
     "newest"
   );
 
-  useEffect(() => {
-    loadNotes();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [
-    notes,
-    searchQuery,
-    subject,
-    semester,
-    difficulty,
-    examType,
-    professor,
-    hasTopperBadge,
-    minRating,
-    sortBy,
-  ]);
-
-  const loadNotes = async () => {
+  const loadNotes = useCallback(async () => {
     setIsLoading(true);
     try {
       const filters: NoteFilter = {};
@@ -113,9 +94,13 @@ function NotesPageContent() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const applyFilters = () => {
+  useEffect(() => {
+    loadNotes();
+  }, [loadNotes]);
+
+  const applyFilters = useCallback(() => {
     let filtered = [...notes];
 
     // Apply search query
@@ -174,7 +159,11 @@ function NotesPageContent() {
     });
 
     setFilteredNotes(filtered);
-  };
+  }, [notes, searchQuery, subject, semester, difficulty, examType, professor, hasTopperBadge, minRating, sortBy]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const clearFilters = () => {
     setSearchQuery("");

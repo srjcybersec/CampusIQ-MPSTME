@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -30,13 +30,7 @@ function SurvivalKitDetailContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  useEffect(() => {
-    if (kitId) {
-      loadKit();
-    }
-  }, [kitId]);
-
-  const loadKit = async () => {
+  const loadKit = useCallback(async () => {
     setIsLoading(true);
     try {
       const fetchedKit = await getSurvivalKit(kitId);
