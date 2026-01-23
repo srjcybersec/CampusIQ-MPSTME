@@ -2,6 +2,7 @@ import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { getFunctions, Functions } from "firebase/functions";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 
 // Firebase configuration
 // These should be set via environment variables
@@ -19,12 +20,18 @@ let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore;
 let functions: Functions;
+let storage: FirebaseStorage;
 
 if (typeof window !== "undefined") {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
   auth = getAuth(app);
   db = getFirestore(app);
   functions = getFunctions(app);
+  storage = getStorage(app);
+} else {
+  // Server-side initialization
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  storage = getStorage(app);
 }
 
-export { app, auth, db, functions };
+export { app, auth, db, functions, storage };

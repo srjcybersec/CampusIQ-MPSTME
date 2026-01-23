@@ -24,15 +24,18 @@ function ResourcesPageContent() {
                 Notes Uploader
               </CardTitle>
               <CardDescription>
-                Upload and organize your course notes
+                Upload, browse, and rate study materials with AI-powered summaries
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-neutral-600 mb-4">
-                Upload notes by subject and access them anytime.
+                Upload notes by subject, get AI summaries, ask questions, and discover top-rated study materials from toppers.
               </p>
-              <Button variant="outline" disabled>
-                Upload Notes
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = "/resources/notes"}
+              >
+                Browse Notes
               </Button>
             </CardContent>
           </Card>

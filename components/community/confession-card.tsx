@@ -1,0 +1,199 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Confession, CONFESSION_CATEGORIES, REPORT_REASONS } from "@/lib/types/confession";
+import { likeConfession, hasUserLiked, reportConfession } from "@/lib/firebase/confessions";
+import { useAuth } from "@/lib/auth/context";
+import { Heart, Flag } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+
+interface ConfessionCardProps {
+  confession: Confession;
+  onUpdate?: () => void;
+}
+
+export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
+  const { user } = useAuth();
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(confession.likes);
+  const [isLiking, setIsLiking] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [isReporting, setIsReporting] = useState(false);
+
+  const categoryInfo = CONFESSION_CATEGORIES[confession.category];
+
+  useEffect(() => {
+    if (user) {
+      checkLikeStatus();
+    }
+  }, [user, confession.id]);
+
+  const checkLikeStatus = async () => {
+    if (!user) return;
+    try {
+      const liked = await hasUserLiked(confession.id, user.uid);
+      setIsLiked(liked);
+    } catch (error) {
+      console.error("Error checking like status:", error);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!user) {
+      alert("Please log in to like confessions");
+      return;
+    }
+
+    if (isLiking) return;
+
+    setIsLiking(true);
+    try {
+      await likeConfession(confession.id, user.uid);
+      setIsLiked(!isLiked);
+      setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+      if (onUpdate) onUpdate();
+    } catch (error: any) {
+      console.error("Error liking confession:", error);
+      alert(error.message || "Failed to like confession");
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleReport = async () => {
+    if (!user) {
+      alert("Please log in to report confessions");
+      return;
+    }
+
+    if (!reportReason) {
+      alert("Please select a reason for reporting");
+      return;
+    }
+
+    setIsReporting(true);
+    try {
+      await reportConfession(confession.id, user.uid, reportReason);
+      alert("Thank you for reporting. We'll review this confession.");
+      setShowReportModal(false);
+      setReportReason("");
+      if (onUpdate) onUpdate();
+    } catch (error: any) {
+      alert(error.message || "Failed to report confession");
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
+  const getTimeAgo = () => {
+    try {
+      const timestamp = confession.createdAt?.toDate?.() || new Date(confession.createdAt);
+      return formatDistanceToNow(timestamp, { addSuffix: true });
+    } catch {
+      return "recently";
+    }
+  };
+
+  return (
+    <>
+      <Card className="shadow-soft hover:shadow-premium transition-all duration-300">
+        <CardContent className="p-5">
+          {/* Category Badge */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">{categoryInfo.emoji}</span>
+              <span className="text-sm font-medium text-neutral-600">
+                {categoryInfo.label}
+              </span>
+            </div>
+            <span className="text-xs text-neutral-400">{getTimeAgo()}</span>
+          </div>
+
+          {/* Content */}
+          <p className="text-neutral-800 mb-4 leading-relaxed whitespace-pre-wrap">
+            {confession.content}
+          </p>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-3 border-t border-neutral-200">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLike}
+              disabled={isLiking || !user}
+              className={`flex items-center gap-2 ${
+                isLiked ? "text-red-500 hover:text-red-600" : "text-neutral-600"
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
+              <span>{likesCount}</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowReportModal(true)}
+              disabled={!user}
+              className="flex items-center gap-2 text-neutral-600 hover:text-red-600"
+            >
+              <Flag className="w-4 h-4" />
+              <span>Report</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-md w-full shadow-premium">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Report Confession</h3>
+              <p className="text-sm text-neutral-600 mb-4">
+                Why are you reporting this confession?
+              </p>
+              <div className="space-y-2 mb-4">
+                {REPORT_REASONS.map((reason) => (
+                  <button
+                    key={reason}
+                    type="button"
+                    onClick={() => setReportReason(reason)}
+                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                      reportReason === reason
+                        ? "border-red-500 bg-red-50"
+                        : "border-neutral-200 bg-white hover:border-neutral-300"
+                    }`}
+                  >
+                    <span className="text-sm text-neutral-800">{reason}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowReportModal(false);
+                    setReportReason("");
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleReport}
+                  disabled={!reportReason || isReporting}
+                  className="flex-1"
+                >
+                  {isReporting ? "Reporting..." : "Report"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </>
+  );
+}

@@ -17,11 +17,11 @@ function ExtrasPageContent() {
           <p className="text-neutral-600 mb-8">Experimental and optional features</p>
 
           {/* Matrimony */}
-          <Card>
+          <Card className="shadow-premium hover:shadow-glow-hover transition-all duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Heart className="w-5 h-5" />
-                Matrimony
+                Campus Matrimony
                 <span className="text-xs font-normal text-neutral-500 bg-neutral-100 px-2 py-1 rounded">
                   Experimental
                 </span>
@@ -32,11 +32,15 @@ function ExtrasPageContent() {
             </CardHeader>
             <CardContent>
               <p className="text-neutral-600 mb-4">
-                A lighthearted experimental feature for campus connections. This feature does not interfere with core academic flows.
+                Find dating partners, friends, or study buddies based on CGPA, branch, year, study style, and personality compatibility. Safe, ethical, and campus-appropriate.
               </p>
-              <Button variant="outline" disabled>
-                Coming Soon
-              </Button>
+              <button
+                onClick={() => window.location.href = '/extras/matrimony'}
+                className="w-full min-h-[40px] px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-medium rounded-xl shadow-premium hover:shadow-glow-hover hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <Heart className="w-4 h-4" />
+                View Matrimony
+              </button>
             </CardContent>
           </Card>
         </div>

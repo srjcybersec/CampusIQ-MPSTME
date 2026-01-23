@@ -38,7 +38,7 @@ function CommunityPageContent() {
           </Card>
 
           {/* Confessions Page */}
-          <Card>
+          <Card className="shadow-premium hover:shadow-glow-hover transition-all duration-300">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5" />
@@ -50,23 +50,28 @@ function CommunityPageContent() {
             </CardHeader>
             <CardContent>
               <p className="text-neutral-600 mb-4">
-                Share your thoughts anonymously. Content moderation hooks are in place for safe discussions.
+                Share your thoughts anonymously. Post confessions in categories like Unsent Messages, College Truths, Almost Confessed, Guilty Pleasures, and Gratitude Notes. All content is moderated for safety.
               </p>
               <div className="space-y-2 mb-4">
-                <div className="p-3 bg-neutral-50 rounded border border-neutral-200">
-                  <p className="text-sm text-neutral-700">
+                <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-neutral-700 italic">
                     &quot;The library is so peaceful during exam season. Best study spot!&quot;
                   </p>
+                  <p className="text-xs text-neutral-500 mt-1">— Gratitude Notes</p>
                 </div>
-                <div className="p-3 bg-neutral-50 rounded border border-neutral-200">
-                  <p className="text-sm text-neutral-700">
+                <div className="p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-lg border border-pink-200">
+                  <p className="text-sm text-neutral-700 italic">
                     &quot;Anyone else struggling with the Data Structures assignment? Let&apos;s form a study group!&quot;
                   </p>
+                  <p className="text-xs text-neutral-500 mt-1">— College Truths</p>
                 </div>
               </div>
-              <Button variant="outline" disabled>
-                Post Confession
-              </Button>
+              <button
+                onClick={() => window.location.href = '/community/confessions'}
+                className="w-full min-h-[40px] px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl shadow-premium hover:shadow-glow-hover hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center"
+              >
+                View & Post Confessions
+              </button>
             </CardContent>
           </Card>
         </div>
