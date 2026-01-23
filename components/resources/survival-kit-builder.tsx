@@ -99,7 +99,7 @@ export function SurvivalKitBuilder({
     try {
       await createSurvivalKit({
         name: kitName,
-        description: description || undefined,
+        description: description.trim() || "",
         creatorId: user.uid,
         noteIds: selectedNoteIds,
         subject,
