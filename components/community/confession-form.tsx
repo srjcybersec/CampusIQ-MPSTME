@@ -21,7 +21,7 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [moderationResult, setModerationResult] = useState<{ errors: string[]; warnings: string[] } | null>(null);
+  const [moderationResult, setModerationResult] = useState<{ isValid: boolean; errors: string[]; warnings: string[] } | null>(null);
 
   const handleContentChange = (value: string) => {
     setContent(value);
@@ -184,7 +184,7 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting || !content.trim() || (moderationResult && !moderationResult.isValid)}
+            disabled={isSubmitting || !content.trim() || !!(moderationResult && !moderationResult.isValid)}
             className="w-full min-h-[40px] px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl shadow-premium hover:shadow-glow-hover hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center"
           >
             {isSubmitting ? "Posting..." : "Post Confession"}
