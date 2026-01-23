@@ -94,7 +94,7 @@ function NotesPageContent() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [subject, semester, difficulty, examType, professor, hasTopperBadge, minRating, searchQuery]);
 
   useEffect(() => {
     loadNotes();
