@@ -15,7 +15,7 @@ export function ConfessionFeed() {
   const [selectedCategory, setSelectedCategory] = useState<ConfessionCategory | "all">("all");
   const [error, setError] = useState<string | null>(null);
 
-  const loadConfessions = async () => {
+  const loadConfessions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {

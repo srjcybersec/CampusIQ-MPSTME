@@ -51,7 +51,7 @@ function SurvivalKitDetailContent() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [kitId, router]);
 
   const handleDownload = async () => {
     if (!user) {
