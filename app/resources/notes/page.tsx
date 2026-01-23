@@ -17,8 +17,8 @@ import {
   Loader2,
   Package,
 } from "lucide-react";
-import { getNotes, NoteFilter } from "@/lib/firebase/notes";
-import { Note, Subject, Semester, Difficulty, ExamType } from "@/lib/types/notes";
+import { getNotes } from "@/lib/firebase/notes";
+import { Note, NoteFilter, Subject, Semester, Difficulty, ExamType } from "@/lib/types/notes";
 import { formatDistanceToNow } from "date-fns";
 
 const SUBJECTS: Subject[] = [

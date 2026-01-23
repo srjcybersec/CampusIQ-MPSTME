@@ -20,30 +20,7 @@ function MatrimonyPageContent() {
   const [activeTab, setActiveTab] = useState<"profile" | "matches" | "my-matches">("profile");
   const [profileDetails, setProfileDetails] = useState<Record<string, MatrimonyProfile>>({});
 
-  const loadProfile = useCallback(async () => {
-    if (!user) return;
-    setIsLoading(true);
-    try {
-      const userProfile = await getProfile(user.uid);
-      setProfile(userProfile);
-      if (userProfile) {
-        setActiveTab("matches");
-        await loadMyMatches();
-      }
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user) {
-      loadProfile();
-    }
-  }, [user, loadProfile]);
-
-  const loadMyMatches = async () => {
+  const loadMyMatches = useCallback(async () => {
     if (!user) return;
     try {
       const userMatches = await getUserMatches(user.uid);
@@ -63,7 +40,30 @@ function MatrimonyPageContent() {
     } catch (error) {
       console.error("Error loading matches:", error);
     }
-  };
+  }, [user, profileDetails]);
+
+  const loadProfile = useCallback(async () => {
+    if (!user) return;
+    setIsLoading(true);
+    try {
+      const userProfile = await getProfile(user.uid);
+      setProfile(userProfile);
+      if (userProfile) {
+        setActiveTab("matches");
+        await loadMyMatches();
+      }
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, loadMyMatches]);
+
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user, loadProfile]);
 
   const handleFindMatches = async () => {
     if (!user) return;

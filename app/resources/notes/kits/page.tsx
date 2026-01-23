@@ -54,10 +54,6 @@ function SurvivalKitsPageContent() {
   const [semester, setSemester] = useState<Semester | "">("");
   const [examType, setExamType] = useState<ExamType | "">("");
 
-  useEffect(() => {
-    loadKits();
-  }, []);
-
   const loadKits = useCallback(async () => {
     setIsLoading(true);
     try {
