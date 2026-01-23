@@ -33,7 +33,7 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
     } catch (error) {
       console.error("Error checking like status:", error);
     }
-  };
+  }, [user, confession.id]);
 
   const handleLike = async () => {
     if (!user) {
