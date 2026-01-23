@@ -79,6 +79,7 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
         personality,
         connectionType,
         bio: bio.trim() || undefined,
+        isActive: true,
       });
 
       setSuccess(true);
