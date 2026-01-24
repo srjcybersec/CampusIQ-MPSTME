@@ -203,7 +203,7 @@ export function MicrosoftTeamsSync({
         {!isConnected && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>Note:</strong> Microsoft Teams integration is optional. You can create and manage assignments manually using the "Add Assignment" button below. If you have Azure AD permissions, you can connect your Microsoft account to automatically sync assignments from Teams.
+              <strong>Note:</strong> Microsoft Teams integration is optional. You can create and manage assignments manually using the &quot;Add Assignment&quot; button below. If you have Azure AD permissions, you can connect your Microsoft account to automatically sync assignments from Teams.
             </p>
           </div>
         )}
