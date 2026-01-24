@@ -768,10 +768,22 @@ export async function getLatestHealthScore(
       return null;
     }
     // Sort client-side and get the latest
-    const scores = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as AssignmentHealthScore[];
+    const scores = snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        userId: data.userId,
+        period: data.period,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        totalAssignments: data.totalAssignments,
+        completedOnTime: data.completedOnTime,
+        overdue: data.overdue,
+        late: data.late,
+        score: data.score,
+        status: data.status,
+        createdAt: data.createdAt,
+      } as AssignmentHealthScore;
+    });
     scores.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
     return scores[0] || null;
   } catch (error) {
