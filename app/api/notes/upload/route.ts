@@ -12,17 +12,50 @@ try {
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
     if (projectId && clientEmail && privateKey) {
+      // Handle private key formatting - Vercel environment variables may have different escaping
+      let formattedPrivateKey = privateKey;
+      
+      // Try to parse as JSON first (in case it's stored as a JSON string in Vercel)
+      try {
+        const parsed = JSON.parse(privateKey);
+        if (typeof parsed === "string") {
+          formattedPrivateKey = parsed;
+        }
+      } catch {
+        // Not JSON, use as-is
+      }
+      
+      // Replace escaped newlines (handle both \\n and \n patterns)
+      formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, "\n");
+      // Handle double-escaped newlines
+      formattedPrivateKey = formattedPrivateKey.replace(/\\\\n/g, "\n");
+      // Handle literal \n strings
+      if (formattedPrivateKey.includes("\\n") && !formattedPrivateKey.includes("\n")) {
+        formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, "\n");
+      }
+      
+      // Ensure proper key format (should start with -----BEGIN PRIVATE KEY-----)
+      if (!formattedPrivateKey.includes("BEGIN PRIVATE KEY") && !formattedPrivateKey.includes("BEGIN RSA PRIVATE KEY")) {
+        console.error("Invalid private key format detected - key does not contain BEGIN marker");
+        throw new Error("Invalid private key format");
+      }
+      
       initializeApp({
         credential: cert({
           projectId,
           clientEmail,
-          privateKey: privateKey.replace(/\\n/g, "\n"),
+          privateKey: formattedPrivateKey,
         }),
         storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
       adminStorage = getStorage();
     } else {
       console.warn("Firebase Admin credentials not found. File upload will be disabled.");
+      console.warn("Missing:", { 
+        projectId: !!projectId, 
+        clientEmail: !!clientEmail, 
+        privateKey: !!privateKey 
+      });
     }
   } else {
     try {
