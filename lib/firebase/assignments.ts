@@ -79,7 +79,15 @@ export async function getMicrosoftTokens(
     if (!tokenDoc.exists()) {
       return null;
     }
-    return { id: tokenDoc.id, ...tokenDoc.data() } as MicrosoftTokens;
+    const data = tokenDoc.data();
+    return {
+      userId: data.userId,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      expiresAt: data.expiresAt,
+      scope: data.scope,
+      updatedAt: data.updatedAt,
+    } as MicrosoftTokens;
   } catch (error) {
     console.error("Error getting Microsoft tokens:", error);
     return null;
