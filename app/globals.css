@@ -230,3 +230,26 @@ html {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Ensure button text is always visible - CRITICAL FIX */
+button.bg-gradient-primary,
+button[class*="bg-gradient-primary"] {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%) !important;
+  background-size: 200% 200% !important;
+}
+
+button.bg-gradient-primary *,
+button[class*="bg-gradient-primary"] *,
+button.bg-gradient-primary span,
+button[class*="bg-gradient-primary"] span {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+button[class*="Button"] span,
+button[class*="button"] span {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: inline-flex !important;
+}

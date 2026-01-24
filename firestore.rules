@@ -1,4 +1,23 @@
 rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Notes uploads - authenticated users can upload/read their own files
+    match /notes/{userId}/{fileName} {
+      // Allow read if authenticated
+      allow read: if request.auth != null;
+      // Allow write only if the user is uploading to their own folder
+      // and file size is less than 50MB
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && request.resource.size < 50 * 1024 * 1024;
+    }
+    
+    // Default: deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
 service cloud.firestore {
   match /databases/{database}/documents {
     // Users collection - users can read/write their own document
@@ -19,9 +38,54 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
     
-    // Allow authenticated users to read/write assignments
+    // Assignments - users can read/write their own assignments
     match /assignments/{assignmentId} {
-      allow read, write: if request.auth != null;
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Courses - users can read/write their own courses
+    match /courses/{courseId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Assignment Submissions - users can read/write their own submissions
+    match /assignmentSubmissions/{submissionId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Assignment Reminders - users can read/write their own reminders
+    match /assignmentReminders/{reminderId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Reminder Preferences - users can read/write their own preferences
+    match /reminderPreferences/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Assignment Health Scores - users can read/write their own scores
+    match /assignmentHealthScores/{scoreId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Microsoft OAuth Tokens - users can read/write their own tokens
+    match /microsoftTokens/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
     // Notes - all authenticated users can read, only uploader can delete

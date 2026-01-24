@@ -31,6 +31,7 @@ if (typeof window !== "undefined") {
 } else {
   // Server-side initialization
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  db = getFirestore(app);
   storage = getStorage(app);
 }
 

@@ -48,14 +48,17 @@ function ResourcesPageContent() {
                 Assignment Management
               </CardTitle>
               <CardDescription>
-                Track assignment submissions and deadlines
+                Sync from Microsoft Teams or create manually. Track deadlines, submissions, and get smart reminders.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-neutral-600 mb-4">
-                Keep track of all your assignments with submission status and reminders.
+                Automatically sync assignments from Microsoft Teams, track submission status, get reminders, and monitor your assignment health score.
               </p>
-              <Button variant="outline" disabled>
+              <Button
+                variant="outline"
+                onClick={() => window.location.href = "/resources/assignments"}
+              >
                 View Assignments
               </Button>
             </CardContent>
