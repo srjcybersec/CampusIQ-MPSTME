@@ -3,7 +3,7 @@
  * Server-side only
  */
 
-import { createWorker } from "tesseract.js";
+import { createWorker, PSM } from "tesseract.js";
 
 /**
  * Extract text from an image buffer using OCR
@@ -22,7 +22,7 @@ export async function extractTextFromPDFImage(
     
     // Set OCR parameters for better accuracy
     await worker.setParameters({
-      tessedit_pageseg_mode: 1, // Automatic page segmentation
+      tessedit_pageseg_mode: PSM.AUTO_OSD, // Automatic page segmentation
     });
 
     const { data: { text } } = await worker.recognize(imageBuffer);
