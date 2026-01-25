@@ -1,11 +1,13 @@
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardProps
+  extends Omit<HTMLMotionProps<"div">, "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration" | "children"> {
   variant?: "default" | "glass" | "elevated" | "gradient";
   interactive?: boolean;
   delay?: number;
+  children?: React.ReactNode;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
