@@ -215,8 +215,8 @@ export async function extractTextFromStoragePDF(
       
       try {
         // Try with path alias first (works in Next.js)
-        const module = await import("@/lib/utils/pdf-parser-server");
-        parsePDF = module.parsePDF;
+        const pdfParserModule = await import("@/lib/utils/pdf-parser-server");
+        parsePDF = pdfParserModule.parsePDF;
       } catch (e1: any) {
         try {
           // Try relative path (works with ts-node)
@@ -224,18 +224,18 @@ export async function extractTextFromStoragePDF(
           const fs = require("fs");
           const pdfParserPath = path.resolve(__dirname, "pdf-parser-server.ts");
           if (fs.existsSync(pdfParserPath)) {
-            const module = await import(pdfParserPath);
-            parsePDF = module.parsePDF;
+            const pdfParserModule = await import(pdfParserPath);
+            parsePDF = pdfParserModule.parsePDF;
           } else {
             // Try .js extension
             const pdfParserPathJs = path.resolve(__dirname, "pdf-parser-server.js");
-            const module = await import(pdfParserPathJs);
-            parsePDF = module.parsePDF;
+            const pdfParserModule = await import(pdfParserPathJs);
+            parsePDF = pdfParserModule.parsePDF;
           }
         } catch (e2: any) {
           // Try direct require (CommonJS)
-          const module = require("./pdf-parser-server");
-          parsePDF = module.parsePDF;
+          const pdfParserModule = require("./pdf-parser-server");
+          parsePDF = pdfParserModule.parsePDF;
         }
       }
       
