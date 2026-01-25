@@ -85,36 +85,50 @@ async function getStudentResourceBookText(): Promise<string> {
   const pdfPath = "student-resource-book/student-resource-book.pdf";
   
   try {
-    console.log(`Extracting text from Student Resource Book PDF: ${pdfPath}`);
+    console.log(`[SRB] Extracting text from Student Resource Book PDF: ${pdfPath}`);
     
     // Check if file exists first
     const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.replace(/^gs:\/\//, "") || "";
     if (!bucketName) {
+      console.error("[SRB] Storage bucket not configured");
       throw new Error("Firebase Storage bucket not configured. Please set NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET in environment variables.");
     }
     
+    console.log(`[SRB] Using bucket: ${bucketName}`);
     const bucket = storage.bucket(bucketName);
     const file = bucket.file(pdfPath);
+    
+    console.log(`[SRB] Checking if file exists: ${pdfPath}`);
     const [exists] = await file.exists();
     
     if (!exists) {
+      console.error(`[SRB] File not found at path: ${pdfPath}`);
       throw new Error(`PDF file not found at path: ${pdfPath}. Please upload the Student Resource Book PDF to Firebase Storage. Instructions: 1) Go to Firebase Console > Storage, 2) Create folder 'student-resource-book', 3) Upload your PDF as 'student-resource-book.pdf'`);
     }
     
-    const pdfText = await extractTextFromStoragePDF(pdfPath);
-    console.log(`Extracted ${pdfText.length} characters from PDF`);
+    console.log(`[SRB] File exists, starting text extraction...`);
+    // Pass the storage instance to avoid re-initialization
+    const pdfText = await extractTextFromStoragePDF(pdfPath, storage);
+    console.log(`[SRB] Extracted ${pdfText.length} characters from PDF`);
 
     if (!pdfText || pdfText.trim().length === 0) {
+      console.error("[SRB] Extracted text is empty");
       throw new Error("PDF file is empty or could not extract text. Please check the PDF file.");
     }
 
     // Cache the result
     cachedPdfText = pdfText;
     pdfTextCacheTime = now;
+    console.log(`[SRB] Text extraction successful, cached for 1 hour`);
 
     return pdfText;
   } catch (error: any) {
-    console.error("Error extracting PDF text:", error);
+    console.error("[SRB] Error extracting PDF text:", error);
+    console.error("[SRB] Error details:", {
+      message: error.message,
+      code: error.code,
+      stack: error.stack?.substring(0, 500)
+    });
     throw new Error(`Failed to extract text from PDF: ${error.message}`);
   }
 }
@@ -134,13 +148,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get PDF text
+    // Get PDF text with timeout handling
     let pdfText: string;
     try {
-      pdfText = await getStudentResourceBookText();
+      // Set a timeout for PDF extraction (60 seconds for Vercel Pro, 10 seconds for Free)
+      const extractionPromise = getStudentResourceBookText();
+      const timeoutPromise = new Promise<string>((_, reject) => {
+        setTimeout(() => reject(new Error("PDF extraction timed out. The PDF might be too large. Please try again or contact support.")), 50000); // 50 seconds
+      });
+      
+      pdfText = await Promise.race([extractionPromise, timeoutPromise]);
     } catch (error: any) {
+      console.error("[SRB API] Error getting PDF text:", error);
       return NextResponse.json(
-        { error: `Failed to load Student Resource Book: ${error.message}. Please ensure the PDF is uploaded to Firebase Storage at 'student-resource-book/student-resource-book.pdf'` },
+        { error: `Failed to load Student Resource Book: ${error.message}. Please ensure the PDF is uploaded to Firebase Storage at 'student-resource-book/student-resource-book.pdf'. If the PDF is very large (100+ pages), extraction may take longer than expected.` },
         { status: 500 }
       );
     }

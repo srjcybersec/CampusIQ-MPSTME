@@ -73,54 +73,61 @@ export async function pdfPageToImage(
 /**
  * Extract text from a PDF stored in Firebase Storage
  * Supports both text-based and image-based PDFs with OCR fallback
+ * @param storagePath - Path to the PDF in Firebase Storage
+ * @param storage - Optional Firebase Admin Storage instance (if not provided, will initialize)
  */
 export async function extractTextFromStoragePDF(
-  storagePath: string
+  storagePath: string,
+  storage?: any
 ): Promise<string> {
   if (typeof window !== "undefined") {
     throw new Error("PDF extraction can only run on the server");
   }
 
-  // Import Firebase Admin Storage dynamically
-  const { getStorage } = await import("firebase-admin/storage");
-  const { getApps, initializeApp, cert } = await import("firebase-admin/app");
+  let storageInstance = storage;
   
-  // Initialize Firebase Admin if needed
-  if (!getApps().length) {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  // If storage instance not provided, initialize Firebase Admin
+  if (!storageInstance) {
+    const { getStorage } = await import("firebase-admin/storage");
+    const { getApps, initializeApp, cert } = await import("firebase-admin/app");
+    
+    // Initialize Firebase Admin if needed
+    if (!getApps().length) {
+      const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-    if (projectId && clientEmail && privateKey) {
-      let formattedPrivateKey = privateKey;
-      try {
-        const parsed = JSON.parse(privateKey);
-        if (typeof parsed === "string") {
-          formattedPrivateKey = parsed;
+      if (projectId && clientEmail && privateKey) {
+        let formattedPrivateKey = privateKey;
+        try {
+          const parsed = JSON.parse(privateKey);
+          if (typeof parsed === "string") {
+            formattedPrivateKey = parsed;
+          }
+        } catch {
+          // Not JSON, use as-is
         }
-      } catch {
-        // Not JSON, use as-is
-      }
-      formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, "\n");
-      formattedPrivateKey = formattedPrivateKey.replace(/\\\\n/g, "\n");
+        formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, "\n");
+        formattedPrivateKey = formattedPrivateKey.replace(/\\\\n/g, "\n");
 
-      initializeApp({
-        credential: cert({
-          projectId,
-          clientEmail,
-          privateKey: formattedPrivateKey,
-        }),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      });
+        initializeApp({
+          credential: cert({
+            projectId,
+            clientEmail,
+            privateKey: formattedPrivateKey,
+          }),
+          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        });
+      }
     }
+    storageInstance = getStorage();
   }
 
-  const storage = getStorage();
   const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.replace(/^gs:\/\//, "") || "";
   if (!bucketName) {
     throw new Error("Firebase Storage bucket not configured");
   }
-  const bucket = storage.bucket(bucketName);
+  const bucket = storageInstance.bucket(bucketName);
   const file = bucket.file(storagePath);
 
   // Check if file exists
@@ -193,8 +200,10 @@ export async function extractTextFromStoragePDF(
   }
 
   if (!fullExtractedText || fullExtractedText.trim().length === 0) {
-    throw new Error("Failed to extract any meaningful text from PDF using all methods (text extraction and OCR).");
+    console.error("[PDF-OCR] All extraction methods failed. PDF might be corrupted or password-protected.");
+    throw new Error("Failed to extract any meaningful text from PDF using all methods (text extraction and OCR). The PDF might be corrupted, password-protected, or contain only images without text.");
   }
 
+  console.log(`[PDF-OCR] Successfully extracted ${fullExtractedText.length} characters from PDF`);
   return fullExtractedText.trim();
 }
