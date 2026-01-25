@@ -240,14 +240,14 @@ export async function extractTextFromStoragePDF(
   if (!textExtractionSuccessful) {
     try {
       console.log("[PDF-OCR] Text extraction failed, trying OCR on first few pages...");
-      console.log("[PDF-OCR] ⚠️  OCR is slow - only processing first 5 pages to avoid timeout");
+      console.log("[PDF-OCR] ⚠️  OCR is slow - only processing first 3 pages to avoid timeout");
       
       const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
       const loadingTask = pdfjsLib.getDocument({ data: buffer });
       const pdf = await loadingTask.promise;
       
       let ocrText = "";
-      const pagesToProcess = Math.min(pdf.numPages, 5); // Only first 5 pages for OCR
+      const pagesToProcess = Math.min(pdf.numPages, 3); // Only first 3 pages for OCR to avoid timeout
       
       for (let pageNum = 1; pageNum <= pagesToProcess; pageNum++) {
         try {
@@ -261,11 +261,13 @@ export async function extractTextFromStoragePDF(
         }
       }
       
-      if (ocrText && ocrText.trim().length > 100) {
+      if (ocrText && ocrText.trim().length > 50) {
         fullExtractedText = ocrText;
         textExtractionSuccessful = true;
         console.log(`[PDF-OCR] OCR extracted ${fullExtractedText.length} characters from ${pagesToProcess} pages.`);
         console.log(`[PDF-OCR] ⚠️  Note: Only first ${pagesToProcess} pages were processed. For full extraction, use the pre-extraction script.`);
+      } else {
+        console.warn(`[PDF-OCR] OCR extracted insufficient text (${ocrText?.length || 0} chars).`);
       }
     } catch (error: any) {
       console.warn("[PDF-OCR] OCR fallback failed:", error.message);
