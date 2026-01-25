@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,11 +46,7 @@ export function ResultViewerAnalyzer() {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    loadResults();
-  }, [user]);
-
-  const loadResults = async () => {
+  const loadResults = useCallback(async () => {
     if (!user) return;
     setIsLoadingResults(true);
     try {
@@ -64,7 +60,11 @@ export function ResultViewerAnalyzer() {
     } finally {
       setIsLoadingResults(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadResults();
+  }, [loadResults]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -66,15 +66,23 @@ export async function GET(request: NextRequest) {
       .get();
 
     // Sort client-side by uploadedAt descending
+    interface ResultItem {
+      id: string;
+      semester: string;
+      fileName: string;
+      fileUrl: string;
+      uploadedAt: Date;
+    }
+    
     const results = resultsSnapshot.docs
-      .map((doc: any) => ({
+      .map((doc: any): ResultItem => ({
         id: doc.id,
         semester: doc.data().semester,
         fileName: doc.data().fileName,
         fileUrl: doc.data().fileUrl,
         uploadedAt: doc.data().uploadedAt?.toDate() || new Date(),
       }))
-      .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime());
+      .sort((a: ResultItem, b: ResultItem) => b.uploadedAt.getTime() - a.uploadedAt.getTime());
 
     return NextResponse.json({ success: true, results });
   } catch (error: any) {
