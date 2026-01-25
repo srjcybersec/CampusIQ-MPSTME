@@ -22,7 +22,7 @@ export async function extractTextFromPDFImage(
     
     // Set OCR parameters for better accuracy
     await worker.setParameters({
-      tessedit_pageseg_mode: "1", // Automatic page segmentation
+      tessedit_pageseg_mode: 1, // Automatic page segmentation
     });
 
     const { data: { text } } = await worker.recognize(imageBuffer);
