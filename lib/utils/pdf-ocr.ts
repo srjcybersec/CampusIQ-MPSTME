@@ -161,12 +161,37 @@ export async function extractTextFromStoragePDF(
       pdfParseModule = require("pdf-parse");
     }
     
-    // pdf-parse can be a function or a class
+    // pdf-parse can be a function, class, or have different exports
     let data: any;
+    
+    // Try different ways to call pdf-parse
     if (typeof pdfParseModule === "function") {
       data = await pdfParseModule(buffer);
     } else if (pdfParseModule.default && typeof pdfParseModule.default === "function") {
       data = await pdfParseModule.default(buffer);
+    } else if (pdfParseModule.PDFParse) {
+      // It's a class
+      const PDFParseClass = pdfParseModule.PDFParse;
+      const parser = new PDFParseClass({ data: buffer });
+      const result = await parser.getText();
+      data = { text: result.text || "" };
+    } else if (typeof pdfParseModule === "object" && pdfParseModule !== null) {
+      // Try to find a callable function in the module
+      const keys = Object.keys(pdfParseModule);
+      for (const key of keys) {
+        const value = pdfParseModule[key];
+        if (typeof value === "function") {
+          try {
+            data = await value(buffer);
+            break;
+          } catch (e) {
+            continue;
+          }
+        }
+      }
+      if (!data) {
+        throw new Error("pdf-parse module is not callable");
+      }
     } else {
       throw new Error("pdf-parse module is not callable");
     }
@@ -185,7 +210,35 @@ export async function extractTextFromStoragePDF(
   // --- Attempt 2: Use pdf-parser-server utility (more reliable) ---
   if (!textExtractionSuccessful) {
     try {
-      const { parsePDF } = await import("@/lib/utils/pdf-parser-server");
+      // Try multiple import methods for compatibility
+      let parsePDF: (buffer: Buffer) => Promise<string>;
+      
+      try {
+        // Try with path alias first (works in Next.js)
+        const module = await import("@/lib/utils/pdf-parser-server");
+        parsePDF = module.parsePDF;
+      } catch (e1: any) {
+        try {
+          // Try relative path (works with ts-node)
+          const path = require("path");
+          const fs = require("fs");
+          const pdfParserPath = path.resolve(__dirname, "pdf-parser-server.ts");
+          if (fs.existsSync(pdfParserPath)) {
+            const module = await import(pdfParserPath);
+            parsePDF = module.parsePDF;
+          } else {
+            // Try .js extension
+            const pdfParserPathJs = path.resolve(__dirname, "pdf-parser-server.js");
+            const module = await import(pdfParserPathJs);
+            parsePDF = module.parsePDF;
+          }
+        } catch (e2: any) {
+          // Try direct require (CommonJS)
+          const module = require("./pdf-parser-server");
+          parsePDF = module.parsePDF;
+        }
+      }
+      
       const extractedText = await parsePDF(buffer);
       if (extractedText && extractedText.trim().length > 100) {
         fullExtractedText = extractedText;
