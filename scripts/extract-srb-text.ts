@@ -7,10 +7,12 @@
 
 import { initializeApp, cert, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { extractTextFromStoragePDF } from "../lib/utils/pdf-ocr";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import * as fs from "fs";
+
+// Import pdf-parser-server directly for better compatibility
+const { parsePDF } = require("../lib/utils/pdf-parser-server");
 import * as https from "https";
 
 // Fix for self-signed certificate issues on Windows/corporate networks
@@ -97,9 +99,19 @@ async function extractAndStoreSRBText() {
 
     const pdfPath = "student-resource-book/student-resource-book.pdf";
     
-    // Extract text from PDF
+    // Download PDF from Storage
+    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.replace(/^gs:\/\//, "") || "";
+    const bucket = storage.bucket(bucketName);
+    const file = bucket.file(pdfPath);
+    
+    console.log(`📥 Downloading PDF from ${pdfPath}...`);
+    const [buffer] = await file.download();
+    console.log(`✅ Downloaded PDF: ${(buffer.length / 1024 / 1024).toFixed(2)} MB`);
+    
+    // Extract text from PDF using pdf-parser-server directly
+    console.log("📝 Extracting text from PDF...");
     const startTime = Date.now();
-    const extractedText = await extractTextFromStoragePDF(pdfPath, storage);
+    const extractedText = await parsePDF(buffer);
     const extractionTime = ((Date.now() - startTime) / 1000).toFixed(2);
 
     console.log(`✅ Text extraction completed in ${extractionTime} seconds`);
