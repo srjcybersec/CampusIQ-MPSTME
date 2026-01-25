@@ -199,9 +199,82 @@ export async function extractTextFromStoragePDF(
     }
   }
 
+  // --- Attempt 3: Try pdfjs-dist for text extraction ---
+  if (!textExtractionSuccessful) {
+    try {
+      console.log("[PDF-OCR] Trying pdfjs-dist for text extraction...");
+      const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+      const loadingTask = pdfjsLib.getDocument({ data: buffer });
+      const pdf = await loadingTask.promise;
+      
+      let extractedText = "";
+      const numPages = Math.min(pdf.numPages, 50); // Limit to first 50 pages for performance
+      console.log(`[PDF-OCR] Processing ${numPages} pages with pdfjs-dist...`);
+      
+      for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+        try {
+          const page = await pdf.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(" ");
+          extractedText += pageText + "\n";
+        } catch (pageError: any) {
+          console.warn(`[PDF-OCR] Error extracting text from page ${pageNum}:`, pageError.message);
+        }
+      }
+      
+      if (extractedText && extractedText.trim().length > 100) {
+        fullExtractedText = extractedText;
+        textExtractionSuccessful = true;
+        console.log(`[PDF-OCR] pdfjs-dist extracted ${fullExtractedText.length} characters.`);
+      } else {
+        console.warn(`[PDF-OCR] pdfjs-dist extracted insufficient text (${extractedText?.length || 0} chars).`);
+      }
+    } catch (error: any) {
+      console.warn("[PDF-OCR] pdfjs-dist failed:", error.message);
+    }
+  }
+
+  // --- Attempt 4: OCR fallback for image-based PDFs (only try first few pages to avoid timeout) ---
+  if (!textExtractionSuccessful) {
+    try {
+      console.log("[PDF-OCR] Text extraction failed, trying OCR on first few pages...");
+      console.log("[PDF-OCR] ⚠️  OCR is slow - only processing first 5 pages to avoid timeout");
+      
+      const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
+      const loadingTask = pdfjsLib.getDocument({ data: buffer });
+      const pdf = await loadingTask.promise;
+      
+      let ocrText = "";
+      const pagesToProcess = Math.min(pdf.numPages, 5); // Only first 5 pages for OCR
+      
+      for (let pageNum = 1; pageNum <= pagesToProcess; pageNum++) {
+        try {
+          console.log(`[PDF-OCR] Processing page ${pageNum}/${pagesToProcess} with OCR...`);
+          const page = await pdf.getPage(pageNum);
+          const imageBuffer = await pdfPageToImage(page, 2.0);
+          const pageText = await extractTextFromPDFImage(imageBuffer, pageNum);
+          ocrText += `\n--- Page ${pageNum} ---\n${pageText}\n`;
+        } catch (pageError: any) {
+          console.warn(`[PDF-OCR] OCR failed for page ${pageNum}:`, pageError.message);
+        }
+      }
+      
+      if (ocrText && ocrText.trim().length > 100) {
+        fullExtractedText = ocrText;
+        textExtractionSuccessful = true;
+        console.log(`[PDF-OCR] OCR extracted ${fullExtractedText.length} characters from ${pagesToProcess} pages.`);
+        console.log(`[PDF-OCR] ⚠️  Note: Only first ${pagesToProcess} pages were processed. For full extraction, use the pre-extraction script.`);
+      }
+    } catch (error: any) {
+      console.warn("[PDF-OCR] OCR fallback failed:", error.message);
+    }
+  }
+
   if (!fullExtractedText || fullExtractedText.trim().length === 0) {
-    console.error("[PDF-OCR] All extraction methods failed. PDF might be corrupted or password-protected.");
-    throw new Error("Failed to extract any meaningful text from PDF using all methods (text extraction and OCR). The PDF might be corrupted, password-protected, or contain only images without text.");
+    console.error("[PDF-OCR] All extraction methods failed. PDF might be corrupted, password-protected, or contain only images without text.");
+    throw new Error("Failed to extract any meaningful text from PDF using all methods (text extraction and OCR). The PDF might be corrupted, password-protected, or contain only images without text. For large image-based PDFs, please use the pre-extraction script: npx ts-node scripts/extract-srb-text.ts");
   }
 
   console.log(`[PDF-OCR] Successfully extracted ${fullExtractedText.length} characters from PDF`);
