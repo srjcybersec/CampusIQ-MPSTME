@@ -56,9 +56,10 @@ async function extractAndStoreSRBText() {
 
       console.log("✅ All required environment variables found");
 
-      let formattedPrivateKey = privateKey;
+      // At this point, TypeScript knows all variables are defined
+      let formattedPrivateKey: string = privateKey!;
       try {
-        const parsed = JSON.parse(privateKey);
+        const parsed = JSON.parse(privateKey!);
         if (typeof parsed === "string") {
           formattedPrivateKey = parsed;
         }
