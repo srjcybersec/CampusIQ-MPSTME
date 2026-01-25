@@ -11,6 +11,15 @@ import { extractTextFromStoragePDF } from "../lib/utils/pdf-ocr";
 import * as dotenv from "dotenv";
 import * as path from "path";
 import * as fs from "fs";
+import * as https from "https";
+
+// Fix for self-signed certificate issues on Windows/corporate networks
+// This only affects the local script, not production
+if (process.env.NODE_TLS_REJECT_UNAUTHORIZED !== "1") {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  console.warn("⚠️  SSL certificate verification disabled for local script execution");
+  console.warn("⚠️  This is safe for local scripts but should never be used in production");
+}
 
 // Load environment variables from multiple possible locations
 const envFiles = [".env.local", ".env", ".env.development.local", ".env.development"];
