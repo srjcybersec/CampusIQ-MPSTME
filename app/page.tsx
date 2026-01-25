@@ -89,10 +89,6 @@ export default function Home() {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: {
-        duration: 0.5,
-        ease: [0.4, 0, 0.2, 1],
-      },
     },
   };
 
@@ -140,7 +136,7 @@ export default function Home() {
                     key={feature.href}
                     variants={itemVariants}
                     whileHover={{ y: -8, scale: 1.02 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                   >
                     <Link href={feature.href} data-cursor-hover>
                       <Card
