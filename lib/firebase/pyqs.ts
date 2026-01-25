@@ -7,6 +7,7 @@ import {
   orderBy,
   limit,
   updateDoc,
+  setDoc,
   increment,
   Timestamp
 } from "firebase/firestore";
@@ -23,13 +24,13 @@ export async function savePYQDocument(
 ): Promise<string> {
   const pyqsRef = collection(db, PYQS_COLLECTION);
   
-  const docRef = await doc(pyqsRef);
+  const docRef = doc(pyqsRef);
   const pyqDoc: Omit<PYQDocument, "id"> = {
     ...pyqData,
     downloadCount: 0,
   };
 
-  await docRef.set({
+  await setDoc(docRef, {
     ...pyqDoc,
     uploadedAt: Timestamp.fromDate(pyqData.uploadedAt),
   });
