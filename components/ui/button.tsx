@@ -3,9 +3,10 @@ import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 
 export interface ButtonProps
-  extends Omit<HTMLMotionProps<"button">, "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration"> {
+  extends Omit<HTMLMotionProps<"button">, "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration" | "children"> {
   variant?: "default" | "outline" | "ghost" | "neon" | "ai";
   size?: "sm" | "md" | "lg" | "xl";
+  children?: React.ReactNode;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
