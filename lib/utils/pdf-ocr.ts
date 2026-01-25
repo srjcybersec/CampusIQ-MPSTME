@@ -116,12 +116,30 @@ export async function extractTextFromStoragePDF(
   }
 
   const storage = getStorage();
-  const bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+  const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.replace(/^gs:\/\//, "") || "";
+  if (!bucketName) {
+    throw new Error("Firebase Storage bucket not configured");
+  }
+  const bucket = storage.bucket(bucketName);
   const file = bucket.file(storagePath);
 
+  // Check if file exists
+  const [exists] = await file.exists();
+  if (!exists) {
+    throw new Error(`PDF file not found at path: ${storagePath}. Please upload the Student Resource Book PDF to Firebase Storage at this path.`);
+  }
+
   // Download PDF as buffer
-  const [buffer] = await file.download();
-  console.log(`Downloaded PDF: ${storagePath}, size: ${buffer.length} bytes`);
+  let buffer: Buffer;
+  try {
+    [buffer] = await file.download();
+    console.log(`Downloaded PDF: ${storagePath}, size: ${buffer.length} bytes`);
+  } catch (error: any) {
+    if (error.code === 404) {
+      throw new Error(`PDF file not found at path: ${storagePath}. Please upload the Student Resource Book PDF to Firebase Storage.`);
+    }
+    throw new Error(`Failed to download PDF from storage: ${error.message}`);
+  }
 
   let fullExtractedText = "";
   let textExtractionSuccessful = false;

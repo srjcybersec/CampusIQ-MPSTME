@@ -77,7 +77,7 @@ async function getStudentResourceBookText(): Promise<string> {
 
   const { db, storage } = getAdminDbAndStorage();
   if (!db || !storage) {
-    throw new Error("Firebase Admin not initialized");
+    throw new Error("Firebase Admin not initialized. Please check your Firebase Admin credentials in environment variables.");
   }
 
   // The PDF should be stored at: student-resource-book/student-resource-book.pdf
@@ -86,8 +86,27 @@ async function getStudentResourceBookText(): Promise<string> {
   
   try {
     console.log(`Extracting text from Student Resource Book PDF: ${pdfPath}`);
+    
+    // Check if file exists first
+    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.replace(/^gs:\/\//, "") || "";
+    if (!bucketName) {
+      throw new Error("Firebase Storage bucket not configured. Please set NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET in environment variables.");
+    }
+    
+    const bucket = storage.bucket(bucketName);
+    const file = bucket.file(pdfPath);
+    const [exists] = await file.exists();
+    
+    if (!exists) {
+      throw new Error(`PDF file not found at path: ${pdfPath}. Please upload the Student Resource Book PDF to Firebase Storage. Instructions: 1) Go to Firebase Console > Storage, 2) Create folder 'student-resource-book', 3) Upload your PDF as 'student-resource-book.pdf'`);
+    }
+    
     const pdfText = await extractTextFromStoragePDF(pdfPath);
     console.log(`Extracted ${pdfText.length} characters from PDF`);
+
+    if (!pdfText || pdfText.trim().length === 0) {
+      throw new Error("PDF file is empty or could not extract text. Please check the PDF file.");
+    }
 
     // Cache the result
     cachedPdfText = pdfText;

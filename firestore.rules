@@ -31,6 +31,14 @@ service firebase.storage {
                    && request.resource.size < 50 * 1024 * 1024;
     }
     
+    // Student Resource Book - authenticated users can read, only admins can write
+    match /student-resource-book/{fileName} {
+      // Allow read if authenticated
+      allow read: if request.auth != null;
+      // Allow write only for admin (you can add admin check later)
+      allow write: if false; // Disable writes for now - upload via Firebase Console or script
+    }
+    
     // Default: deny all other access
     match /{allPaths=**} {
       allow read, write: if false;
