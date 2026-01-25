@@ -68,10 +68,10 @@ let pdfTextCacheTime: number = 0;
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour cache
 
 async function getStudentResourceBookText(): Promise<string> {
-  // Check cache first
+  // Check in-memory cache first
   const now = Date.now();
   if (cachedPdfText && (now - pdfTextCacheTime) < CACHE_DURATION) {
-    console.log("Using cached PDF text");
+    console.log("[SRB] Using in-memory cached PDF text");
     return cachedPdfText;
   }
 
@@ -80,12 +80,32 @@ async function getStudentResourceBookText(): Promise<string> {
     throw new Error("Firebase Admin not initialized. Please check your Firebase Admin credentials in environment variables.");
   }
 
-  // The PDF should be stored at: student-resource-book/student-resource-book.pdf
-  // You can change this path if you store it elsewhere
+  // Try to get pre-extracted text from Firestore first (faster, avoids timeout)
+  try {
+    console.log("[SRB] Checking Firestore for pre-extracted text...");
+    const srbDoc = await db.collection("studentResourceBook").doc("text").get();
+    
+    if (srbDoc.exists) {
+      const data = srbDoc.data();
+      if (data?.extractedText && data.extractedText.length > 100) {
+        console.log(`[SRB] Found pre-extracted text in Firestore (${data.extractedText.length} characters)`);
+        // Cache in memory
+        cachedPdfText = data.extractedText;
+        pdfTextCacheTime = now;
+        return data.extractedText;
+      }
+    }
+    console.log("[SRB] No pre-extracted text found in Firestore, will extract from PDF");
+  } catch (error: any) {
+    console.warn("[SRB] Error checking Firestore:", error.message, "Will try PDF extraction");
+  }
+
+  // Fallback: Extract from PDF (may timeout for large PDFs)
   const pdfPath = "student-resource-book/student-resource-book.pdf";
   
   try {
     console.log(`[SRB] Extracting text from Student Resource Book PDF: ${pdfPath}`);
+    console.log(`[SRB] ⚠️  This may take a while for large PDFs. Consider pre-extracting with: npx ts-node scripts/extract-srb-text.ts`);
     
     // Check if file exists first
     const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.replace(/^gs:\/\//, "") || "";
@@ -116,7 +136,7 @@ async function getStudentResourceBookText(): Promise<string> {
       throw new Error("PDF file is empty or could not extract text. Please check the PDF file.");
     }
 
-    // Cache the result
+    // Cache the result in memory
     cachedPdfText = pdfText;
     pdfTextCacheTime = now;
     console.log(`[SRB] Text extraction successful, cached for 1 hour`);
