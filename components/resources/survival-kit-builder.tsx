@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Note } from "@/lib/types/notes";
 import { createSurvivalKit, getSurvivalKits } from "@/lib/firebase/notes";
 import { useAuth } from "@/lib/auth/context";
@@ -131,9 +133,9 @@ export function SurvivalKitBuilder({
   );
 
   return (
-    <Card className="shadow-premium">
+    <Card variant="glass" className="relative z-10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           <Package className="w-5 h-5" />
           Create Exam Survival Kit
         </CardTitle>
@@ -142,14 +144,13 @@ export function SurvivalKitBuilder({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Kit Name */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Kit Name *
             </label>
-            <input
+            <Input
               type="text"
               value={kitName}
               onChange={(e) => setKitName(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="e.g., Data Structures Final Exam Kit"
               required
               disabled={isSubmitting}
@@ -158,13 +159,12 @@ export function SurvivalKitBuilder({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Description (Optional)
             </label>
-            <textarea
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={2}
               placeholder="Brief description of this exam kit..."
               disabled={isSubmitting}
@@ -174,7 +174,7 @@ export function SurvivalKitBuilder({
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Subject *
               </label>
               <select
@@ -183,7 +183,7 @@ export function SurvivalKitBuilder({
                   setSubject(e.target.value as Subject);
                   setSelectedNoteIds([]); // Clear selection when filter changes
                 }}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#1a1a1a] bg-[#161616]/50 rounded-xl text-white text-sm focus:ring-2 focus:ring-[#7C7CFF] focus:border-[#7C7CFF]"
                 required
                 disabled={isSubmitting}
               >
@@ -196,7 +196,7 @@ export function SurvivalKitBuilder({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Semester *
               </label>
               <select
@@ -205,7 +205,7 @@ export function SurvivalKitBuilder({
                   setSemester(e.target.value as Semester);
                   setSelectedNoteIds([]);
                 }}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#1a1a1a] bg-[#161616]/50 rounded-xl text-white text-sm focus:ring-2 focus:ring-[#7C7CFF] focus:border-[#7C7CFF]"
                 required
                 disabled={isSubmitting}
               >
@@ -218,7 +218,7 @@ export function SurvivalKitBuilder({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Exam Type *
               </label>
               <select
@@ -227,7 +227,7 @@ export function SurvivalKitBuilder({
                   setExamType(e.target.value as ExamType);
                   setSelectedNoteIds([]);
                 }}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#1a1a1a] bg-[#161616]/50 rounded-xl text-white text-sm focus:ring-2 focus:ring-[#7C7CFF] focus:border-[#7C7CFF]"
                 required
                 disabled={isSubmitting}
               >
@@ -242,32 +242,32 @@ export function SurvivalKitBuilder({
 
           {/* Available Notes */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Select Notes ({selectedNoteIds.length} selected) *
             </label>
-            <div className="max-h-60 overflow-y-auto border border-neutral-300 rounded-lg p-3 space-y-2">
+            <div className="max-h-60 overflow-y-auto border border-[#222222] bg-[#161616]/50 rounded-lg p-3 space-y-2">
               {filteredNotes.length === 0 ? (
-                <p className="text-sm text-neutral-500 text-center py-4">
+                <p className="text-sm text-[#D4D4D8] text-center py-4">
                   No notes available for the selected filters
                 </p>
               ) : (
                 filteredNotes.map((note) => (
                   <label
                     key={note.id}
-                    className="flex items-center gap-3 p-2 hover:bg-neutral-50 rounded cursor-pointer"
+                    className="flex items-center gap-3 p-2 hover:bg-[#161616] rounded cursor-pointer"
                   >
                     <input
                       type="checkbox"
                       checked={selectedNoteIds.includes(note.id)}
                       onChange={() => handleToggleNote(note.id)}
-                      className="w-4 h-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-blue-600 border-[#222222] rounded focus:ring-blue-500 bg-[#161616]"
                       disabled={isSubmitting}
                     />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-neutral-900 truncate">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <p className="text-sm font-medium text-white truncate">
                         {note.title}
                       </p>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-[#D4D4D8]">
                         {note.difficulty} • {note.averageRating.toFixed(1)}⭐
                       </p>
                     </div>
@@ -279,7 +279,7 @@ export function SurvivalKitBuilder({
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
               <AlertCircle className="w-4 h-4" />
               <span className="text-sm">{error}</span>
             </div>
@@ -287,7 +287,7 @@ export function SurvivalKitBuilder({
 
           {/* Success Message */}
           {success && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700">
+            <div className="flex items-center gap-2 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400">
               <CheckCircle className="w-4 h-4" />
               <span className="text-sm">Survival kit created successfully!</span>
             </div>

@@ -326,10 +326,10 @@ export function GoogleCalendarSync() {
   }, [user, checkConnection]);
 
   return (
-    <Card className="shadow-premium border-2 border-green-100">
+    <Card variant="glass" className="relative z-10 border-green-500/50">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-green-600" />
+        <CardTitle className="flex items-center gap-2 text-white">
+          <Calendar className="w-5 h-5 text-green-400" />
           Google Calendar Integration
         </CardTitle>
         <CardDescription>
@@ -339,13 +339,15 @@ export function GoogleCalendarSync() {
       <CardContent className="space-y-4">
         {!isConnected ? (
           <div className="space-y-4">
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-[#D4D4D8]">
               Connect your Google Calendar to sync your class schedule automatically.
             </p>
             <Button
               onClick={handleConnect}
               disabled={isConnecting}
-              className="w-full gradient-primary text-white"
+              variant="neon"
+              className="w-full"
+              data-cursor-hover
             >
               {isConnecting ? (
                 <>
@@ -362,15 +364,17 @@ export function GoogleCalendarSync() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-green-400">
               <CheckCircle className="w-5 h-5" />
-              <span className="font-medium">Google Calendar Connected</span>
+              <span className="font-medium text-white">Google Calendar Connected</span>
             </div>
             
             <Button
               onClick={handleSync}
               disabled={isSyncing}
-              className="w-full gradient-primary text-white"
+              variant="neon"
+              className="w-full"
+              data-cursor-hover
             >
               {isSyncing ? (
                 <>
@@ -389,7 +393,8 @@ export function GoogleCalendarSync() {
               onClick={handleDisconnect}
               disabled={isDisconnecting}
               variant="outline"
-              className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+              className="w-full border-red-500/50 text-red-400 hover:bg-red-500/20 hover:border-red-500"
+              data-cursor-hover
             >
               {isDisconnecting ? (
                 <>
@@ -406,33 +411,33 @@ export function GoogleCalendarSync() {
 
             {syncStatus && (
               <div
-                className={`p-4 rounded-lg border-2 ${
+                className={`p-4 rounded-lg border ${
                   syncStatus.success
-                    ? "bg-green-50 border-green-300"
-                    : "bg-red-50 border-red-300"
+                    ? "bg-green-500/20 border-green-500/50"
+                    : "bg-red-500/20 border-red-500/50"
                 }`}
               >
                 <div className="flex items-start gap-3">
                   {syncStatus.success ? (
-                    <CheckCircle className="w-6 h-6 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-6 h-6 text-green-400 mt-0.5 flex-shrink-0" />
                   ) : (
-                    <XCircle className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" />
+                    <XCircle className="w-6 h-6 text-red-400 mt-0.5 flex-shrink-0" />
                   )}
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <p
                       className={`text-sm font-medium ${
-                        syncStatus.success ? "text-green-900" : "text-red-900"
-                      }`}
+                        syncStatus.success ? "text-green-400" : "text-red-400"
+                      } break-words`}
                     >
                       {syncStatus.message}
                     </p>
                     {syncStatus.success && syncStatus.eventsCreated && (
-                      <p className="text-xs text-green-700 mt-2">
+                      <p className="text-xs text-green-300 mt-2">
                         Your classes have been added to Google Calendar with weekly recurrence.
                       </p>
                     )}
                     {syncStatus.success && !syncStatus.eventsCreated && (
-                      <p className="text-xs text-green-700 mt-2">
+                      <p className="text-xs text-green-300 mt-2">
                         Click &quot;Sync Timetable to Calendar&quot; below to add your classes.
                       </p>
                     )}

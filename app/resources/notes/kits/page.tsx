@@ -5,6 +5,8 @@ import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SurvivalKitCard } from "@/components/resources/survival-kit-card";
 import { Card, CardContent } from "@/components/ui/card";
+import { AnimatedBackground } from "@/components/ui/animated-background";
+import { Input } from "@/components/ui/input";
 import {
   Package,
   Search,
@@ -119,34 +121,35 @@ function SurvivalKitsPageContent() {
   const hasActiveFilters = searchQuery || subject || semester || examType;
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      <AnimatedBackground />
       <MainNav />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative z-20">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-neutral-900 mb-2">
+            <h1 className="text-3xl font-bold text-white mb-2">
               Exam Survival Kits
             </h1>
-            <p className="text-neutral-600">
+            <p className="text-[#D4D4D8]">
               Curated bundles of study materials for your exams
             </p>
           </div>
 
           {/* Filters */}
-          <Card className="mb-6 shadow-premium">
+          <Card variant="glass" className="mb-6 relative z-10">
             <CardContent className="p-4">
               <div className="space-y-4">
                 {/* Search Bar */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
-                  <input
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#D4D4D8] w-5 h-5 z-10" />
+                  <Input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search kits by name or description..."
-                    className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10"
                   />
                 </div>
 
@@ -155,7 +158,7 @@ function SurvivalKitsPageContent() {
                   <select
                     value={subject}
                     onChange={(e) => setSubject(e.target.value as Subject | "")}
-                    className="px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="px-3 py-2 border border-[#1a1a1a] bg-[#161616]/50 rounded-xl text-white text-sm focus:ring-2 focus:ring-[#7C7CFF] focus:border-[#7C7CFF]"
                   >
                     <option value="">All Subjects</option>
                     {SUBJECTS.map((s) => (
@@ -170,7 +173,7 @@ function SurvivalKitsPageContent() {
                     onChange={(e) =>
                       setSemester(e.target.value as Semester | "")
                     }
-                    className="px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="px-3 py-2 border border-[#1a1a1a] bg-[#161616]/50 rounded-xl text-white text-sm focus:ring-2 focus:ring-[#7C7CFF] focus:border-[#7C7CFF]"
                   >
                     <option value="">All Semesters</option>
                     {SEMESTERS.map((s) => (
@@ -185,7 +188,7 @@ function SurvivalKitsPageContent() {
                     onChange={(e) =>
                       setExamType(e.target.value as ExamType | "")
                     }
-                    className="px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="px-3 py-2 border border-[#1a1a1a] bg-[#161616]/50 rounded-xl text-white text-sm focus:ring-2 focus:ring-[#7C7CFF] focus:border-[#7C7CFF]"
                   >
                     <option value="">All Exam Types</option>
                     {EXAM_TYPES.map((e) => (
@@ -200,7 +203,7 @@ function SurvivalKitsPageContent() {
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-sm text-blue-600 hover:text-blue-700"
+                    className="text-sm text-blue-400 hover:text-blue-300"
                   >
                     Clear Filters
                   </button>
@@ -212,16 +215,16 @@ function SurvivalKitsPageContent() {
           {/* Kits Grid */}
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
             </div>
           ) : filteredKits.length === 0 ? (
-            <Card className="shadow-premium">
+            <Card variant="glass" className="relative z-10">
               <CardContent className="p-12 text-center">
-                <Package className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+                <Package className="w-12 h-12 text-[#D4D4D8] mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-white mb-2">
                   No survival kits found
                 </h3>
-                <p className="text-neutral-600 mb-4">
+                <p className="text-[#D4D4D8] mb-4">
                   {hasActiveFilters
                     ? "Try adjusting your filters"
                     : "Create your first exam survival kit!"}
@@ -238,16 +241,17 @@ function SurvivalKitsPageContent() {
             </Card>
           ) : (
             <>
-              <div className="mb-4 text-sm text-neutral-600">
+              <div className="mb-4 text-sm text-[#D4D4D8]">
                 Showing {filteredKits.length} kit{filteredKits.length !== 1 ? "s" : ""}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
                 {filteredKits.map((kit) => (
-                  <SurvivalKitCard
-                    key={kit.id}
-                    kit={kit}
-                    onView={() => loadKits()}
-                  />
+                  <div key={kit.id} className="h-full w-full flex">
+                    <SurvivalKitCard
+                      kit={kit}
+                      onView={() => loadKits()}
+                    />
+                  </div>
                 ))}
               </div>
             </>

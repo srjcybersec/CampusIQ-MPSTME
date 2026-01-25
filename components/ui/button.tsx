@@ -1,51 +1,67 @@
 import * as React from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "outline" | "ghost";
-  size?: "sm" | "md" | "lg";
+  variant?: "default" | "outline" | "ghost" | "neon" | "ai";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "md", children, ...props }, ref) => {
     return (
-      <button
+      <motion.button
         className={cn(
-          "inline-flex items-center justify-center rounded-xl font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative",
+          "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-300",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C7CFF] focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+          "disabled:pointer-events-none disabled:opacity-50",
+          "relative overflow-hidden group",
+          "liquid-hover",
           {
-            "bg-gradient-primary text-white hover:shadow-glow-hover hover:scale-105 active:scale-95 shadow-premium": variant === "default",
-            "border-2 border-neutral-300 bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:border-blue-300 hover:shadow-soft hover:scale-105 active:scale-95 text-neutral-700": variant === "outline",
-            "hover:bg-neutral-100/80 hover:scale-105 active:scale-95 text-neutral-700": variant === "ghost",
-            "h-8 px-3 text-sm": size === "sm",
-            "h-10 px-4 text-base": size === "md",
-            "h-12 px-6 text-lg": size === "lg",
+            // Default (Purple to Blue gradient)
+            "bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] text-white glow-purple": variant === "default",
+            // Outline
+            "border-2 border-[#1a1a1a] bg-[#161616]/50 text-white hover:border-[#7C7CFF]/50 hover:bg-[#161616]": variant === "outline",
+            // Ghost
+            "text-[#D4D4D8] hover:text-white hover:bg-[#161616]/50": variant === "ghost",
+            // Neon (Orange to Pink)
+            "bg-gradient-to-r from-[#FB923C] to-[#EC4899] text-white glow-orange": variant === "neon",
+            // AI (Cyan to Purple)
+            "bg-gradient-to-r from-[#22D3EE] to-[#A855F7] text-white glow-blue": variant === "ai",
+            // Sizes
+            "h-8 px-3 text-xs": size === "sm",
+            "h-10 px-4 text-sm": size === "md",
+            "h-12 px-6 text-base": size === "lg",
+            "h-14 px-8 text-lg": size === "xl",
           },
           className
         )}
         style={{
-          color: variant === "default" ? "#ffffff" : undefined,
+          color: variant === "default" || variant === "neon" || variant === "ai" ? "#ffffff" : undefined,
         }}
         ref={ref}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.98 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        data-cursor-hover
         {...props}
       >
-        {variant === "default" && (
-          <span 
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" 
-            style={{ zIndex: 1, pointerEvents: "none" }}
-          ></span>
+        {/* Shimmer effect */}
+        {(variant === "default" || variant === "neon" || variant === "ai") && (
+          <motion.span
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            initial={{ x: "-100%" }}
+            whileHover={{ x: "100%" }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+          />
         )}
-        <span 
-          style={{ 
-            position: "relative", 
-            zIndex: 100, 
-            color: variant === "default" ? "#ffffff" : "#374151",
-            WebkitTextFillColor: variant === "default" ? "#ffffff" : "#374151",
-          }}
-        >
+        <span className="relative z-10 flex items-center justify-center gap-2">
           {children}
         </span>
-      </button>
+      </motion.button>
     );
   }
 );

@@ -3,8 +3,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, BarChart3, GraduationCap } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth/context";
 
 export function FacultyDashboard() {
+  const { user } = useAuth();
   const quickActions = [
     { href: "/academics", label: "Class Management", icon: Users, color: "blue" },
     { href: "/resources", label: "Course Materials", icon: FileText, color: "purple" },
@@ -19,7 +21,7 @@ export function FacultyDashboard() {
             <GraduationCap className="w-8 h-8" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Faculty Dashboard</h2>
+            <h2 className="text-2xl font-bold">Welcome Back {user?.email ? user.email : ""}! 👋</h2>
             <p className="text-purple-100">Manage your classes and students</p>
           </div>
         </div>

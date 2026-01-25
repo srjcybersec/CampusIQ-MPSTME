@@ -6,6 +6,7 @@ import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NoteQA } from "@/components/resources/note-qa";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import {
   FileText,
   Download,
@@ -168,11 +169,11 @@ function NoteDetailContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-black relative">
         <MainNav />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 relative z-20">
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
           </div>
         </main>
       </div>
@@ -198,7 +199,7 @@ function NoteDetailContent() {
               className={`w-5 h-5 ${
                 star <= rating
                   ? "fill-yellow-400 text-yellow-400"
-                  : "text-neutral-300"
+                  : "text-[#D4D4D8]"
               }`}
             />
           </button>
@@ -208,32 +209,33 @@ function NoteDetailContent() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      <AnimatedBackground />
       <MainNav />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative z-20">
         <div className="max-w-5xl mx-auto">
           {/* Back Button */}
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900 mb-6"
+            className="flex items-center gap-2 text-[#D4D4D8] hover:text-white mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Notes
           </button>
 
           {/* Note Details */}
-          <Card className="mb-6 shadow-premium">
+          <Card variant="glass" className="mb-6 shadow-premium relative z-10">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-blue-50 rounded-lg">
-                      <FileText className="w-6 h-6 text-blue-600" />
+                    <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                      <FileText className="w-6 h-6 text-blue-400" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <CardTitle className="text-2xl">{note.title}</CardTitle>
+                        <CardTitle className="text-2xl text-white">{note.title}</CardTitle>
                         {note.hasTopperBadge && (
                           <div className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full shadow-md">
                             <Award className="w-4 h-4 text-white" />
@@ -244,11 +246,11 @@ function NoteDetailContent() {
                         )}
                       </div>
                       {note.uploaderName && !note.isAnonymous && (
-                        <div className="flex items-center gap-2 text-sm text-neutral-600">
-                          <User className="w-4 h-4 text-neutral-400" />
+                        <div className="flex items-center gap-2 text-sm text-[#D4D4D8]">
+                          <User className="w-4 h-4 text-[#D4D4D8]" />
                           <span className="font-medium">Uploaded by {note.uploaderName}</span>
                           {note.uploaderCGPA && (
-                            <span className="text-xs text-neutral-500">
+                            <span className="text-xs text-[#D4D4D8]">
                               (CGPA: {note.uploaderCGPA.toFixed(2)})
                             </span>
                           )}
@@ -263,34 +265,34 @@ function NoteDetailContent() {
               {/* Description */}
               {note.description && (
                 <div>
-                  <h3 className="font-semibold text-neutral-900 mb-2">
+                  <h3 className="font-semibold text-white mb-2">
                     Description
                   </h3>
-                  <p className="text-neutral-700">{note.description}</p>
+                  <p className="text-[#D4D4D8]">{note.description}</p>
                 </div>
               )}
 
               {/* AI Summary */}
               {note.aiSummary && (
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-blue-900 mb-2">
+                <div className="p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                  <h3 className="font-semibold text-blue-400 mb-2">
                     AI Summary
                   </h3>
-                  <p className="text-sm text-neutral-700">{note.aiSummary}</p>
+                  <p className="text-sm text-[#D4D4D8]">{note.aiSummary}</p>
                 </div>
               )}
 
               {/* Key Topics */}
               {note.keyTopics && Array.isArray(note.keyTopics) && note.keyTopics.length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-neutral-900 mb-2">
+                  <h3 className="font-semibold text-white mb-2">
                     Key Topics
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {note.keyTopics.map((topic, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 bg-purple-50 text-purple-700 text-sm rounded-full"
+                        className="px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full border border-purple-500/30"
                       >
                         {topic}
                       </span>
@@ -302,12 +304,12 @@ function NoteDetailContent() {
               {/* Tags */}
               {note.tags.length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-neutral-900 mb-2">Tags</h3>
+                  <h3 className="font-semibold text-white mb-2">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {note.tags.map((tag, idx) => (
                       <span
                         key={idx}
-                        className="px-3 py-1 bg-neutral-100 text-neutral-600 text-sm rounded-full"
+                        className="px-3 py-1 bg-[#161616] text-[#D4D4D8] text-sm rounded-full border border-[#222222]"
                       >
                         {tag}
                       </span>
@@ -317,50 +319,50 @@ function NoteDetailContent() {
               )}
 
               {/* Metadata */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-neutral-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[#222222]">
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Subject</p>
-                  <p className="font-semibold text-neutral-900">{note.subject}</p>
+                  <p className="text-xs text-[#D4D4D8] mb-1">Subject</p>
+                  <p className="font-semibold text-white">{note.subject}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Semester</p>
-                  <p className="font-semibold text-neutral-900">Sem {note.semester}</p>
+                  <p className="text-xs text-[#D4D4D8] mb-1">Semester</p>
+                  <p className="font-semibold text-white">Sem {note.semester}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Difficulty</p>
-                  <p className="font-semibold text-neutral-900">{note.difficulty}</p>
+                  <p className="text-xs text-[#D4D4D8] mb-1">Difficulty</p>
+                  <p className="font-semibold text-white">{note.difficulty}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Exam Type</p>
-                  <p className="font-semibold text-neutral-900">{note.examType}</p>
+                  <p className="text-xs text-[#D4D4D8] mb-1">Exam Type</p>
+                  <p className="font-semibold text-white">{note.examType}</p>
                 </div>
                 {note.professor && (
                   <div>
-                    <p className="text-xs text-neutral-500 mb-1">Professor</p>
-                    <p className="font-semibold text-neutral-900">{note.professor}</p>
+                    <p className="text-xs text-[#D4D4D8] mb-1">Professor</p>
+                    <p className="font-semibold text-white">{note.professor}</p>
                   </div>
                 )}
               </div>
 
               {/* Stats */}
-              <div className="flex items-center gap-6 pt-4 border-t border-neutral-200">
+              <div className="flex items-center gap-6 pt-4 border-t border-[#222222]">
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-yellow-400" />
-                  <span className="text-sm font-semibold">
+                  <span className="text-sm font-semibold text-white">
                     {note.averageRating.toFixed(1)} ({note.totalRatings} ratings)
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-neutral-400" />
-                  <span className="text-sm text-neutral-600">{note.views} views</span>
+                  <Eye className="w-4 h-4 text-[#D4D4D8]" />
+                  <span className="text-sm text-[#D4D4D8]">{note.views} views</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Download className="w-4 h-4 text-neutral-400" />
-                  <span className="text-sm text-neutral-600">{note.downloads} downloads</span>
+                  <Download className="w-4 h-4 text-[#D4D4D8]" />
+                  <span className="text-sm text-[#D4D4D8]">{note.downloads} downloads</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-neutral-400" />
-                  <span className="text-sm text-neutral-600">
+                  <Calendar className="w-4 h-4 text-[#D4D4D8]" />
+                  <span className="text-sm text-[#D4D4D8]">
                     {note.createdAt
                       ? formatDistanceToNow(note.createdAt.toDate(), { addSuffix: true })
                       : "Recently"}
@@ -368,16 +370,16 @@ function NoteDetailContent() {
                 </div>
                 {note.uploaderName && !note.isAnonymous && (
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-neutral-400" />
-                    <span className="text-sm text-neutral-600">{note.uploaderName}</span>
+                    <User className="w-4 h-4 text-[#D4D4D8]" />
+                    <span className="text-sm text-[#D4D4D8]">{note.uploaderName}</span>
                   </div>
                 )}
               </div>
 
               {/* Rating Section */}
               {user && (
-                <div className="pt-4 border-t border-neutral-200">
-                  <h3 className="font-semibold text-neutral-900 mb-3">
+                <div className="pt-4 border-t border-[#222222]">
+                  <h3 className="font-semibold text-white mb-3">
                     Rate this note
                   </h3>
                   <div className="space-y-3">
@@ -386,7 +388,7 @@ function NoteDetailContent() {
                       value={ratingComment}
                       onChange={(e) => setRatingComment(e.target.value)}
                       placeholder="Add a comment (optional)..."
-                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#222222] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#161616] text-white placeholder:text-[#D4D4D8]"
                       rows={2}
                     />
                     {userRating && (
@@ -424,8 +426,8 @@ function NoteDetailContent() {
                         Delete Note
                       </button>
                     ) : (
-                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="text-sm text-red-900 mb-3 font-semibold">
+                      <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
+                        <p className="text-sm text-red-400 mb-3 font-semibold">
                           Are you sure you want to delete this note? This action cannot be undone.
                         </p>
                         <div className="flex gap-2">
@@ -449,7 +451,7 @@ function NoteDetailContent() {
                           <button
                             onClick={() => setShowDeleteConfirm(false)}
                             disabled={isDeleting}
-                            className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg font-medium hover:bg-neutral-300 transition-all disabled:opacity-50"
+                            className="flex-1 bg-[#161616] text-white py-2 rounded-lg font-medium hover:bg-[#222222] transition-all disabled:opacity-50 border border-[#222222]"
                           >
                             Cancel
                           </button>
@@ -463,7 +465,9 @@ function NoteDetailContent() {
           </Card>
 
           {/* AI Q&A */}
-          <NoteQA note={note} />
+          <div className="relative z-10">
+            <NoteQA note={note} />
+          </div>
         </div>
       </main>
     </div>

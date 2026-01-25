@@ -138,7 +138,7 @@ export function ScheduleChat({ timetable }: ScheduleChatProps) {
                 className={`max-w-[80%] rounded-lg p-3 ${
                   message.role === "user"
                     ? "bg-green-600 text-white"
-                    : "bg-white text-neutral-900 border border-green-200"
+                    : "bg-[#161616] text-white border border-[#222222]"
                 }`}
               >
                 {message.isLoading ? (

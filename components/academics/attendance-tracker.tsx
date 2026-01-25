@@ -257,23 +257,24 @@ export function AttendanceTracker() {
     <div className="space-y-6">
       {/* Attendance Rules */}
       {showRules && (
-        <Card className="shadow-premium border-2 border-purple-100">
+        <Card variant="glass">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-purple-600" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <AlertCircle className="w-5 h-5 text-purple-400" />
               Attendance Rules
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-[#D4D4D8]">
               MPSTME College Attendance Policy (AY 2025-26)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm max-w-none text-neutral-700 whitespace-pre-wrap leading-relaxed mb-6">
+            <div className="prose prose-sm max-w-none text-white whitespace-pre-wrap leading-relaxed mb-6">
               {ATTENDANCE_RULES}
             </div>
             <Button
               onClick={() => setShowRules(false)}
-              className="gradient-primary text-white"
+              variant="neon"
+              data-cursor-hover
             >
               Continue to Attendance Calculator
             </Button>
@@ -283,31 +284,31 @@ export function AttendanceTracker() {
 
       {/* Attendance Calculator Form */}
       {!showRules && !results && (
-        <Card className="shadow-premium border-2 border-purple-100">
+        <Card variant="glass">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-purple-600" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Calculator className="w-5 h-5 text-purple-400" />
               Attendance Calculator
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-[#D4D4D8]">
               Enter the number of hours you have missed for each subject
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 mb-6">
+            <div className="space-y-4 mb-6 max-h-96 overflow-y-auto custom-scrollbar">
               {SUBJECTS.map((subject) => (
                 <div
                   key={subject.id}
-                  className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200"
+                  className="p-4 bg-[#161616] border border-[#222222] rounded-lg"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <label
                       htmlFor={`subject-${subject.id}`}
-                      className="font-medium text-neutral-900"
+                      className="font-medium text-white"
                     >
                       {subject.name}
                     </label>
-                    <span className="text-sm text-neutral-600">
+                    <span className="text-sm text-[#D4D4D8]">
                       Can Miss: {subject.maxMissableHours} hrs | Min: {subject.minAttendancePercent}%
                     </span>
                   </div>
@@ -315,13 +316,27 @@ export function AttendanceTracker() {
                     id={`subject-${subject.id}`}
                     type="number"
                     min="0"
-                    step="0.1"
+                    step="1"
                     value={missedHours[subject.id] || ""}
                     onChange={(e) => {
-                      setMissedHours({
-                        ...missedHours,
-                        [subject.id]: e.target.value,
-                      });
+                      const value = e.target.value;
+                      // Only allow whole numbers (integers)
+                      if (value === "" || /^\d+$/.test(value)) {
+                        setMissedHours({
+                          ...missedHours,
+                          [subject.id]: value,
+                        });
+                      }
+                    }}
+                    onWheel={(e) => {
+                      // Prevent scroll from changing the input value
+                      e.currentTarget.blur();
+                    }}
+                    onKeyDown={(e) => {
+                      // Prevent decimal point and negative sign
+                      if (e.key === "." || e.key === "-" || e.key === "e" || e.key === "E" || e.key === "+") {
+                        e.preventDefault();
+                      }
                     }}
                     placeholder={`Enter missed hours`}
                     className="mt-2"
@@ -331,8 +346,10 @@ export function AttendanceTracker() {
             </div>
             <Button
               onClick={calculateAttendance}
-              className="w-full gradient-primary text-white"
+              variant="neon"
               size="lg"
+              className="w-full"
+              data-cursor-hover
             >
               Calculate Attendance
             </Button>
@@ -342,44 +359,44 @@ export function AttendanceTracker() {
 
       {/* Results Display */}
       {results && (
-        <Card className="shadow-premium border-2 border-purple-100">
+        <Card variant="glass">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-purple-600" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Calculator className="w-5 h-5 text-purple-400" />
               Your Attendance Status
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-[#D4D4D8]">
               Detailed breakdown of your attendance across all subjects
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 mb-6">
+            <div className="space-y-4 mb-6 max-h-96 overflow-y-auto custom-scrollbar">
               {results.map((result, index) => (
                 <div
                   key={index}
-                  className={`p-4 rounded-lg border-2 ${
+                  className={`p-4 rounded-lg border ${
                     result.status === "danger"
-                      ? "bg-red-50 border-red-200"
+                      ? "bg-red-500/20 border-red-500/30"
                       : result.status === "warning"
-                      ? "bg-amber-50 border-amber-200"
-                      : "bg-green-50 border-green-200"
+                      ? "bg-amber-500/20 border-amber-500/30"
+                      : "bg-green-500/20 border-green-500/30"
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-neutral-900">{result.subject}</h3>
+                    <h3 className="font-semibold text-white">{result.subject}</h3>
                     <div className="flex items-center gap-2">
                       {result.isEligible ? (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <CheckCircle className="w-5 h-5 text-green-400" />
                       ) : (
-                        <XCircle className="w-5 h-5 text-red-600" />
+                        <XCircle className="w-5 h-5 text-red-400" />
                       )}
                       <span
                         className={`font-bold ${
                           result.status === "danger"
-                            ? "text-red-700"
+                            ? "text-red-400"
                             : result.status === "warning"
-                            ? "text-amber-700"
-                            : "text-green-700"
+                            ? "text-amber-400"
+                            : "text-green-400"
                         }`}
                       >
                         {result.attendancePercent.toFixed(1)}%
@@ -388,29 +405,29 @@ export function AttendanceTracker() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                     <div>
-                      <span className="text-neutral-600">Total Hours:</span>{" "}
-                      <span className="font-medium">{result.totalHours}</span>
+                      <span className="text-[#D4D4D8]">Total Hours:</span>{" "}
+                      <span className="font-medium text-white">{result.totalHours}</span>
                     </div>
                     <div>
-                      <span className="text-neutral-600">Missed:</span>{" "}
-                      <span className="font-medium text-red-600">{result.missedHours} / {result.maxMissableHours}</span>
+                      <span className="text-[#D4D4D8]">Missed:</span>{" "}
+                      <span className="font-medium text-red-400">{result.missedHours} / {result.maxMissableHours}</span>
                     </div>
                     <div>
-                      <span className="text-neutral-600">Attended:</span>{" "}
-                      <span className="font-medium text-green-600">{result.attendedHours}</span>
+                      <span className="text-[#D4D4D8]">Attended:</span>{" "}
+                      <span className="font-medium text-green-400">{result.attendedHours}</span>
                     </div>
                     <div>
-                      <span className="text-neutral-600">Can Miss More:</span>{" "}
-                      <span className="font-medium text-blue-600">{result.canMissMore} hrs</span>
+                      <span className="text-[#D4D4D8]">Can Miss More:</span>{" "}
+                      <span className="font-medium text-blue-400">{result.canMissMore} hrs</span>
                     </div>
                   </div>
                   {!result.isEligible && (
-                    <div className="mt-2 p-2 bg-red-100 rounded text-sm text-red-800">
+                    <div className="mt-2 p-2 bg-red-500/20 border border-red-500/30 rounded text-sm text-red-300">
                       ⚠️ Exceeded maximum missable hours ({result.maxMissableHours} hrs). Re-admission may be required.
                     </div>
                   )}
                   {result.isEligible && result.canMissMore === 0 && (
-                    <div className="mt-2 p-2 bg-amber-100 rounded text-sm text-amber-800">
+                    <div className="mt-2 p-2 bg-amber-500/20 border border-amber-500/30 rounded text-sm text-amber-300">
                       ⚠️ You&apos;ve reached the maximum missable hours. No more absences allowed.
                     </div>
                   )}
@@ -423,19 +440,19 @@ export function AttendanceTracker() {
 
       {/* Chat Interface */}
       {results && (
-        <Card className="shadow-premium border-2 border-purple-100">
+        <Card variant="glass">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-purple-600" />
+            <CardTitle className="flex items-center gap-2 text-white">
+              <MessageSquare className="w-5 h-5 text-purple-400" />
               Ask About Your Attendance
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-[#D4D4D8]">
               Get insights and advice about your attendance status
             </CardDescription>
           </CardHeader>
           <CardContent>
             {/* Chat Messages */}
-            <div className="h-96 overflow-y-auto mb-4 space-y-4 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+            <div className="h-96 overflow-y-auto mb-4 space-y-4 p-4 bg-[#161616] border border-[#222222] rounded-lg custom-scrollbar">
               {chatMessages.map((message) => (
                 <div
                   key={message.id}
@@ -444,17 +461,17 @@ export function AttendanceTracker() {
                   <div
                     className={`max-w-[80%] rounded-lg p-3 ${
                       message.role === "user"
-                        ? "bg-purple-600 text-white"
-                        : "bg-white text-neutral-900 border border-purple-200"
+                        ? "bg-purple-500/20 border border-purple-500/30 text-white"
+                        : "bg-[#161616] border border-[#222222] text-[#D4D4D8]"
                     }`}
                   >
                     {message.isLoading ? (
                       <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Thinking...</span>
+                        <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                        <span className="text-sm">Thinking...</span>
                       </div>
                     ) : (
-                      <div className="whitespace-pre-wrap">{cleanMarkdown(message.content)}</div>
+                      <div className="text-sm whitespace-pre-wrap break-words">{cleanMarkdown(message.content)}</div>
                     )}
                   </div>
                 </div>
@@ -476,7 +493,8 @@ export function AttendanceTracker() {
               <Button
                 onClick={handleChatSend}
                 disabled={isChatLoading || !chatInput.trim()}
-                className="gradient-primary text-white"
+                variant="neon"
+                data-cursor-hover
               >
                 {isChatLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

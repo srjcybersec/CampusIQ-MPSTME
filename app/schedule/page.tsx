@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { motion } from "framer-motion";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { ScheduleDayView } from "@/components/schedule/schedule-day-view";
@@ -9,6 +10,7 @@ import { GoogleCalendarSync } from "@/components/schedule/google-calendar-sync";
 import { TIMETABLE_DATA, TimetableEntry } from "@/lib/data/timetable";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import { format, addDays, startOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 
 function SchedulePageContent() {
@@ -75,32 +77,47 @@ function SchedulePageContent() {
   const selected = getSelectedDaySchedule();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      <AnimatedBackground />
       <MainNav />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 relative z-20">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             <div className="flex items-center gap-4 mb-3">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative w-14 h-14 bg-gradient-to-br from-green-500 via-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-glow transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              <motion.div
+                className="relative group"
+                whileHover={{ scale: 1.1, rotate: 6 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-[#22D3EE] via-[#38BDF8] to-[#22D3EE] rounded-2xl blur-xl opacity-60 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative w-14 h-14 bg-gradient-to-br from-[#22D3EE] via-[#38BDF8] to-[#22D3EE] rounded-2xl flex items-center justify-center glow-blue">
                   <Calendar className="w-7 h-7 text-white" />
                 </div>
-              </div>
+              </motion.div>
               <div>
-                <h1 className="text-4xl font-bold gradient-text">Schedule</h1>
-                <p className="text-lg text-neutral-600 mt-1">Your weekly timetable and class schedule</p>
+                <h1 className="text-4xl font-bold gradient-text-purple">Schedule</h1>
+                <p className="text-lg text-[#D4D4D8] mt-1">Your weekly timetable and class schedule</p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Day Selector */}
-          <div className="mb-6 flex flex-wrap gap-2">
+          <motion.div
+            className="mb-6 flex flex-wrap gap-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
             <Button
               onClick={() => setSelectedDay("today")}
               variant={selectedDay === "today" ? "default" : "outline"}
-              className={selectedDay === "today" ? "gradient-primary text-white" : ""}
+              data-cursor-hover
             >
               Today ({todayDayName})
             </Button>
@@ -112,17 +129,22 @@ function SchedulePageContent() {
                   key={index}
                   onClick={() => setSelectedDay(index.toString())}
                   variant={selectedDay === index.toString() ? "default" : "outline"}
-                  className={selectedDay === index.toString() ? "gradient-primary text-white" : ""}
+                  data-cursor-hover
                 >
                   {dayName} {isToday && "(Today)"}
                 </Button>
               );
             })}
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Schedule View */}
-            <div className="space-y-6">
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
               <ScheduleDayView
                 entries={selected.entries}
                 day={selected.day}
@@ -133,12 +155,16 @@ function SchedulePageContent() {
               
               {/* Google Calendar Sync */}
               <GoogleCalendarSync />
-            </div>
+            </motion.div>
 
             {/* AI Chat */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
               <ScheduleChat timetable={TIMETABLE_DATA} />
-            </div>
+            </motion.div>
           </div>
         </div>
       </main>
@@ -149,7 +175,7 @@ function SchedulePageContent() {
 export default function SchedulePage() {
   return (
     <ProtectedRoute>
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
         <SchedulePageContent />
       </Suspense>
     </ProtectedRoute>

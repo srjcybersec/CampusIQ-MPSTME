@@ -98,12 +98,12 @@ export function MatrimonyMatchCard({ match, otherUserProfile, onUpdate, onChat }
                     {match.cgpaLeague}
                   </span>
                 </div>
-                <p className="text-sm text-neutral-500">{getTimeAgo()}</p>
+                <p className="text-sm text-[#D4D4D8]">{getTimeAgo()}</p>
               </div>
             </div>
             <button
               onClick={() => setShowReportModal(true)}
-              className="text-neutral-400 hover:text-red-600 transition-colors"
+              className="text-[#D4D4D8] hover:text-red-600 transition-colors"
               title="Report"
             >
               <Flag className="w-4 h-4" />
@@ -145,19 +145,19 @@ export function MatrimonyMatchCard({ match, otherUserProfile, onUpdate, onChat }
             <div className="mb-4 p-3 bg-neutral-50 rounded-lg">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <span className="text-neutral-500">Branch:</span>
+                  <span className="text-[#D4D4D8]">Branch:</span>
                   <span className="ml-2 font-medium">{BRANCHES[otherUserProfile.branch].label}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500">Year:</span>
+                  <span className="text-[#D4D4D8]">Year:</span>
                   <span className="ml-2 font-medium">Year {otherUserProfile.year}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500">CGPA:</span>
+                  <span className="text-[#D4D4D8]">CGPA:</span>
                   <span className="ml-2 font-medium">{otherUserProfile.cgpa}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500">Study Style:</span>
+                  <span className="text-[#D4D4D8]">Study Style:</span>
                   <span className="ml-2 font-medium">{STUDY_STYLES[otherUserProfile.studyStyle].label}</span>
                 </div>
               </div>

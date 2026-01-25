@@ -87,7 +87,7 @@ export function AssignmentDashboard({ userId }: AssignmentDashboardProps) {
   const hasActiveFilters = statusFilter.length > 0 || courseFilter || searchQuery;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative z-10">
       {/* Health Score and Workload Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AssignmentHealthScore userId={userId} />
@@ -103,11 +103,11 @@ export function AssignmentDashboard({ userId }: AssignmentDashboardProps) {
       <PrioritySuggestions assignments={assignments} />
 
       {/* Filters and Search */}
-      <Card>
+      <Card variant="glass" className="relative z-10">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Assignments</CardTitle>
+              <CardTitle className="text-white">Assignments</CardTitle>
               <CardDescription>
                 {assignments.length} assignment{assignments.length !== 1 ? "s" : ""} found
               </CardDescription>
@@ -134,7 +134,7 @@ export function AssignmentDashboard({ userId }: AssignmentDashboardProps) {
           <div className="space-y-4 mb-6">
             <div className="flex gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#D4D4D8]" />
                 <Input
                   placeholder="Search assignments..."
                   value={searchQuery}
@@ -155,7 +155,7 @@ export function AssignmentDashboard({ userId }: AssignmentDashboardProps) {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className="text-sm text-neutral-600 self-center">Status:</span>
+              <span className="text-sm text-[#D4D4D8] self-center">Status:</span>
               {(["pending", "submitted", "overdue", "late"] as AssignmentStatus[]).map((status) => (
                 <Button
                   key={status}
@@ -171,7 +171,7 @@ export function AssignmentDashboard({ userId }: AssignmentDashboardProps) {
 
             {courses.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                <span className="text-sm text-neutral-600 self-center">Course:</span>
+                <span className="text-sm text-[#D4D4D8] self-center">Course:</span>
                 <Button
                   variant={!courseFilter ? "default" : "outline"}
                   size="sm"
@@ -196,11 +196,11 @@ export function AssignmentDashboard({ userId }: AssignmentDashboardProps) {
           {/* Assignment List */}
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-neutral-600">Loading assignments...</p>
+              <p className="text-[#D4D4D8]">Loading assignments...</p>
             </div>
           ) : assignments.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-neutral-600 mb-4">
+              <p className="text-[#D4D4D8] mb-4">
                 {hasActiveFilters
                   ? "No assignments match your filters."
                   : "No assignments found. Sync from Microsoft Teams or create one manually."}

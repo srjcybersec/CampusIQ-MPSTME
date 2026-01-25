@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,41 +9,59 @@ import { Sparkles, Heart } from "lucide-react";
 
 function ExtrasPageContent() {
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-black relative overflow-hidden">
       <MainNav />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-neutral-900 mb-2">Extras</h1>
-          <p className="text-neutral-600 mb-8">Experimental and optional features</p>
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl font-bold text-white mb-2">Extras</h1>
+            <p className="text-lg text-[#D4D4D8]">Experimental and optional features</p>
+          </motion.div>
 
-          {/* Matrimony */}
-          <Card className="shadow-premium hover:shadow-glow-hover transition-all duration-300">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="w-5 h-5" />
-                Campus Matrimony
-                <span className="text-xs font-normal text-neutral-500 bg-neutral-100 px-2 py-1 rounded">
-                  Experimental
-                </span>
-              </CardTitle>
-              <CardDescription>
-                CGPA-based matchmaking for campus connections
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-neutral-600 mb-4">
-                Find dating partners, friends, or study buddies based on CGPA, branch, year, study style, and personality compatibility. Safe, ethical, and campus-appropriate.
-              </p>
-              <button
-                onClick={() => window.location.href = '/extras/matrimony'}
-                className="w-full min-h-[40px] px-4 py-2 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-medium rounded-xl shadow-premium hover:shadow-glow-hover hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <Heart className="w-4 h-4" />
-                View Matrimony
-              </button>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <Card variant="glass" interactive delay={0.1} className="group">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <motion.div
+                    className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FB923C] to-[#EC4899] flex items-center justify-center glow-orange"
+                    whileHover={{ scale: 1.1, rotate: 6 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Heart className="w-6 h-6 text-white" />
+                  </motion.div>
+                  Campus Connections
+                  <span className="ml-2 px-2 py-1 text-xs font-medium text-[#D4D4D8] border border-[#222222] rounded-full bg-[#161616]/50">Experimental</span>
+                </CardTitle>
+                <CardDescription>
+                  CGPA-based matchmaking for campus connections
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-[#D4D4D8] mb-4">
+                  Find friends or study buddies based on CGPA, branch, year, study style, and personality compatibility. Safe, ethical, and campus-appropriate.
+                </p>
+                <Button
+                  variant="neon"
+                  onClick={() => window.location.href = '/extras/matrimony'}
+                  className="w-full"
+                  data-cursor-hover
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  View Connections
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </main>
     </div>

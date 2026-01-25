@@ -109,7 +109,7 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* CGPA */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               CGPA <span className="text-red-500">*</span>
             </label>
             <Input
@@ -123,14 +123,14 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
               required
               className="max-w-xs"
             />
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-[#D4D4D8] mt-1">
               Your CGPA helps match you with similar academic achievers
             </p>
           </div>
 
           {/* Branch */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               Branch <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -141,12 +141,12 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
                   onClick={() => setBranch(key as Branch)}
                   className={`p-3 rounded-lg border-2 transition-all text-left ${
                     branch === key
-                      ? "border-blue-500 bg-blue-50 shadow-soft"
-                      : "border-neutral-200 bg-white hover:border-neutral-300"
+                      ? "border-blue-500 bg-blue-500/20 shadow-soft"
+                      : "border-[#222222] bg-[#161616] hover:border-[#333333]"
                   }`}
                 >
                   <div className="text-lg mb-1">{value.emoji}</div>
-                  <div className="text-sm font-medium">{value.label}</div>
+                  <div className="text-sm font-medium text-white">{value.label}</div>
                 </button>
               ))}
             </div>
@@ -154,7 +154,7 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
 
           {/* Year */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               Year <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-2">
@@ -165,8 +165,8 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
                   onClick={() => setYear(y)}
                   className={`px-4 py-2 rounded-lg border-2 transition-all ${
                     year === y
-                      ? "border-blue-500 bg-blue-50 shadow-soft font-medium"
-                      : "border-neutral-200 bg-white hover:border-neutral-300"
+                      ? "border-blue-500 bg-blue-500/20 shadow-soft font-medium text-white"
+                      : "border-[#222222] bg-[#161616] hover:border-[#333333] text-white"
                   }`}
                 >
                   Year {y}
@@ -177,7 +177,7 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
 
           {/* Study Style */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               Study Style <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -188,13 +188,13 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
                   onClick={() => setStudyStyle(key as StudyStyle)}
                   className={`p-3 rounded-lg border-2 transition-all text-left ${
                     studyStyle === key
-                      ? "border-blue-500 bg-blue-50 shadow-soft"
-                      : "border-neutral-200 bg-white hover:border-neutral-300"
+                      ? "border-blue-500 bg-blue-500/20 shadow-soft"
+                      : "border-[#222222] bg-[#161616] hover:border-[#333333]"
                   }`}
                 >
                   <div className="text-lg mb-1">{value.emoji}</div>
-                  <div className="text-sm font-medium">{value.label}</div>
-                  <div className="text-xs text-neutral-500 mt-1">{value.description}</div>
+                  <div className="text-sm font-medium text-white">{value.label}</div>
+                  <div className="text-xs text-[#D4D4D8] mt-1">{value.description}</div>
                 </button>
               ))}
             </div>
@@ -202,7 +202,7 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
 
           {/* Personality */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               Personality Traits <span className="text-red-500">*</span> (Select at least one)
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -213,13 +213,13 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
                   onClick={() => togglePersonality(key as PersonalityType)}
                   className={`p-3 rounded-lg border-2 transition-all text-left ${
                     personality.includes(key as PersonalityType)
-                      ? "border-blue-500 bg-blue-50 shadow-soft"
-                      : "border-neutral-200 bg-white hover:border-neutral-300"
+                      ? "border-blue-500 bg-blue-500/20 shadow-soft"
+                      : "border-[#222222] bg-[#161616] hover:border-[#333333]"
                   }`}
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{value.emoji}</span>
-                    <span className="text-sm font-medium">{value.label}</span>
+                    <span className="text-sm font-medium text-white">{value.label}</span>
                   </div>
                 </button>
               ))}
@@ -228,24 +228,26 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
 
           {/* Connection Type */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               Looking For <span className="text-red-500">*</span> (Select at least one)
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {Object.entries(CONNECTION_TYPES).map(([key, value]) => (
+              {Object.entries(CONNECTION_TYPES)
+                .filter(([key]) => key !== "dating")
+                .map(([key, value]) => (
                 <button
                   key={key}
                   type="button"
                   onClick={() => toggleConnectionType(key as ConnectionType)}
                   className={`p-4 rounded-lg border-2 transition-all text-left ${
                     connectionType.includes(key as ConnectionType)
-                      ? "border-blue-500 bg-blue-50 shadow-soft"
-                      : "border-neutral-200 bg-white hover:border-neutral-300"
+                      ? "border-blue-500 bg-blue-500/20 shadow-soft"
+                      : "border-[#222222] bg-[#161616] hover:border-[#333333]"
                   }`}
                 >
                   <div className="text-2xl mb-2">{value.emoji}</div>
-                  <div className="text-sm font-medium mb-1">{value.label}</div>
-                  <div className="text-xs text-neutral-500">{value.description}</div>
+                  <div className="text-sm font-medium mb-1 text-white">{value.label}</div>
+                  <div className="text-xs text-[#D4D4D8]">{value.description}</div>
                 </button>
               ))}
             </div>
@@ -253,7 +255,7 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
 
           {/* Bio */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               Bio (Optional)
             </label>
             <Textarea
@@ -264,13 +266,13 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
               maxLength={200}
               className="resize-none"
             />
-            <p className="text-xs text-neutral-500 mt-1">{bio.length}/200 characters</p>
+            <p className="text-xs text-[#D4D4D8] mt-1">{bio.length}/200 characters</p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <div className="text-sm text-red-800 flex items-center gap-2">
+            <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+              <div className="text-sm text-red-400 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
                 {error}
               </div>
@@ -279,8 +281,8 @@ export function MatrimonyProfileForm({ existingProfile, onSuccess }: MatrimonyPr
 
           {/* Success */}
           {success && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <div className="text-sm text-green-800 flex items-center gap-2">
+            <div className="p-3 bg-green-500/20 border border-green-500/50 rounded-lg">
+              <div className="text-sm text-green-400 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4" />
                 Profile saved successfully!
               </div>

@@ -41,9 +41,9 @@ export function WorkloadOverview({ assignments }: WorkloadOverviewProps) {
   );
 
   return (
-    <Card>
+    <Card variant="glass" className="relative z-10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           <Calendar className="w-5 h-5" />
           Workload Overview
         </CardTitle>
@@ -51,18 +51,18 @@ export function WorkloadOverview({ assignments }: WorkloadOverviewProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="text-center p-4 bg-neutral-50 rounded-lg">
-            <p className="text-3xl font-bold text-neutral-900">{totalThisWeek}</p>
-            <p className="text-sm text-neutral-600">
+          <div className="text-center p-4 bg-[#161616] border border-[#222222] rounded-lg">
+            <p className="text-3xl font-bold text-white">{totalThisWeek}</p>
+            <p className="text-sm text-[#D4D4D8]">
               Assignments due this week
             </p>
           </div>
 
           {heavyDays.length > 0 && (
-            <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
-              <div className="flex items-center gap-2 text-orange-800">
+            <div className="p-3 bg-orange-500/20 border border-orange-500/50 rounded-lg">
+              <div className="flex items-center gap-2 text-orange-400">
                 <AlertTriangle className="w-4 h-4" />
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-white">
                   Heavy workload detected on {heavyDays.length} day{heavyDays.length !== 1 ? "s" : ""}
                 </span>
               </div>
@@ -73,28 +73,28 @@ export function WorkloadOverview({ assignments }: WorkloadOverviewProps) {
             {weekDays.map((day, index) => (
               <div
                 key={index}
-                className={`flex items-center justify-between p-3 rounded-lg ${
+                className={`flex items-center justify-between p-3 rounded-lg border ${
                   day.isHeavy
-                    ? "bg-orange-50 border border-orange-200"
-                    : "bg-neutral-50"
+                    ? "bg-orange-500/20 border-orange-500/50"
+                    : "bg-[#161616] border-[#222222]"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-16 text-sm font-medium text-neutral-700">
+                  <div className="w-16 text-sm font-medium text-white">
                     {format(day.date, "EEE d")}
                   </div>
                   <div className="flex-1">
                     {day.assignmentCount === 0 ? (
-                      <span className="text-sm text-neutral-500">No assignments</span>
+                      <span className="text-sm text-[#D4D4D8]">No assignments</span>
                     ) : (
-                      <span className="text-sm text-neutral-700">
+                      <span className="text-sm text-white">
                         {day.assignmentCount} assignment{day.assignmentCount !== 1 ? "s" : ""}
                       </span>
                     )}
                   </div>
                 </div>
                 {day.isHeavy && (
-                  <span className="text-xs font-medium text-orange-700 bg-orange-100 px-2 py-1 rounded">
+                  <span className="text-xs font-medium text-orange-400 bg-orange-500/20 border border-orange-500/50 px-2 py-1 rounded">
                     Heavy
                   </span>
                 )}

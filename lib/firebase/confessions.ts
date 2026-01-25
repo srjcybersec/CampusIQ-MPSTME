@@ -6,6 +6,7 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -256,6 +257,56 @@ export async function getConfessionById(confessionId: string): Promise<Confessio
     return null;
   } catch (error) {
     console.error("Error getting confession:", error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a confession (only by the author)
+ */
+export async function deleteConfession(
+  confessionId: string,
+  userId: string
+): Promise<void> {
+  try {
+    // Verify confession exists and user is the author
+    const confessionRef = doc(db, CONFESSIONS_COLLECTION, confessionId);
+    const confessionDoc = await getDoc(confessionRef);
+    
+    if (!confessionDoc.exists()) {
+      throw new Error("Confession not found");
+    }
+
+    const confessionData = confessionDoc.data() as Confession;
+    
+    if (confessionData.authorId !== userId) {
+      throw new Error("You can only delete your own confessions");
+    }
+
+    // Delete all related likes
+    const likesQuery = query(
+      collection(db, LIKES_COLLECTION),
+      where("confessionId", "==", confessionId)
+    );
+    const likesSnapshot = await getDocs(likesQuery);
+    
+    const batch = writeBatch(db);
+    
+    // Delete all likes for this confession
+    likesSnapshot.docs.forEach((likeDoc) => {
+      batch.delete(likeDoc.ref);
+    });
+    
+    // Delete the confession
+    batch.delete(confessionRef);
+    
+    await batch.commit();
+  } catch (error: any) {
+    console.error("Error deleting confession:", error);
+    // Provide more helpful error message
+    if (error.code === 'permission-denied' || error.message?.includes('permission')) {
+      throw new Error("You don't have permission to delete this confession.");
+    }
     throw error;
   }
 }

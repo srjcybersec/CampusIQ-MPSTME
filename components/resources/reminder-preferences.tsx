@@ -90,23 +90,23 @@ export function ReminderPreferencesComponent({
 
   if (loading || !preferences) {
     return (
-      <Card>
+      <Card variant="glass">
         <CardHeader>
-          <CardTitle>Reminder Preferences</CardTitle>
-          <CardDescription>Loading...</CardDescription>
+          <CardTitle className="text-white">Reminder Preferences</CardTitle>
+          <CardDescription className="text-[#D4D4D8]">Loading...</CardDescription>
         </CardHeader>
       </Card>
     );
   }
 
   return (
-    <Card>
+    <Card variant="glass">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="w-5 h-5" />
+        <CardTitle className="flex items-center gap-2 text-white">
+          <Bell className="w-5 h-5 text-purple-400" />
           Reminder Preferences
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-[#D4D4D8]">
           Configure when and how you want to receive assignment reminders
         </CardDescription>
       </CardHeader>
@@ -115,17 +115,18 @@ export function ReminderPreferencesComponent({
           {/* Enable/Disable */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-neutral-900">Enable Reminders</p>
-              <p className="text-sm text-neutral-600">
+              <p className="font-medium text-white">Enable Reminders</p>
+              <p className="text-sm text-[#D4D4D8]">
                 Turn reminders on or off
               </p>
             </div>
             <Button
-              variant={preferences.enabled ? "default" : "outline"}
+              variant={preferences.enabled ? "neon" : "outline"}
               size="sm"
               onClick={() =>
                 setPreferences({ ...preferences, enabled: !preferences.enabled })
               }
+              data-cursor-hover
             >
               {preferences.enabled ? "Enabled" : "Disabled"}
             </Button>
@@ -135,7 +136,7 @@ export function ReminderPreferencesComponent({
             <>
               {/* Notification Channels */}
               <div>
-                <p className="font-medium text-neutral-900 mb-3">
+                <p className="font-medium text-white mb-3">
                   Notification Channels
                 </p>
                 <div className="flex gap-2">
@@ -145,10 +146,11 @@ export function ReminderPreferencesComponent({
                     return (
                       <Button
                         key={channel}
-                        variant={isSelected ? "default" : "outline"}
+                        variant={isSelected ? "neon" : "outline"}
                         size="sm"
                         onClick={() => toggleChannel(channel)}
                         className="capitalize"
+                        data-cursor-hover
                       >
                         {isSelected && <Check className="w-4 h-4 mr-1" />}
                         {label}
@@ -161,7 +163,7 @@ export function ReminderPreferencesComponent({
               {/* Email Address */}
               {preferences.channels.includes("email") && (
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  <label className="block text-sm font-medium text-white mb-1">
                     Email Address
                   </label>
                   <Input
@@ -177,7 +179,7 @@ export function ReminderPreferencesComponent({
 
               {/* Reminder Types */}
               <div>
-                <p className="font-medium text-neutral-900 mb-3">
+                <p className="font-medium text-white mb-3">
                   Reminder Timing
                 </p>
                 <div className="space-y-2">
@@ -189,17 +191,18 @@ export function ReminderPreferencesComponent({
                   ].map(({ key, label }) => (
                     <div
                       key={key}
-                      className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-[#161616] border border-[#222222] rounded-lg"
                     >
-                      <span className="text-sm text-neutral-700">{label}</span>
+                      <span className="text-sm text-white">{label}</span>
                       <Button
                         variant={
                           preferences[key as keyof ReminderPreferences]
-                            ? "default"
+                            ? "neon"
                             : "outline"
                         }
                         size="sm"
                         onClick={() => toggleReminderType(key as keyof ReminderPreferences)}
+                        data-cursor-hover
                       >
                         {preferences[key as keyof ReminderPreferences] ? (
                           <>
@@ -220,7 +223,9 @@ export function ReminderPreferencesComponent({
           <Button
             onClick={handleSave}
             disabled={saving}
+            variant="neon"
             className="w-full"
+            data-cursor-hover
           >
             {saving ? "Saving..." : "Save Preferences"}
           </Button>

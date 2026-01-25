@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/lib/auth/context";
 import { AssignmentDashboard } from "@/components/resources/assignment-dashboard";
 import { MicrosoftTeamsSync } from "@/components/resources/microsoft-teams-sync";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 
 function AssignmentsPageContent() {
   const { user } = useAuth();
@@ -39,12 +40,12 @@ function AssignmentsPageContent() {
 
   if (checkingConnection) {
     return (
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-black relative">
         <MainNav />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 relative z-20">
           <div className="max-w-7xl mx-auto">
             <div className="text-center py-12">
-              <p className="text-neutral-600">Loading...</p>
+              <p className="text-white">Loading...</p>
             </div>
           </div>
         </main>
@@ -53,15 +54,16 @@ function AssignmentsPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      <AnimatedBackground />
       <MainNav />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative z-20">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-neutral-900 mb-2">
+            <h1 className="text-3xl font-bold text-white mb-2">
               Assignment Management
             </h1>
-            <p className="text-neutral-600">
+            <p className="text-[#D4D4D8]">
               Track your assignments, deadlines, and submissions from Microsoft Teams
             </p>
           </div>

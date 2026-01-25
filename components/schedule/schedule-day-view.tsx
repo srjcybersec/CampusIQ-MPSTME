@@ -38,10 +38,10 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
   };
 
   const getEntryColor = (entry: TimetableEntry) => {
-    if (entry.type === "break") return "bg-neutral-100 border-neutral-200";
-    if (entry.type === "placement") return "bg-blue-50 border-blue-200";
-    if (entry.type === "elective") return "bg-purple-50 border-purple-200";
-    return "bg-white border-neutral-200";
+    if (entry.type === "break") return "bg-[#161616] border-[#222222]";
+    if (entry.type === "placement") return "bg-blue-500/20 border-blue-500/50";
+    if (entry.type === "elective") return "bg-purple-500/20 border-purple-500/50";
+    return "bg-[#161616] border-[#222222]";
   };
 
   const getEntryIcon = (entry: TimetableEntry) => {
@@ -52,16 +52,16 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
   };
 
   return (
-    <Card className="shadow-soft border-2 border-neutral-200">
+    <Card variant="glass" className="relative z-10 overflow-hidden">
       <CardContent className="p-6">
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-neutral-900 mb-1">{day}</h2>
-          <p className="text-neutral-600">{format(date, "MMMM d, yyyy")}</p>
+          <h2 className="text-2xl font-bold text-white mb-1">{day}</h2>
+          <p className="text-[#D4D4D8]">{format(date, "MMMM d, yyyy")}</p>
         </div>
 
         <div className="space-y-3">
           {entries.length === 0 ? (
-            <p className="text-neutral-500 text-center py-8">No classes scheduled for this day.</p>
+            <p className="text-[#D4D4D8] text-center py-8">No classes scheduled for this day.</p>
           ) : (
             entries.map((entry) => {
               const comment = comments[entry.id] || "";
@@ -70,45 +70,45 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
               return (
                 <div
                   key={entry.id}
-                  className={`p-4 rounded-lg border-2 transition-calm ${getEntryColor(entry)}`}
+                  className={`p-4 rounded-lg border transition-calm overflow-hidden ${getEntryColor(entry)}`}
                 >
                   {entry.type === "break" ? (
                     <div className="flex items-center justify-center">
-                      <span className="text-neutral-500 font-medium">Break</span>
+                      <span className="text-[#D4D4D8] font-medium">Break</span>
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            {getEntryIcon(entry) && <span>{getEntryIcon(entry)}</span>}
-                            <h3 className="font-semibold text-neutral-900">{entry.subject}</h3>
+                      <div className="flex items-start justify-between mb-2 min-w-0">
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            {getEntryIcon(entry) && <span className="flex-shrink-0">{getEntryIcon(entry)}</span>}
+                            <h3 className="font-semibold text-white truncate flex-1 min-w-0">{entry.subject}</h3>
                             {entry.subjectCode && entry.subjectCode !== "BREAK" && (
-                              <span className="text-xs bg-neutral-200 px-2 py-0.5 rounded text-neutral-700">
+                              <span className="text-xs bg-[#161616] px-2 py-0.5 rounded text-[#D4D4D8] flex-shrink-0">
                                 {entry.subjectCode}
                               </span>
                             )}
                             {entry.batch && (
-                              <span className="text-xs bg-blue-200 px-2 py-0.5 rounded text-blue-800 font-medium">
+                              <span className="text-xs bg-blue-500/20 border border-blue-500/50 px-2 py-0.5 rounded text-blue-400 font-medium flex-shrink-0">
                                 {entry.batch}
                               </span>
                             )}
                           </div>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-600 mt-2">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {entry.time}
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-[#D4D4D8] mt-2 overflow-hidden">
+                            <span className="flex items-center gap-1 flex-shrink-0">
+                              <Clock className="w-4 h-4 flex-shrink-0" />
+                              <span className="whitespace-nowrap">{entry.time}</span>
                             </span>
                             {entry.room && (
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-4 h-4" />
-                                {entry.room}
+                              <span className="flex items-center gap-1 flex-shrink-0">
+                                <MapPin className="w-4 h-4 flex-shrink-0" />
+                                <span className="whitespace-nowrap">{entry.room}</span>
                               </span>
                             )}
                             {entry.faculty && (
-                              <span className="flex items-center gap-1">
-                                <User className="w-4 h-4" />
-                                {entry.faculty}
+                              <span className="flex items-center gap-1 min-w-0 flex-1">
+                                <User className="w-4 h-4 flex-shrink-0" />
+                                <span className="truncate">{entry.faculty}</span>
                               </span>
                             )}
                           </div>
@@ -117,7 +117,8 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEditComment(entry.id)}
-                          className="flex-shrink-0"
+                          className="flex-shrink-0 ml-2"
+                          data-cursor-hover
                         >
                           <MessageSquare className="w-4 h-4" />
                         </Button>
@@ -125,7 +126,7 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
 
                       {/* Comment Section */}
                       {isEditing ? (
-                        <div className="mt-3 p-3 bg-white rounded border border-neutral-300">
+                        <div className="mt-3 p-3 bg-[#161616] rounded border border-[#222222]">
                           <Textarea
                             value={commentText}
                             onChange={(e) => setCommentText(e.target.value)}
@@ -137,7 +138,8 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
                             <Button
                               onClick={() => handleSaveComment(entry.id)}
                               size="sm"
-                              className="gradient-primary text-white"
+                              variant="neon"
+                              data-cursor-hover
                             >
                               Save
                             </Button>
@@ -145,19 +147,22 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
                               onClick={handleCancelEdit}
                               size="sm"
                               variant="outline"
+                              data-cursor-hover
                             >
                               Cancel
                             </Button>
                           </div>
                         </div>
                       ) : comment ? (
-                        <div className="mt-3 p-3 bg-white rounded border border-neutral-300">
-                          <div className="flex items-start justify-between">
-                            <p className="text-sm text-neutral-700 flex-1">{comment}</p>
+                        <div className="mt-3 p-3 bg-[#161616] rounded border border-[#222222]">
+                          <div className="flex items-start justify-between min-w-0">
+                            <p className="text-sm text-white flex-1 break-words overflow-hidden">{comment}</p>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEditComment(entry.id)}
+                              className="flex-shrink-0 ml-2"
+                              data-cursor-hover
                             >
                               <Edit2 className="w-3 h-3" />
                             </Button>

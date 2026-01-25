@@ -94,17 +94,17 @@ export function NoteQA({ note }: NoteQAProps) {
   };
 
   return (
-    <Card className="shadow-premium">
+    <Card variant="glass" className="shadow-premium relative z-10">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <MessageSquare className="w-5 h-5" />
             Ask AI About This Note
           </CardTitle>
           {messages.length > 0 && (
             <button
               onClick={handleClearChat}
-              className="text-sm text-neutral-500 hover:text-neutral-700 flex items-center gap-1"
+              className="text-sm text-[#D4D4D8] hover:text-white flex items-center gap-1"
             >
               <Trash2 className="w-4 h-4" />
               Clear Chat
@@ -115,7 +115,7 @@ export function NoteQA({ note }: NoteQAProps) {
       <CardContent className="space-y-4">
         {/* Chat Messages */}
         {messages.length > 0 && (
-          <div className="space-y-4 max-h-96 overflow-y-auto border border-neutral-200 rounded-lg p-4 bg-neutral-50">
+          <div className="space-y-4 max-h-96 overflow-y-auto border border-[#222222] rounded-lg p-4 bg-[#161616]">
             {messages.map((message, idx) => (
               <div
                 key={idx}
@@ -124,35 +124,35 @@ export function NoteQA({ note }: NoteQAProps) {
                 }`}
               >
                 {message.role === "assistant" && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-blue-600" />
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-blue-400" />
                   </div>
                 )}
                 <div
                   className={`max-w-[80%] rounded-lg px-4 py-2 ${
                     message.role === "user"
                       ? "bg-blue-600 text-white"
-                      : "bg-white border border-neutral-200 text-neutral-900"
+                      : "bg-[#161616] border border-[#222222] text-white"
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                 </div>
                 {message.role === "user" && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-neutral-200 flex items-center justify-center">
-                    <User className="w-4 h-4 text-neutral-600" />
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#161616] border border-[#222222] flex items-center justify-center">
+                    <User className="w-4 h-4 text-[#D4D4D8]" />
                   </div>
                 )}
               </div>
             ))}
             {isLoading && (
               <div className="flex gap-3 justify-start">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-blue-600" />
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-blue-400" />
                 </div>
-                <div className="bg-white border border-neutral-200 rounded-lg px-4 py-2">
+                <div className="bg-[#161616] border border-[#222222] rounded-lg px-4 py-2">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                    <span className="text-sm text-neutral-500">Thinking...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+                    <span className="text-sm text-[#D4D4D8]">Thinking...</span>
                   </div>
                 </div>
               </div>
@@ -171,12 +171,12 @@ export function NoteQA({ note }: NoteQAProps) {
                 ? "Ask a question about this study material... (e.g., What are the key concepts? Explain the main topics.)"
                 : "Ask a follow-up question..."
             }
-            className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-2 border border-[#222222] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-[#161616] text-white placeholder:text-[#D4D4D8]"
             rows={3}
             disabled={isLoading}
           />
           <div className="flex items-center justify-between">
-            <p className="text-xs text-neutral-500">
+            <p className="text-xs text-[#D4D4D8]">
               Press Enter to send, Shift+Enter for new line
             </p>
             <button
@@ -200,7 +200,7 @@ export function NoteQA({ note }: NoteQAProps) {
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
             {error}
           </div>
         )}

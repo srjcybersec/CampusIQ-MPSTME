@@ -108,15 +108,15 @@ export function ManualAssignmentForm({
   const defaultTime = "23:59";
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white">
-        <CardHeader className="border-b border-neutral-200">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <Card variant="glass" className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <CardHeader className="border-b border-[#222222]">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl font-bold text-neutral-900">Create Assignment</CardTitle>
-              <CardDescription className="text-neutral-600 mt-1">Add a new assignment manually</CardDescription>
+              <CardTitle className="text-2xl font-bold text-white">Create Assignment</CardTitle>
+              <CardDescription className="text-[#D4D4D8] mt-1">Add a new assignment manually</CardDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-neutral-600 hover:text-neutral-900">
+            <Button variant="ghost" size="sm" onClick={onClose} className="text-[#D4D4D8] hover:text-white">
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -124,7 +124,7 @@ export function ManualAssignmentForm({
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
+              <label className="block text-sm font-medium text-white mb-1">
                 Assignment Title *
               </label>
               <Input
@@ -136,7 +136,7 @@ export function ManualAssignmentForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
+              <label className="block text-sm font-medium text-white mb-1">
                 Course *
               </label>
               {courses.length > 0 && (
@@ -166,7 +166,7 @@ export function ManualAssignmentForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
+              <label className="block text-sm font-medium text-white mb-1">
                 Description
               </label>
               <Textarea
@@ -179,7 +179,7 @@ export function ManualAssignmentForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Due Date *
                 </label>
                 <Input
@@ -190,7 +190,7 @@ export function ManualAssignmentForm({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Due Time
                 </label>
                 <Input
@@ -203,7 +203,7 @@ export function ManualAssignmentForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
+              <label className="block text-sm font-medium text-white mb-1">
                 Points (optional)
               </label>
               <Input
@@ -216,20 +216,22 @@ export function ManualAssignmentForm({
               />
             </div>
 
-            <div className="flex gap-4 pt-4 border-t border-neutral-200">
+            <div className="flex gap-4 pt-4 border-t border-[#222222]">
               <Button
                 type="submit"
                 disabled={submitting}
+                variant="neon"
                 className="flex-1"
-                style={{ color: '#ffffff' }}
+                data-cursor-hover
               >
-                <span style={{ color: '#ffffff', display: 'inline-block' }}>{submitting ? "Creating..." : "Create Assignment"}</span>
+                {submitting ? "Creating..." : "Create Assignment"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={submitting}
+                data-cursor-hover
               >
                 Cancel
               </Button>

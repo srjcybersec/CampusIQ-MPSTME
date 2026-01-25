@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/auth/context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Upload, FileText, Loader2, CheckCircle, X, AlertCircle } from "lucide-react";
 import {
   Subject,
@@ -254,10 +255,10 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* File Upload */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               File *
             </label>
-            <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center hover:border-neutral-400 transition-colors">
+            <div className="border-2 border-dashed border-[#222222] rounded-lg p-6 text-center hover:border-[#333333] transition-colors bg-[#161616]">
               <input
                 type="file"
                 id="file-upload"
@@ -270,27 +271,27 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
                 htmlFor="file-upload"
                 className="cursor-pointer flex flex-col items-center gap-2"
               >
-                <FileText className="w-8 h-8 text-neutral-400" />
+                <FileText className="w-8 h-8 text-[#D4D4D8]" />
                 {file ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-neutral-700">{file.name}</span>
+                    <span className="text-sm text-white">{file.name}</span>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setFile(null);
                       }}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-400 hover:text-red-500"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <span className="text-sm text-neutral-600">
+                  <span className="text-sm text-[#D4D4D8]">
                     Click to upload or drag and drop
                   </span>
                 )}
-                <span className="text-xs text-neutral-500">
+                <span className="text-xs text-[#D4D4D8]">
                   PDF, DOC, DOCX, TXT, PPTX, XLSX (Max 50MB)
                 </span>
               </label>
@@ -299,14 +300,13 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Title *
             </label>
-            <input
+            <Input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="e.g., Data Structures Midterm Notes"
               required
               disabled={isSubmitting}
@@ -315,13 +315,13 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Description (Optional)
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-[#222222] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#161616] text-white placeholder:text-[#D4D4D8]"
               rows={3}
               placeholder="Brief description of the material..."
               disabled={isSubmitting}
@@ -332,18 +332,18 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Subject */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Subject *
               </label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value as Subject)}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#222222] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#161616] text-white"
                 required
                 disabled={isSubmitting}
               >
                 {SUBJECTS.map((s) => (
-                  <option key={s} value={s}>
+                  <option key={s} value={s} className="bg-[#161616] text-white">
                     {s}
                   </option>
                 ))}
@@ -352,18 +352,18 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
 
             {/* Semester */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Semester *
               </label>
               <select
                 value={semester}
                 onChange={(e) => setSemester(e.target.value as Semester)}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#222222] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#161616] text-white"
                 required
                 disabled={isSubmitting}
               >
                 {SEMESTERS.map((s) => (
-                  <option key={s} value={s}>
+                  <option key={s} value={s} className="bg-[#161616] text-white">
                     Semester {s}
                   </option>
                 ))}
@@ -372,18 +372,18 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
 
             {/* Difficulty */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Difficulty *
               </label>
               <select
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#222222] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#161616] text-white"
                 required
                 disabled={isSubmitting}
               >
                 {DIFFICULTIES.map((d) => (
-                  <option key={d} value={d}>
+                  <option key={d} value={d} className="bg-[#161616] text-white">
                     {d}
                   </option>
                 ))}
@@ -392,18 +392,18 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
 
             {/* Exam Type */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Exam Type *
               </label>
               <select
                 value={examType}
                 onChange={(e) => setExamType(e.target.value as ExamType)}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-[#222222] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#161616] text-white"
                 required
                 disabled={isSubmitting}
               >
                 {EXAM_TYPES.map((e) => (
-                  <option key={e} value={e}>
+                  <option key={e} value={e} className="bg-[#161616] text-white">
                     {e}
                   </option>
                 ))}
@@ -414,28 +414,26 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
           {/* Professor and Tags */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Professor (Optional)
               </label>
-              <input
+              <Input
                 type="text"
                 value={professor}
                 onChange={(e) => setProfessor(e.target.value)}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="e.g., Dr. John Smith"
                 disabled={isSubmitting}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Tags (Optional)
               </label>
-              <input
+              <Input
                 type="text"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="e.g., algorithms, sorting, trees (comma-separated)"
                 disabled={isSubmitting}
               />
@@ -449,10 +447,10 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
               id="anonymous"
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-neutral-300 rounded focus:ring-blue-500"
+              className="w-4 h-4 text-blue-600 border-[#222222] rounded focus:ring-blue-500 bg-[#161616]"
               disabled={isSubmitting}
             />
-            <label htmlFor="anonymous" className="text-sm text-neutral-700">
+            <label htmlFor="anonymous" className="text-sm text-white">
               Upload anonymously
             </label>
           </div>
@@ -460,11 +458,11 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
           {/* Progress Bar */}
           {isSubmitting && uploadProgress > 0 && (
             <div>
-              <div className="flex justify-between text-xs text-neutral-600 mb-1">
+              <div className="flex justify-between text-xs text-[#D4D4D8] mb-1">
                 <span>Uploading...</span>
                 <span>{uploadProgress}%</span>
               </div>
-              <div className="w-full bg-neutral-200 rounded-full h-2">
+              <div className="w-full bg-[#222222] rounded-full h-2">
                 <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
@@ -475,7 +473,7 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            <div className="flex items-center gap-2 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400">
               <AlertCircle className="w-4 h-4" />
               <span className="text-sm">{error}</span>
             </div>
@@ -483,7 +481,7 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
 
           {/* Success Message */}
           {success && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700">
+            <div className="flex items-center gap-2 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-400">
               <CheckCircle className="w-4 h-4" />
               <span className="text-sm">Note uploaded successfully!</span>
             </div>

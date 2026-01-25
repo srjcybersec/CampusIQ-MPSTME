@@ -99,18 +99,18 @@ export function AssignmentCard({
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-lg font-semibold text-neutral-900">
+              <h3 className="text-lg font-semibold text-white">
                 {assignment.title}
               </h3>
               {getStatusBadge(assignment.status)}
               {assignment.isManual && (
-                <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-1 rounded">
+                <span className="text-xs text-[#D4D4D8] bg-[#161616] px-2 py-1 rounded">
                   Manual
                 </span>
               )}
             </div>
 
-            <p className="text-sm text-neutral-600 mb-3">
+            <p className="text-sm text-[#D4D4D8] mb-3">
               <span className="font-medium">{assignment.courseName}</span>
               {assignment.points && (
                 <span className="ml-2">• {assignment.points} points</span>
@@ -118,12 +118,12 @@ export function AssignmentCard({
             </p>
 
             {assignment.description && (
-              <p className="text-sm text-neutral-600 mb-3 line-clamp-2">
+              <p className="text-sm text-[#D4D4D8] mb-3 line-clamp-2">
                 {assignment.description}
               </p>
             )}
 
-            <div className="flex items-center gap-4 text-sm text-neutral-600">
+            <div className="flex items-center gap-4 text-sm text-[#D4D4D8]">
               <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
                 <span>

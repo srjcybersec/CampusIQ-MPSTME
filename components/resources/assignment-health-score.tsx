@@ -51,24 +51,24 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-green-600";
-    if (score >= 70) return "text-blue-600";
-    if (score >= 50) return "text-yellow-600";
-    return "text-red-600";
+    if (score >= 90) return "text-green-400";
+    if (score >= 70) return "text-blue-400";
+    if (score >= 50) return "text-yellow-400";
+    return "text-red-400";
   };
 
   const getScoreBgColor = (score: number) => {
-    if (score >= 90) return "bg-green-100 border-green-300";
-    if (score >= 70) return "bg-blue-100 border-blue-300";
-    if (score >= 50) return "bg-yellow-100 border-yellow-300";
-    return "bg-red-100 border-red-300";
+    if (score >= 90) return "bg-green-500/20 border-green-500/50";
+    if (score >= 70) return "bg-blue-500/20 border-blue-500/50";
+    if (score >= 50) return "bg-yellow-500/20 border-yellow-500/50";
+    return "bg-red-500/20 border-red-500/50";
   };
 
   if (loading && !healthScore) {
     return (
-      <Card>
+      <Card variant="glass" className="relative z-10">
         <CardHeader>
-          <CardTitle>Assignment Health Score</CardTitle>
+          <CardTitle className="text-white">Assignment Health Score</CardTitle>
           <CardDescription>Calculating...</CardDescription>
         </CardHeader>
       </Card>
@@ -77,9 +77,9 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
 
   if (!healthScore) {
     return (
-      <Card>
+      <Card variant="glass" className="relative z-10">
         <CardHeader>
-          <CardTitle>Assignment Health Score</CardTitle>
+          <CardTitle className="text-white">Assignment Health Score</CardTitle>
           <CardDescription>No data available</CardDescription>
         </CardHeader>
       </Card>
@@ -87,11 +87,11 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
   }
 
   return (
-    <Card>
+    <Card variant="glass" className="relative z-10">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white">
               <Activity className="w-5 h-5" />
               Assignment Health Score
             </CardTitle>
@@ -105,6 +105,7 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
               size="sm"
               onClick={() => setPeriod("weekly")}
               style={{ minWidth: '70px', color: '#ffffff' }}
+              data-cursor-hover
             >
               <span style={{ color: '#ffffff', display: 'inline-block' }}>Week</span>
             </Button>
@@ -113,6 +114,7 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
               size="sm"
               onClick={() => setPeriod("monthly")}
               style={{ minWidth: '70px' }}
+              data-cursor-hover
             >
               Month
             </Button>
@@ -127,35 +129,35 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
                 healthScore.score
               )} ${getScoreColor(healthScore.score)}`}
             >
-              <span className="text-3xl font-bold">{healthScore.score}</span>
+              <span className="text-3xl font-bold text-white">{healthScore.score}</span>
             </div>
-            <p className="mt-2 text-sm font-medium text-neutral-600 capitalize">
+            <p className="mt-2 text-sm font-medium text-[#D4D4D8] capitalize">
               {healthScore.status.replace("_", " ")}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-neutral-600">Total Assignments</p>
-              <p className="text-2xl font-bold text-neutral-900">
+              <p className="text-[#D4D4D8]">Total Assignments</p>
+              <p className="text-2xl font-bold text-white">
                 {healthScore.totalAssignments}
               </p>
             </div>
             <div>
-              <p className="text-neutral-600">Completed On Time</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-[#D4D4D8]">Completed On Time</p>
+              <p className="text-2xl font-bold text-green-400">
                 {healthScore.completedOnTime}
               </p>
             </div>
             <div>
-              <p className="text-neutral-600">Overdue</p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-[#D4D4D8]">Overdue</p>
+              <p className="text-2xl font-bold text-red-400">
                 {healthScore.overdue}
               </p>
             </div>
             <div>
-              <p className="text-neutral-600">Late Submissions</p>
-              <p className="text-2xl font-bold text-orange-600">
+              <p className="text-[#D4D4D8]">Late Submissions</p>
+              <p className="text-2xl font-bold text-orange-400">
                 {healthScore.late}
               </p>
             </div>
@@ -167,6 +169,7 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
             onClick={handleRecalculate}
             disabled={loading}
             className="w-full"
+            data-cursor-hover
           >
             Recalculate Score
           </Button>

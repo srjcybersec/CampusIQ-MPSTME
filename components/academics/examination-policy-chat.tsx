@@ -137,7 +137,7 @@ export function ExaminationPolicyChat() {
                 className={`max-w-[80%] rounded-lg p-3 ${
                   message.role === "user"
                     ? "bg-blue-600 text-white"
-                    : "bg-white text-neutral-900 border border-blue-200"
+                    : "bg-[#161616] text-white border border-[#222222]"
                 }`}
               >
                 {message.isLoading ? (

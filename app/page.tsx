@@ -1,103 +1,205 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { MainNav } from "@/components/navigation/main-nav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/lib/auth/context";
 import { StudentDashboard } from "@/components/dashboards/student-dashboard";
 import { FacultyDashboard } from "@/components/dashboards/faculty-dashboard";
-import { BookOpen, Calendar, MapPin, FolderOpen, Users, Settings, Sparkles, GraduationCap, LogOut } from "lucide-react";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase/config";
-import { useRouter } from "next/navigation";
+import { BookOpen, Calendar, MapPin, FolderOpen, Users, Settings, Sparkles, GraduationCap } from "lucide-react";
 
 export default function Home() {
-  const { user, userRole } = useAuth();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.push("/auth/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
+  const { userRole } = useAuth();
 
   const features = [
-    { href: "/academics", label: "Academics", icon: BookOpen, description: "AI-powered rule explanations and academic intelligence", color: "blue" },
-    { href: "/schedule", label: "Schedule", icon: Calendar, description: "Unified timeline and smart reminders", color: "purple" },
-    { href: "/campus", label: "Campus", icon: MapPin, description: "Empty space finder and infrastructure intelligence", color: "green" },
-    { href: "/resources", label: "Resources", icon: FolderOpen, description: "Notes, assignments, and PYQ repository", color: "orange" },
-    { href: "/community", label: "Community", icon: Users, description: "Events and campus engagement", color: "pink" },
-    { href: "/services", label: "Services", icon: Settings, description: "Administrative services made simple", color: "indigo" },
-    { href: "/extras", label: "Extras", icon: Sparkles, description: "Experimental features", color: "violet" },
+    { 
+      href: "/academics", 
+      label: "Academics", 
+      icon: BookOpen, 
+      description: "AI-powered rule explanations and academic intelligence",
+      gradient: "from-[#7C7CFF] to-[#38BDF8]",
+      glow: "glow-purple"
+    },
+    { 
+      href: "/schedule", 
+      label: "Schedule", 
+      icon: Calendar, 
+      description: "Unified timeline and smart reminders",
+      gradient: "from-[#7C7CFF] to-[#38BDF8]",
+      glow: "glow-blue"
+    },
+    { 
+      href: "/campus", 
+      label: "Campus", 
+      icon: MapPin, 
+      description: "Empty space finder and infrastructure intelligence",
+      gradient: "from-[#22D3EE] to-[#A855F7]",
+      glow: "glow-blue"
+    },
+    { 
+      href: "/resources", 
+      label: "Resources", 
+      icon: FolderOpen, 
+      description: "Notes, assignments, and PYQ repository",
+      gradient: "from-[#FB923C] to-[#EC4899]",
+      glow: "glow-orange"
+    },
+    { 
+      href: "/community", 
+      label: "Community", 
+      icon: Users, 
+      description: "Events and campus engagement",
+      gradient: "from-[#22D3EE] to-[#A855F7]",
+      glow: "glow-pink"
+    },
+    { 
+      href: "/services", 
+      label: "Services", 
+      icon: Settings, 
+      description: "Administrative services made simple",
+      gradient: "from-[#7C7CFF] to-[#38BDF8]",
+      glow: "glow-purple"
+    },
+    { 
+      href: "/extras", 
+      label: "Extras", 
+      icon: Sparkles, 
+      description: "Experimental features",
+      gradient: "from-[#FB923C] to-[#EC4899]",
+      glow: "glow-orange"
+    },
   ];
 
-  const colorClasses = {
-    blue: "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100",
-    purple: "text-purple-600 bg-purple-50 border-purple-200 hover:bg-purple-100",
-    green: "text-green-600 bg-green-50 border-green-200 hover:bg-green-100",
-    orange: "text-orange-600 bg-orange-50 border-orange-200 hover:bg-orange-100",
-    pink: "text-pink-600 bg-pink-50 border-pink-200 hover:bg-pink-100",
-    indigo: "text-indigo-600 bg-indigo-50 border-indigo-200 hover:bg-indigo-100",
-    violet: "text-violet-600 bg-violet-50 border-violet-200 hover:bg-violet-100",
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
   };
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        
+      <div className="min-h-screen bg-black relative overflow-hidden">
         <MainNav />
         
-        <main className="container mx-auto px-4 py-12 relative z-10">
-          <div className="max-w-6xl mx-auto">
+        <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 relative z-10">
+          <div className="max-w-7xl mx-auto">
             {/* Role-Based Dashboard */}
             {userRole === "student" && <StudentDashboard />}
             {userRole === "faculty" && <FacultyDashboard />}
             {!userRole && (
-              <div className="text-center py-12">
+              <motion.div
+                className="text-center py-12"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+              >
                 <div className="inline-block">
-                  <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow mx-auto mb-4">
+                  <motion.div
+                    className="w-16 h-16 bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] rounded-2xl flex items-center justify-center glow-purple mx-auto mb-4"
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                  >
                     <GraduationCap className="w-8 h-8 text-white" />
-                  </div>
-                  <p className="text-neutral-600">Loading your dashboard...</p>
+                  </motion.div>
+                  <p className="text-[#D4D4D8]">Loading your dashboard...</p>
                 </div>
-              </div>
+              </motion.div>
             )}
 
-            {/* Features Grid - Show for all users */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+            {/* Features Grid - Cinematic */}
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {features.map((feature, index) => {
                 const Icon = feature.icon;
-                const colorClass = colorClasses[feature.color as keyof typeof colorClasses];
                 return (
-                  <Link 
-                    key={feature.href} 
-                    href={feature.href}
-                    className="group"
-                    style={{ animationDelay: `${index * 100}ms` }}
+                  <motion.div
+                    key={feature.href}
+                    variants={itemVariants}
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <Card className={`h-full hover-lift cursor-pointer border-2 relative overflow-hidden ${colorClass}`}>
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <CardHeader className="relative z-10">
-                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 shadow-premium transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 ${colorClass.split(' ')[1]}`}>
-                          <Icon className={`w-7 h-7 ${colorClass.split(' ')[0]} group-hover:scale-110 transition-transform duration-300`} />
-                        </div>
-                        <CardTitle className="text-xl text-neutral-900 group-hover:gradient-text transition-all duration-300">{feature.label}</CardTitle>
-                        <CardDescription className="text-neutral-600 group-hover:text-neutral-700 transition-colors duration-300">{feature.description}</CardDescription>
-                      </CardHeader>
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                    </Card>
-                  </Link>
+                    <Link href={feature.href} data-cursor-hover>
+                      <Card
+                        variant="glass"
+                        interactive
+                        delay={index * 0.1}
+                        className="h-full relative overflow-hidden group"
+                      >
+                        {/* Gradient glow on hover */}
+                        <motion.div
+                          className={`absolute -inset-1 bg-gradient-to-br ${feature.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 -z-10`}
+                          animate={{
+                            scale: [1, 1.1, 1],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            delay: index * 0.2,
+                          }}
+                        />
+                        
+                        <CardHeader className="relative z-10">
+                          <motion.div
+                            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 shadow-xl ${feature.glow}`}
+                            whileHover={{ scale: 1.1, rotate: 6 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <Icon className="w-8 h-8 text-white" />
+                          </motion.div>
+                          <CardTitle className="text-2xl group-hover:gradient-text-purple transition-all duration-300 font-bold mb-1">
+                            {feature.label}
+                          </CardTitle>
+                          <CardDescription className="text-base leading-relaxed">
+                            {feature.description}
+                          </CardDescription>
+                        </CardHeader>
+                        
+                        {/* Bottom accent line */}
+                        <motion.div
+                          className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${feature.gradient} rounded-b-2xl`}
+                          initial={{ scaleX: 0 }}
+                          whileHover={{ scaleX: 1 }}
+                          transition={{ duration: 0.5 }}
+                          style={{ originX: 0 }}
+                        />
+                        
+                        {/* Shine effect */}
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+                          initial={{ x: "-100%" }}
+                          whileHover={{ x: "100%" }}
+                          transition={{ duration: 0.8, ease: "easeInOut" }}
+                        />
+                      </Card>
+                    </Link>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </main>
       </div>

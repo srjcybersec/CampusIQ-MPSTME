@@ -76,9 +76,9 @@ export function NoteCard({ note, onView }: NoteCardProps) {
           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 opacity-50" />
         )}
         {[...Array(emptyStars)].map((_, i) => (
-          <Star key={i} className="w-4 h-4 text-neutral-300" />
+          <Star key={i} className="w-4 h-4 text-[#D4D4D8]" />
         ))}
-        <span className="text-sm text-neutral-600 ml-1">
+        <span className="text-sm text-[#D4D4D8] ml-1">
           ({note.totalRatings})
         </span>
       </div>
@@ -86,16 +86,16 @@ export function NoteCard({ note, onView }: NoteCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start gap-3 flex-1">
-            <div className="p-2 bg-blue-50 rounded-lg">
-              <FileText className="w-5 h-5 text-blue-600" />
+    <Card variant="glass" className="hover:shadow-lg transition-shadow h-full w-full flex flex-col relative z-10 overflow-hidden">
+      <CardContent className="p-6 flex flex-col flex-1 min-h-0 overflow-hidden">
+        <div className="flex items-start justify-between mb-4 min-w-0">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="p-2 bg-blue-500/20 rounded-lg border border-blue-500/30 flex-shrink-0">
+              <FileText className="w-5 h-5 text-blue-400" />
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-semibold text-neutral-900 line-clamp-2 flex-1">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <div className="flex items-center gap-2 mb-1 min-w-0">
+                <h3 className="font-semibold text-white line-clamp-2 flex-1 min-w-0 break-words">
                   {note.title}
                 </h3>
                 {note.hasTopperBadge && (
@@ -106,33 +106,33 @@ export function NoteCard({ note, onView }: NoteCardProps) {
                 )}
               </div>
               {note.description && (
-                <p className="text-sm text-neutral-600 line-clamp-2 mb-2">
+                <p className="text-sm text-[#D4D4D8] line-clamp-2 mb-2 break-words overflow-hidden">
                   {note.description}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500 mb-2">
-                <span className="flex items-center gap-1">
-                  <Tag className="w-3 h-3" />
-                  {note.subject}
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[#D4D4D8] mb-2 overflow-hidden">
+                <span className="flex items-center gap-1 flex-shrink-0">
+                  <Tag className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate max-w-[120px]">{note.subject}</span>
                 </span>
-                <span>•</span>
-                <span>Sem {note.semester}</span>
-                <span>•</span>
-                <span>{note.difficulty}</span>
-                <span>•</span>
-                <span>{note.examType}</span>
+                <span className="flex-shrink-0">•</span>
+                <span className="flex-shrink-0">Sem {note.semester}</span>
+                <span className="flex-shrink-0">•</span>
+                <span className="flex-shrink-0">{note.difficulty}</span>
+                <span className="flex-shrink-0">•</span>
+                <span className="flex-shrink-0">{note.examType}</span>
                 {note.professor && (
                   <>
-                    <span>•</span>
-                    <span>{note.professor}</span>
+                    <span className="flex-shrink-0">•</span>
+                    <span className="truncate max-w-[100px]">{note.professor}</span>
                   </>
                 )}
                 {note.uploaderName && !note.isAnonymous && (
                   <>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <User className="w-3 h-3" />
-                      {note.uploaderName}
+                    <span className="flex-shrink-0">•</span>
+                    <span className="flex items-center gap-1 flex-shrink-0">
+                      <User className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate max-w-[100px]">{note.uploaderName}</span>
                     </span>
                   </>
                 )}
@@ -151,17 +151,18 @@ export function NoteCard({ note, onView }: NoteCardProps) {
 
         {/* Tags */}
         {note.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div className="flex flex-wrap gap-1 mb-3 overflow-hidden">
             {note.tags.slice(0, 5).map((tag, idx) => (
               <span
                 key={idx}
-                className="px-2 py-1 bg-neutral-100 text-neutral-600 text-xs rounded-full"
+                className="px-2 py-1 bg-[#161616] text-[#D4D4D8] text-xs rounded-full border border-[#222222] truncate max-w-[150px]"
+                title={tag}
               >
                 {tag}
               </span>
             ))}
             {note.tags.length > 5 && (
-              <span className="px-2 py-1 text-neutral-500 text-xs">
+              <span className="px-2 py-1 text-[#D4D4D8] text-xs flex-shrink-0">
                 +{note.tags.length - 5} more
               </span>
             )}
@@ -170,9 +171,9 @@ export function NoteCard({ note, onView }: NoteCardProps) {
 
         {/* AI Summary Preview */}
         {note.aiSummary && (
-          <div className="mb-3 p-2 bg-blue-50 rounded-lg">
-            <p className="text-xs text-neutral-700 line-clamp-2">
-              <span className="font-semibold">AI Summary: </span>
+          <div className="mb-3 p-2 bg-blue-500/20 rounded-lg border border-blue-500/30 overflow-hidden">
+            <p className="text-xs text-[#D4D4D8] line-clamp-2 break-words">
+              <span className="font-semibold text-white">AI Summary: </span>
               {note.aiSummary}
             </p>
           </div>
@@ -180,21 +181,22 @@ export function NoteCard({ note, onView }: NoteCardProps) {
 
         {/* Key Topics */}
         {note.keyTopics && Array.isArray(note.keyTopics) && note.keyTopics.length > 0 && (
-          <div className="mb-3">
-            <p className="text-xs font-semibold text-neutral-700 mb-1">
+          <div className="mb-3 overflow-hidden">
+            <p className="text-xs font-semibold text-white mb-1">
               Key Topics:
             </p>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 overflow-hidden">
               {note.keyTopics.slice(0, 4).map((topic, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-full"
+                  className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full border border-purple-500/30 truncate max-w-[150px]"
+                  title={topic}
                 >
                   {topic}
                 </span>
               ))}
               {note.keyTopics.length > 4 && (
-                <span className="px-2 py-1 text-neutral-500 text-xs">
+                <span className="px-2 py-1 text-[#D4D4D8] text-xs flex-shrink-0">
                   +{note.keyTopics.length - 4} more
                 </span>
               )}
@@ -203,8 +205,8 @@ export function NoteCard({ note, onView }: NoteCardProps) {
         )}
 
         {/* Stats and Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-neutral-200">
-          <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[#222222] mt-auto flex-shrink-0 min-w-0">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[#D4D4D8] min-w-0 overflow-hidden">
             <div className="flex items-center gap-1">
               <Star className="w-3 h-3" />
               {renderStars(note.averageRating)}

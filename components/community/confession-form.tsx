@@ -90,7 +90,7 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Category Selection */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               Category
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -101,13 +101,13 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
                   onClick={() => setCategory(key as ConfessionCategory)}
                   className={`p-3 rounded-lg border-2 transition-all text-left ${
                     category === key
-                      ? "border-blue-500 bg-blue-50 shadow-soft"
-                      : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-soft"
+                      ? "border-blue-500 bg-blue-500/20 shadow-soft"
+                      : "border-[#222222] bg-[#161616] hover:border-[#333333] hover:shadow-soft"
                   }`}
                 >
                   <div className="text-lg mb-1">{value.emoji}</div>
-                  <div className="text-sm font-medium text-neutral-900">{value.label}</div>
-                  <div className="text-xs text-neutral-500 mt-1">{value.description}</div>
+                  <div className="text-sm font-medium text-white">{value.label}</div>
+                  <div className="text-xs text-[#D4D4D8] mt-1">{value.description}</div>
                 </button>
               ))}
             </div>
@@ -115,7 +115,7 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
 
           {/* Content Input */}
           <div>
-            <label className="text-sm font-medium text-neutral-700 mb-2 block">
+            <label className="text-sm font-medium text-white mb-2 block">
               Your Confession
             </label>
             <Textarea
@@ -127,25 +127,25 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
               className="resize-none"
             />
             <div className="flex items-center justify-between mt-2">
-              <div className="text-xs text-neutral-500">
+              <div className="text-xs text-[#D4D4D8]">
                 {content.length}/500 characters
               </div>
               {moderationResult && (
                 <div className="flex items-center gap-2">
                   {moderationResult.errors.length > 0 && (
-                    <div className="flex items-center gap-1 text-red-600 text-xs">
+                    <div className="flex items-center gap-1 text-red-400 text-xs">
                       <AlertCircle className="w-3 h-3" />
                       {moderationResult.errors.length} error(s)
                     </div>
                   )}
                   {moderationResult.warnings.length > 0 && moderationResult.errors.length === 0 && (
-                    <div className="flex items-center gap-1 text-amber-600 text-xs">
+                    <div className="flex items-center gap-1 text-amber-400 text-xs">
                       <AlertCircle className="w-3 h-3" />
                       {moderationResult.warnings.length} warning(s)
                     </div>
                   )}
                   {moderationResult.errors.length === 0 && moderationResult.warnings.length === 0 && (
-                    <div className="flex items-center gap-1 text-green-600 text-xs">
+                    <div className="flex items-center gap-1 text-green-400 text-xs">
                       <CheckCircle2 className="w-3 h-3" />
                       Looks good!
                     </div>
@@ -157,8 +157,8 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
 
           {/* Moderation Warnings */}
           {moderationResult && moderationResult.warnings.length > 0 && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <div className="text-sm text-amber-800">
+            <div className="p-3 bg-amber-500/20 border border-amber-500/50 rounded-lg">
+              <div className="text-sm text-amber-400">
                 <strong>Note:</strong> {moderationResult.warnings.join(", ")}
               </div>
             </div>
@@ -166,15 +166,15 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
 
           {/* Error Message */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <div className="text-sm text-red-800">{error}</div>
+            <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+              <div className="text-sm text-red-400">{error}</div>
             </div>
           )}
 
           {/* Success Message */}
           {success && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <div className="text-sm text-green-800 flex items-center gap-2">
+            <div className="p-3 bg-green-500/20 border border-green-500/50 rounded-lg">
+              <div className="text-sm text-green-400 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4" />
                 Confession posted successfully!
               </div>
@@ -191,8 +191,8 @@ export function ConfessionForm({ onSuccess }: ConfessionFormProps) {
           </button>
 
           {/* Guidelines */}
-          <div className="text-xs text-neutral-500 space-y-1 pt-2 border-t border-neutral-200">
-            <p><strong>Guidelines:</strong></p>
+          <div className="text-xs text-[#D4D4D8] space-y-1 pt-2 border-t border-[#222222]">
+            <p><strong className="text-white">Guidelines:</strong></p>
             <ul className="list-disc list-inside space-y-1 ml-2">
               <li>No real names or targeting individuals</li>
               <li>No hate speech or inappropriate content</li>

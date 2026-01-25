@@ -12,6 +12,25 @@ service firebase.storage {
                    && request.resource.size < 50 * 1024 * 1024;
     }
     
+    // PYQ files - authenticated users can read, only admins can write
+    match /pyqs/{branch}/{semester}/{subject}/{fileName} {
+      // Allow read if authenticated
+      allow read: if request.auth != null;
+      // Allow write only for admin (you can add admin check later)
+      allow write: if false; // Disable writes for now - upload via script only
+    }
+    
+    // Results uploads - authenticated users can upload/read their own files
+    match /results/{userId}/{fileName} {
+      // Allow read if authenticated
+      allow read: if request.auth != null;
+      // Allow write only if the user is uploading to their own folder
+      // and file size is less than 50MB
+      allow write: if request.auth != null 
+                   && request.auth.uid == userId
+                   && request.resource.size < 50 * 1024 * 1024;
+    }
+    
     // Default: deny all other access
     match /{allPaths=**} {
       allow read, write: if false;
@@ -121,9 +140,12 @@ service cloud.firestore {
     }
     
     // Allow all authenticated users to read/write confessions
+    // Users can only delete their own confessions
     match /confessions/{confessionId} {
       allow read: if true; // Public read
-      allow write: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null;
+      allow delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
     
     // Confession likes - users can read all, write their own
@@ -172,6 +194,14 @@ service cloud.firestore {
     match /matrimonyReports/{reportId} {
       allow read: if request.auth != null; // For moderation
       allow write: if request.auth != null;
+    }
+    
+    // Results - users can read/write their own results
+    match /results/{resultId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }

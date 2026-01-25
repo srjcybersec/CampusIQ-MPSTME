@@ -104,18 +104,18 @@ export function PrioritySuggestions({ assignments }: PrioritySuggestionsProps) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-red-50 border-red-200 text-red-800";
+        return "bg-red-500/20 border-red-500/50 text-red-400";
       case "medium":
-        return "bg-orange-50 border-orange-200 text-orange-800";
+        return "bg-orange-500/20 border-orange-500/50 text-orange-400";
       default:
-        return "bg-yellow-50 border-yellow-200 text-yellow-800";
+        return "bg-yellow-500/20 border-yellow-500/50 text-yellow-400";
     }
   };
 
   return (
-    <Card>
+    <Card variant="glass" className="relative z-10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           <AlertCircle className="w-5 h-5" />
           Priority Suggestions
         </CardTitle>
@@ -135,14 +135,14 @@ export function PrioritySuggestions({ assignments }: PrioritySuggestionsProps) {
                 <div className="flex items-start gap-3">
                   <Icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="font-medium">{suggestion.message}</p>
+                    <p className="font-medium text-white">{suggestion.message}</p>
                     {suggestion.assignment && (
-                      <p className="text-sm mt-1 opacity-90">
+                      <p className="text-sm mt-1 text-[#D4D4D8]">
                         Course: {suggestion.assignment.courseName}
                       </p>
                     )}
                   </div>
-                  <span className="text-xs font-medium uppercase px-2 py-1 rounded bg-white/50">
+                  <span className="text-xs font-medium uppercase px-2 py-1 rounded bg-[#161616] text-white border border-[#222222]">
                     {suggestion.priority}
                   </span>
                 </div>

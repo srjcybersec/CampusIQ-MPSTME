@@ -138,13 +138,13 @@ export function MicrosoftTeamsSync({
   };
 
   return (
-    <Card className="mb-6">
+    <Card variant="glass" className="mb-6 relative z-10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           {isConnected ? (
-            <CheckCircle2 className="w-5 h-5 text-green-600" />
+            <CheckCircle2 className="w-5 h-5 text-green-400" />
           ) : (
-            <XCircle className="w-5 h-5 text-red-600" />
+            <XCircle className="w-5 h-5 text-red-400" />
           )}
           Microsoft Teams Integration (Optional)
         </CardTitle>
@@ -158,11 +158,11 @@ export function MicrosoftTeamsSync({
         {syncStatus && (
           <Alert
             className={`mb-4 ${
-              syncStatus.success ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
+              syncStatus.success ? "bg-green-500/20 border-green-500/50" : "bg-red-500/20 border-red-500/50"
             }`}
           >
             <AlertDescription
-              className={syncStatus.success ? "text-green-800" : "text-red-800"}
+              className={syncStatus.success ? "text-green-400" : "text-red-400"}
             >
               {syncStatus.message}
             </AlertDescription>
@@ -171,7 +171,7 @@ export function MicrosoftTeamsSync({
 
         <div className="flex gap-4">
           {!isConnected ? (
-            <Button onClick={handleConnect} variant="default">
+            <Button onClick={handleConnect} variant="neon" data-cursor-hover>
               Connect Microsoft Account
             </Button>
           ) : (
@@ -179,7 +179,8 @@ export function MicrosoftTeamsSync({
               <Button
                 onClick={handleSync}
                 disabled={syncing}
-                variant="default"
+                variant="neon"
+                data-cursor-hover
               >
                 {syncing ? (
                   <>
@@ -193,7 +194,7 @@ export function MicrosoftTeamsSync({
                   </>
                 )}
               </Button>
-              <Button onClick={handleConnect} variant="outline">
+              <Button onClick={handleConnect} variant="outline" data-cursor-hover>
                 Reconnect Account
               </Button>
             </>
@@ -201,9 +202,9 @@ export function MicrosoftTeamsSync({
         </div>
 
         {!isConnected && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> Microsoft Teams integration is optional. You can create and manage assignments manually using the &quot;Add Assignment&quot; button below. If you have Azure AD permissions, you can connect your Microsoft account to automatically sync assignments from Teams.
+          <div className="mt-4 p-3 bg-blue-500/20 border border-blue-500/50 rounded-lg">
+            <p className="text-sm text-blue-400">
+              <strong className="text-white">Note:</strong> Microsoft Teams integration is optional. You can create and manage assignments manually using the &quot;Add Assignment&quot; button below. If you have Azure AD permissions, you can connect your Microsoft account to automatically sync assignments from Teams.
             </p>
           </div>
         )}

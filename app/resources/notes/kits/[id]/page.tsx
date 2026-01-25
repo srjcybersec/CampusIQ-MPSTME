@@ -128,19 +128,19 @@ function SurvivalKitDetailContent() {
               {/* Metadata */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-neutral-200">
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Subject</p>
+                  <p className="text-xs text-[#D4D4D8] mb-1">Subject</p>
                   <p className="font-semibold text-neutral-900">{kit.subject}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Semester</p>
+                  <p className="text-xs text-[#D4D4D8] mb-1">Semester</p>
                   <p className="font-semibold text-neutral-900">Sem {kit.semester}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Exam Type</p>
+                  <p className="text-xs text-[#D4D4D8] mb-1">Exam Type</p>
                   <p className="font-semibold text-neutral-900">{kit.examType}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-neutral-500 mb-1">Notes</p>
+                  <p className="text-xs text-[#D4D4D8] mb-1">Notes</p>
                   <p className="font-semibold text-neutral-900">
                     {kit.noteIds.length} note{kit.noteIds.length !== 1 ? "s" : ""}
                   </p>
@@ -150,13 +150,13 @@ function SurvivalKitDetailContent() {
               {/* Stats */}
               <div className="flex items-center gap-6 pt-4 border-t border-neutral-200">
                 <div className="flex items-center gap-2">
-                  <Download className="w-4 h-4 text-neutral-400" />
+                  <Download className="w-4 h-4 text-[#D4D4D8]" />
                   <span className="text-sm text-neutral-600">
                     {kit.downloads} downloads
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-neutral-400" />
+                  <Calendar className="w-4 h-4 text-[#D4D4D8]" />
                   <span className="text-sm text-neutral-600">
                     {kit.createdAt
                       ? formatDistanceToNow(kit.createdAt.toDate(), { addSuffix: true })

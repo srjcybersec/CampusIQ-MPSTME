@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Confession, CONFESSION_CATEGORIES, REPORT_REASONS } from "@/lib/types/confession";
-import { likeConfession, hasUserLiked, reportConfession } from "@/lib/firebase/confessions";
+import { likeConfession, hasUserLiked, reportConfession, deleteConfession } from "@/lib/firebase/confessions";
 import { useAuth } from "@/lib/auth/context";
-import { Heart, Flag } from "lucide-react";
+import { Heart, Flag, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface ConfessionCardProps {
@@ -22,6 +22,8 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [isReporting, setIsReporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const categoryInfo = CONFESSION_CATEGORIES[confession.category];
 
@@ -82,6 +84,27 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!user) {
+      alert("Please log in to delete confessions");
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteConfession(confession.id, user.uid);
+      alert("Confession deleted successfully");
+      if (onUpdate) onUpdate();
+    } catch (error: any) {
+      alert(error.message || "Failed to delete confession");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const isAuthor = user && confession.authorId === user.uid;
+
   const getTimeAgo = () => {
     try {
       const timestamp = confession.createdAt?.toDate?.() || new Date(confession.createdAt);
@@ -99,54 +122,105 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="text-xl">{categoryInfo.emoji}</span>
-              <span className="text-sm font-medium text-neutral-600">
+              <span className="text-sm font-medium text-white">
                 {categoryInfo.label}
               </span>
             </div>
-            <span className="text-xs text-neutral-400">{getTimeAgo()}</span>
+            <span className="text-xs text-[#D4D4D8]">{getTimeAgo()}</span>
           </div>
 
           {/* Content */}
-          <p className="text-neutral-800 mb-4 leading-relaxed whitespace-pre-wrap">
+          <p className="text-white mb-4 leading-relaxed whitespace-pre-wrap">
             {confession.content}
           </p>
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-3 border-t border-neutral-200">
+          <div className="flex items-center justify-between pt-3 border-t border-[#222222]">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLike}
               disabled={isLiking || !user}
               className={`flex items-center gap-2 ${
-                isLiked ? "text-red-500 hover:text-red-600" : "text-neutral-600"
+                isLiked ? "text-red-500 hover:text-red-600" : "text-white hover:text-[#D4D4D8]"
               }`}
+              data-cursor-hover
             >
               <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
               <span>{likesCount}</span>
             </Button>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowReportModal(true)}
-              disabled={!user}
-              className="flex items-center gap-2 text-neutral-600 hover:text-red-600"
-            >
-              <Flag className="w-4 h-4" />
-              <span>Report</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              {isAuthor && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isDeleting}
+                  className="flex items-center gap-2 text-white hover:text-red-600"
+                  data-cursor-hover
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReportModal(true)}
+                disabled={!user}
+                className="flex items-center gap-2 text-white hover:text-red-600"
+                data-cursor-hover
+              >
+                <Flag className="w-4 h-4" />
+                <span>Report</span>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card variant="glass" className="max-w-md w-full">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4 text-white">Delete Confession</h3>
+              <p className="text-sm text-[#D4D4D8] mb-4">
+                Are you sure you want to delete this confession? This action cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                  className="flex-1"
+                  data-cursor-hover
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  variant="neon"
+                  className="flex-1"
+                  data-cursor-hover
+                >
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Report Modal */}
       {showReportModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-md w-full shadow-premium">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <Card variant="glass" className="max-w-md w-full">
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Report Confession</h3>
-              <p className="text-sm text-neutral-600 mb-4">
+              <h3 className="text-lg font-semibold mb-4 text-white">Report Confession</h3>
+              <p className="text-sm text-[#D4D4D8] mb-4">
                 Why are you reporting this confession?
               </p>
               <div className="space-y-2 mb-4">
@@ -157,11 +231,11 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                     onClick={() => setReportReason(reason)}
                     className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
                       reportReason === reason
-                        ? "border-red-500 bg-red-50"
-                        : "border-neutral-200 bg-white hover:border-neutral-300"
+                        ? "border-red-500 bg-red-500/20"
+                        : "border-[#222222] bg-[#161616] hover:border-[#333333]"
                     }`}
                   >
-                    <span className="text-sm text-neutral-800">{reason}</span>
+                    <span className="text-sm text-white">{reason}</span>
                   </button>
                 ))}
               </div>
@@ -173,13 +247,16 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                     setReportReason("");
                   }}
                   className="flex-1"
+                  data-cursor-hover
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleReport}
                   disabled={!reportReason || isReporting}
+                  variant="neon"
                   className="flex-1"
+                  data-cursor-hover
                 >
                   {isReporting ? "Reporting..." : "Report"}
                 </Button>

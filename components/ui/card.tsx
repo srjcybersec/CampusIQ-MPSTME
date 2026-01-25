@@ -1,19 +1,50 @@
 import * as React from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils/cn";
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-xl border border-neutral-200/50 bg-white/80 backdrop-blur-sm shadow-soft card-hover",
-      className
-    )}
-    {...props}
-  />
-));
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: "default" | "glass" | "elevated" | "gradient";
+  interactive?: boolean;
+  delay?: number;
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant = "default", interactive = false, delay = 0, ...props }, ref) => {
+    const variantClasses = {
+      default: "glass-card",
+      glass: "glass-card",
+      elevated: "glass-card shadow-2xl",
+      gradient: "glass-card relative overflow-hidden",
+    };
+
+    return (
+      <motion.div
+        ref={ref}
+        className={cn(
+          "rounded-2xl transition-all duration-300",
+          variantClasses[variant],
+          interactive ? "liquid-hover cursor-pointer" : "",
+          className
+        )}
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.5, delay, ease: [0.4, 0, 0.2, 1] }}
+        whileHover={interactive ? { 
+          y: -4, 
+          scale: 1.02,
+          transition: { duration: 0.3 }
+        } : {}}
+        data-cursor-hover={interactive}
+        {...props}
+      >
+        {variant === "gradient" && (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#7C7CFF]/5 via-transparent to-[#38BDF8]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        )}
+        {props.children}
+      </motion.div>
+    );
+  }
+);
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
@@ -22,7 +53,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn("flex flex-col space-y-2 p-6 pb-4", className)}
     {...props}
   />
 ));
@@ -35,7 +66,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-2xl font-semibold leading-none tracking-tight text-neutral-900",
+      "text-xl font-bold leading-tight tracking-tight text-white",
       className
     )}
     {...props}
@@ -49,7 +80,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-neutral-600 leading-relaxed", className)}
+    className={cn("text-sm text-[#D4D4D8] leading-relaxed", className)}
     {...props}
   />
 ));
