@@ -332,6 +332,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Use Gemini to understand the intent for other commands
+    if (!GEMINI_API_KEY) {
+      return NextResponse.json(
+        { error: "Gemini API key is not configured" },
+        { status: 500 }
+      );
+    }
+    
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
