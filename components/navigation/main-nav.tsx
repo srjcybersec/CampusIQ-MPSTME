@@ -54,7 +54,7 @@ export function MainNav() {
     >
       <div className="container mx-auto px-3 sm:px-4 md:px-6 max-w-full">
         <div className="flex items-center justify-between h-14 sm:h-16 md:h-18 gap-2 sm:gap-4 md:gap-6">
-          <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group flex-shrink-0 z-10">
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group flex-shrink-0 z-10">
             <motion.div
               className="relative"
               transition={{ duration: 0.3 }}
@@ -62,14 +62,14 @@ export function MainNav() {
               <Image
                 src="/campusiq-logo.png"
                 alt="CampusIQ Logo"
-                width={40}
-                height={40}
-                className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 object-contain relative z-10"
+                width={56}
+                height={56}
+                className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain relative z-10"
                 priority
               />
             </motion.div>
             <div className="flex flex-col">
-              <span className="text-sm sm:text-base md:text-lg font-bold gradient-text-purple tracking-tight whitespace-nowrap">
+              <span className="text-base sm:text-lg md:text-xl font-bold gradient-text-purple tracking-tight whitespace-nowrap">
                 CampusIQ
               </span>
               <span className="text-[10px] sm:text-xs text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap">MPSTME</span>

@@ -52,17 +52,23 @@ export function StudentDashboard() {
           >
             <GraduationCap className="w-8 h-8 md:w-10 md:h-10" />
           </motion.div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0 w-full">
             <motion.h2
-              className="text-4xl md:text-5xl font-bold mb-3 tracking-tight"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 tracking-tight break-words overflow-wrap-anywhere"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Welcome Back {user?.email ? user.email : ""}! 👋
+              <span className="block">Welcome Back</span>
+              {user?.email && (
+                <span className="block text-lg sm:text-xl md:text-2xl lg:text-3xl mt-1 truncate max-w-full">
+                  {user.email}
+                </span>
+              )}
+              <span className="inline-block ml-1">👋</span>
             </motion.h2>
             <motion.p
-              className="text-white/80 text-lg md:text-xl leading-relaxed"
+              className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}

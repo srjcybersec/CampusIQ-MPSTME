@@ -20,9 +20,17 @@ export function FacultyDashboard() {
           <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
             <GraduationCap className="w-8 h-8" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold">Welcome Back {user?.email ? user.email : ""}! 👋</h2>
-            <p className="text-purple-100">Manage your classes and students</p>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl sm:text-2xl font-bold break-words">
+              <span className="block">Welcome Back</span>
+              {user?.email && (
+                <span className="block text-base sm:text-lg mt-1 truncate max-w-full">
+                  {user.email}
+                </span>
+              )}
+              <span className="inline-block ml-1">👋</span>
+            </h2>
+            <p className="text-purple-100 mt-2">Manage your classes and students</p>
           </div>
         </div>
       </div>
