@@ -57,7 +57,8 @@ export function VoiceWave({ isActive, color = "#7C7CFF", bars = 5, audioStream }
       microphone.connect(analyser);
       
       const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
+      // Create Uint8Array with explicit ArrayBuffer to satisfy TypeScript
+      const dataArray = new Uint8Array(new ArrayBuffer(bufferLength));
       
       audioContextRef.current = audioContext;
       analyserRef.current = analyser;
@@ -67,7 +68,7 @@ export function VoiceWave({ isActive, color = "#7C7CFF", bars = 5, audioStream }
       const updateWave = () => {
         if (!analyserRef.current || !dataArrayRef.current) return;
 
-        analyserRef.current.getByteFrequencyData(dataArrayRef.current as Uint8Array);
+        analyserRef.current.getByteFrequencyData(dataArrayRef.current);
         
         // Extract frequency bands for visualization
         const bandSize = Math.floor(bufferLength / bars);
