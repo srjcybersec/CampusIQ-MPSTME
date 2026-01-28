@@ -103,9 +103,9 @@ export function ProactiveAlerts() {
                     </div>
                     <Button
                       variant="ghost"
-                      size="icon"
+                      size="sm"
                       onClick={() => handleDismiss(alert)}
-                      className="h-6 w-6 text-[#D4D4D8] hover:text-white flex-shrink-0"
+                      className="h-6 w-6 p-0 text-[#D4D4D8] hover:text-white flex-shrink-0"
                     >
                       <X className="w-4 h-4" />
                     </Button>
