@@ -67,7 +67,7 @@ export function VoiceWave({ isActive, color = "#7C7CFF", bars = 5, audioStream }
       const updateWave = () => {
         if (!analyserRef.current || !dataArrayRef.current) return;
 
-        analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+        analyserRef.current.getByteFrequencyData(dataArrayRef.current as Uint8Array);
         
         // Extract frequency bands for visualization
         const bandSize = Math.floor(bufferLength / bars);
