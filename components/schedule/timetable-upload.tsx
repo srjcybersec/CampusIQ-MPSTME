@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -134,7 +135,7 @@ export function TimetableUpload() {
           Upload Your Timetable
         </CardTitle>
         <CardDescription>
-          Upload an image of your timetable and we'll automatically extract your schedule
+          Upload an image of your timetable and we&apos;ll automatically extract your schedule
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -169,11 +170,16 @@ export function TimetableUpload() {
         ) : (
           <div className="space-y-4">
             <div className="relative rounded-lg overflow-hidden border border-[#2a2a2a] bg-[#111111]">
-              <img
-                src={preview || undefined}
-                alt="Timetable preview"
-                className="w-full h-auto max-h-96 object-contain"
-              />
+              {preview && (
+                <Image
+                  src={preview}
+                  alt="Timetable preview"
+                  width={800}
+                  height={600}
+                  className="w-full h-auto max-h-96 object-contain"
+                  unoptimized
+                />
+              )}
             </div>
             <div className="flex gap-2">
               <Button
