@@ -146,17 +146,25 @@ export function useProactiveAssistance() {
 
       setAlerts(allAlerts);
 
-      // Show browser notifications for high priority alerts
+      // Show browser notifications for high priority alerts (with deduplication)
       if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-        allAlerts
-          .filter((alert) => alert.priority === "high")
-          .forEach((alert) => {
-            new Notification(alert.title, {
-              body: alert.message,
-              icon: "/campusiq-logo.png",
-              tag: alert.type,
+        const lastNotificationTime = localStorage.getItem(`last_notification_${user?.uid || "anonymous"}`);
+        const now = Date.now();
+        const timeSinceLastNotification = lastNotificationTime ? now - parseInt(lastNotificationTime) : Infinity;
+        
+        // Only show notifications if at least 1 minute has passed since last notification
+        if (timeSinceLastNotification > 60000) {
+          allAlerts
+            .filter((alert) => alert.priority === "high")
+            .forEach((alert) => {
+              new Notification(alert.title, {
+                body: alert.message,
+                icon: "/campusiq-logo.png",
+                tag: `${alert.type}-${alert.title}`, // Use stable tag to prevent duplicates
+              });
             });
-          });
+          localStorage.setItem(`last_notification_${user?.uid || "anonymous"}`, now.toString());
+        }
       }
 
       return allAlerts;
