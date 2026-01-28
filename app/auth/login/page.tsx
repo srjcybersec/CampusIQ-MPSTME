@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center p-3 sm:p-4 safe-padding">
       <div className="w-full max-w-md relative z-10">
         <motion.div
           className="text-center mb-8"
@@ -70,21 +71,28 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
         >
           <motion.div
-            className="flex items-center justify-center gap-4 mb-4"
+            className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <motion.div
-              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7C7CFF] to-[#38BDF8] flex items-center justify-center glow-purple"
-              whileHover={{ scale: 1.1, rotate: 6 }}
+              className="relative"
+              whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
             >
-              <GraduationCap className="w-8 h-8 text-white" />
+              <Image
+                src="/campusiq-logo.png"
+                alt="CampusIQ Logo"
+                width={64}
+                height={64}
+                className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+                priority
+              />
             </motion.div>
             <div className="text-left">
-              <h1 className="text-3xl font-bold text-white">CampusIQ</h1>
-              <p className="text-sm text-[#D4D4D8] -mt-1 font-medium">MPSTME</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">CampusIQ</h1>
+              <p className="text-xs sm:text-sm text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium">MPSTME</p>
             </div>
           </motion.div>
           <p className="text-[#D4D4D8] text-lg">Sign in to your account</p>

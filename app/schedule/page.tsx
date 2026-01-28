@@ -162,8 +162,8 @@ function SchedulePageContent() {
     <div className="min-h-screen bg-black relative overflow-hidden">
       <MainNav />
       
-      <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 relative z-20">
-        <div className="max-w-6xl mx-auto">
+      <main className="container mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 relative z-20 max-w-full">
+        <div className="max-w-6xl mx-auto w-full">
           <motion.div
             className="mb-8"
             initial={{ opacity: 0, y: 20 }}

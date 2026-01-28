@@ -97,8 +97,8 @@ export default function Home() {
       <div className="min-h-screen bg-black relative overflow-hidden">
         <MainNav />
         
-        <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 relative z-10">
-          <div className="max-w-7xl mx-auto">
+        <main className="container mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 relative z-10 max-w-full">
+          <div className="max-w-7xl mx-auto w-full">
             {/* Role-Based Dashboard */}
             {userRole === "student" && <StudentDashboard />}
             {userRole === "faculty" && <FacultyDashboard />}

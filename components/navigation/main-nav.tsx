@@ -52,9 +52,9 @@ export function MainNav() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
     >
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between h-16 md:h-18 gap-4 md:gap-6">
-          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 max-w-full">
+        <div className="flex items-center justify-between h-14 sm:h-16 md:h-18 gap-2 sm:gap-4 md:gap-6">
+          <Link href="/" className="flex items-center gap-1.5 sm:gap-2.5 group flex-shrink-0 z-10">
             <motion.div
               className="relative"
               transition={{ duration: 0.3 }}
@@ -62,22 +62,22 @@ export function MainNav() {
               <Image
                 src="/campusiq-logo.png"
                 alt="CampusIQ Logo"
-                width={64}
-                height={64}
-                className="object-contain relative z-10"
+                width={40}
+                height={40}
+                className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 object-contain relative z-10"
                 priority
               />
             </motion.div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold gradient-text-purple tracking-tight">
+              <span className="text-sm sm:text-base md:text-lg font-bold gradient-text-purple tracking-tight whitespace-nowrap">
                 CampusIQ
               </span>
-              <span className="text-xs text-[#D4D4D8] -mt-1 font-medium">MPSTME</span>
+              <span className="text-[10px] sm:text-xs text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap">MPSTME</span>
             </div>
           </Link>
           
-          <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 justify-center md:justify-start">
-            <div className="flex items-center gap-1 md:gap-2 overflow-x-auto scrollbar-hide flex-1">
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-1 min-w-0 justify-end md:justify-start overflow-hidden">
+            <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2 overflow-x-auto scrollbar-hide flex-1 max-w-full">
               {navItems.map((item, index) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
@@ -92,17 +92,17 @@ export function MainNav() {
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 whitespace-nowrap relative group flex-shrink-0",
+                        "flex items-center gap-1 sm:gap-2 md:gap-2.5 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap relative group flex-shrink-0",
                         isActive
                           ? "bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] text-white shadow-lg glow-purple"
                           : "text-[#D4D4D8] hover:text-white hover:bg-[#161616]/50"
                       )}
                     >
                       <Icon className={cn(
-                        "w-4 h-4 transition-all duration-300 flex-shrink-0",
+                        "w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-300 flex-shrink-0",
                         isActive ? "scale-110 rotate-0" : "group-hover:scale-110 group-hover:rotate-12"
                       )} />
-                      <span className="hidden md:inline relative">
+                      <span className="hidden lg:inline relative">
                         {item.label}
                       </span>
                       {isActive && (
@@ -119,12 +119,12 @@ export function MainNav() {
             
             {user && (
               <motion.div
-                className="flex items-center gap-3 pl-4 border-l border-[#1a1a1a] flex-shrink-0"
+                className="flex items-center gap-1 sm:gap-2 md:gap-3 pl-2 sm:pl-3 md:pl-4 border-l border-[#1a1a1a] flex-shrink-0"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 }}
               >
-                <div className="hidden lg:flex items-center gap-2.5 text-sm text-[#D4D4D8] glass-card px-4 h-10 rounded-xl">
+                <div className="hidden xl:flex items-center gap-2.5 text-sm text-[#D4D4D8] glass-card px-3 md:px-4 h-9 md:h-10 rounded-lg md:rounded-xl">
                   <motion.div
                     className="w-2 h-2 bg-green-500 rounded-full"
                     animate={{ scale: [1, 1.2, 1] }}
@@ -137,10 +137,10 @@ export function MainNav() {
                   variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="text-[#D4D4D8] hover:text-red-400"
+                  className="text-[#D4D4D8] hover:text-red-400 p-2 sm:p-2.5"
                 >
-                  <LogOut className="w-4 h-4 flex-shrink-0" />
-                  <span className="hidden sm:inline">Sign Out</span>
+                  <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden md:inline">Sign Out</span>
                 </Button>
               </motion.div>
             )}
