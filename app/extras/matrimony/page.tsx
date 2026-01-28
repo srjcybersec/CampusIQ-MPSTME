@@ -155,7 +155,6 @@ function MatrimonyPageContent() {
               variant={activeTab === "profile" ? "default" : "ghost"}
               onClick={() => setActiveTab("profile")}
               className={activeTab === "profile" ? "" : "text-[#D4D4D8]"}
-              data-cursor-hover
             >
               {profile ? "Update Profile" : "Create Profile"}
             </Button>
@@ -165,7 +164,6 @@ function MatrimonyPageContent() {
                   variant={activeTab === "matches" ? "default" : "ghost"}
                   onClick={() => setActiveTab("matches")}
                   className={activeTab === "matches" ? "" : "text-[#D4D4D8]"}
-                  data-cursor-hover
                 >
                   Find Matches
                 </Button>
@@ -176,7 +174,6 @@ function MatrimonyPageContent() {
                     loadMyMatches();
                   }}
                   className={activeTab === "my-matches" ? "" : "text-[#D4D4D8]"}
-                  data-cursor-hover
                 >
                   My Matches
                 </Button>
@@ -216,7 +213,6 @@ function MatrimonyPageContent() {
                     disabled={isFindingMatches}
                     variant="neon"
                     className="w-full"
-                    data-cursor-hover
                   >
                     {isFindingMatches ? (
                       <>
@@ -290,7 +286,6 @@ function MatrimonyPageContent() {
                   variant="ghost"
                   size="sm"
                   onClick={loadMyMatches}
-                  data-cursor-hover
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>

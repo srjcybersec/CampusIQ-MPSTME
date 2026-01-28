@@ -215,7 +215,6 @@ function NotesPageContent() {
               <Button
                 onClick={() => window.location.href = "/resources/notes/kits"}
                 variant="neon"
-                data-cursor-hover
               >
                 <Package className="w-4 h-4 mr-2" />
                 View Kits
@@ -223,7 +222,6 @@ function NotesPageContent() {
               <Button
                 onClick={() => setShowKitBuilder(!showKitBuilder)}
                 variant="neon"
-                data-cursor-hover
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 {showKitBuilder ? "Hide Kit Builder" : "Create Kit"}
@@ -231,7 +229,6 @@ function NotesPageContent() {
               <Button
                 onClick={() => setShowUploadForm(!showUploadForm)}
                 variant="default"
-                data-cursor-hover
               >
                 <Upload className="w-4 h-4 mr-2" />
                 {showUploadForm ? "Hide Upload" : "Upload Note"}
@@ -420,7 +417,6 @@ function NotesPageContent() {
                       variant="ghost"
                       size="sm"
                       onClick={clearFilters}
-                      data-cursor-hover
                     >
                       <X className="w-4 h-4 mr-2" />
                       Clear Filters
@@ -429,7 +425,6 @@ function NotesPageContent() {
                       variant="ghost"
                       size="sm"
                       onClick={loadNotes}
-                      data-cursor-hover
                     >
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Refresh
@@ -483,7 +478,6 @@ function NotesPageContent() {
                     <Button
                       onClick={() => setShowUploadForm(true)}
                       variant="default"
-                      data-cursor-hover
                     >
                       Upload Note
                     </Button>

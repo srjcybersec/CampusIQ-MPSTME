@@ -189,7 +189,7 @@ export function StudentResourceBookChat() {
             disabled={isLoading}
             className="flex-1"
           />
-          <Button onClick={handleSend} disabled={isLoading || !input.trim()} data-cursor-hover>
+          <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (

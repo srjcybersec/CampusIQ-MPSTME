@@ -13,8 +13,7 @@ export function StudentDashboard() {
       href: "/academics", 
       label: "Academics", 
       icon: BookOpen, 
-      gradient: "from-[#7C7CFF] to-[#38BDF8]",
-      glow: "glow-purple"
+      gradient: "from-[#2563eb] to-[#3b82f6]"
     },
     { 
       href: "/schedule", 
@@ -27,8 +26,7 @@ export function StudentDashboard() {
       href: "/extras", 
       label: "Extras", 
       icon: Sparkles, 
-      gradient: "from-[#22D3EE] to-[#A855F7]",
-      glow: "glow-pink"
+      gradient: "from-[#6366f1] to-[#14b8a6]"
     },
   ];
 
@@ -41,57 +39,15 @@ export function StudentDashboard() {
     >
       {/* Premium Welcome Card - Sci-Fi Style */}
       <motion.div
-        className="relative bg-gradient-to-br from-[#7C7CFF] via-[#38BDF8] to-[#7C7CFF] rounded-3xl p-8 md:p-12 text-white shadow-2xl overflow-hidden group float"
+        className="relative bg-gradient-to-br from-[#2563eb] via-[#3b82f6] to-[#2563eb] rounded-xl p-8 md:p-12 text-white shadow-elevated overflow-hidden"
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-        whileHover={{ scale: 1.02 }}
       >
-        {/* Animated background elements */}
-        <motion.div
-          className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, 30, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-0 w-80 h-80 bg-[#38BDF8]/20 rounded-full blur-3xl"
-          animate={{
-            x: [0, -20, 0],
-            y: [0, 20, 0],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        />
-        
-        {/* Shimmer overlay */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-          animate={{
-            x: ["-100%", "100%"],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            repeatDelay: 2,
-            ease: "linear",
-          }}
-        />
         
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
           <motion.div
             className="w-16 h-16 md:w-20 md:h-20 bg-white/20 rounded-2xl md:rounded-3xl flex items-center justify-center backdrop-blur-xl shadow-2xl border border-white/20"
-            whileHover={{ scale: 1.1, rotate: 6 }}
             transition={{ duration: 0.3 }}
           >
             <GraduationCap className="w-8 h-8 md:w-10 md:h-10" />
@@ -134,7 +90,7 @@ export function StudentDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
             >
-              <Link href={action.href} data-cursor-hover>
+              <Link href={action.href}>
                 <Card
                   variant="glass"
                   interactive
@@ -156,8 +112,7 @@ export function StudentDashboard() {
                   
                   <CardHeader className="relative z-10">
                     <motion.div
-                      className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-5 shadow-xl ${action.glow}`}
-                      whileHover={{ scale: 1.1, rotate: 6 }}
+                      className={`w-20 h-20 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center mb-5 shadow-professional`}
                       transition={{ duration: 0.3 }}
                     >
                       <Icon className="w-10 h-10 text-white" />
@@ -172,7 +127,6 @@ export function StudentDashboard() {
                   <motion.div
                     className={`absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r ${action.gradient} rounded-b-2xl`}
                     initial={{ scaleX: 0 }}
-                    whileHover={{ scaleX: 1 }}
                     transition={{ duration: 0.5 }}
                     style={{ originX: 0 }}
                   />

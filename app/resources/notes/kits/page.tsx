@@ -5,7 +5,6 @@ import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { SurvivalKitCard } from "@/components/resources/survival-kit-card";
 import { Card, CardContent } from "@/components/ui/card";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 import { Input } from "@/components/ui/input";
 import {
   Package,
@@ -122,7 +121,6 @@ function SurvivalKitsPageContent() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      <AnimatedBackground />
       <MainNav />
 
       <main className="container mx-auto px-4 py-8 relative z-20">

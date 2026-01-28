@@ -222,7 +222,6 @@ export function ManualAssignmentForm({
                 disabled={submitting}
                 variant="neon"
                 className="flex-1"
-                data-cursor-hover
               >
                 {submitting ? "Creating..." : "Create Assignment"}
               </Button>
@@ -231,7 +230,6 @@ export function ManualAssignmentForm({
                 variant="outline"
                 onClick={onClose}
                 disabled={submitting}
-                data-cursor-hover
               >
                 Cancel
               </Button>

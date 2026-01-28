@@ -105,7 +105,6 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
               size="sm"
               onClick={() => setPeriod("weekly")}
               style={{ minWidth: '70px', color: '#ffffff' }}
-              data-cursor-hover
             >
               <span style={{ color: '#ffffff', display: 'inline-block' }}>Week</span>
             </Button>
@@ -114,7 +113,6 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
               size="sm"
               onClick={() => setPeriod("monthly")}
               style={{ minWidth: '70px' }}
-              data-cursor-hover
             >
               Month
             </Button>
@@ -169,7 +167,6 @@ export function AssignmentHealthScore({ userId }: AssignmentHealthScoreProps) {
             onClick={handleRecalculate}
             disabled={loading}
             className="w-full"
-            data-cursor-hover
           >
             Recalculate Score
           </Button>

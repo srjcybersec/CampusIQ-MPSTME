@@ -118,7 +118,6 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
                           size="sm"
                           onClick={() => handleEditComment(entry.id)}
                           className="flex-shrink-0 ml-2"
-                          data-cursor-hover
                         >
                           <MessageSquare className="w-4 h-4" />
                         </Button>
@@ -139,7 +138,6 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
                               onClick={() => handleSaveComment(entry.id)}
                               size="sm"
                               variant="neon"
-                              data-cursor-hover
                             >
                               Save
                             </Button>
@@ -147,7 +145,6 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
                               onClick={handleCancelEdit}
                               size="sm"
                               variant="outline"
-                              data-cursor-hover
                             >
                               Cancel
                             </Button>
@@ -162,7 +159,6 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange 
                               size="sm"
                               onClick={() => handleEditComment(entry.id)}
                               className="flex-shrink-0 ml-2"
-                              data-cursor-hover
                             >
                               <Edit2 className="w-3 h-3" />
                             </Button>

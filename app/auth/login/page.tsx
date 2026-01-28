@@ -11,7 +11,6 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { createOrUpdateUserProfile } from "@/lib/firebase/user-profile";
 import { useAuth } from "@/lib/auth/context";
 import { GraduationCap, User, Lock, Mail } from "lucide-react";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -63,7 +62,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center p-4">
-      <AnimatedBackground />
       <div className="w-full max-w-md relative z-10">
         <motion.div
           className="text-center mb-8"
@@ -187,7 +185,7 @@ export default function LoginPage() {
                   <p className="text-sm text-red-400">{error}</p>
                 </div>
               )}
-              <Button type="submit" disabled={loading} variant="neon" className="w-full" data-cursor-hover>
+              <Button type="submit" disabled={loading} variant="neon" className="w-full">
                 {loading ? "Signing in..." : `Sign in as ${userType === "student" ? "Student" : "Faculty"}`}
               </Button>
             </form>

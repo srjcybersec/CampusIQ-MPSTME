@@ -340,7 +340,6 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
                     variant="ghost"
                     size="sm"
                     onClick={handleClearChat}
-                    data-cursor-hover
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -401,7 +400,6 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
                   <Button
                     onClick={handleSend}
                     disabled={isLoading || !input.trim()}
-                    data-cursor-hover
                   >
                     {isLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

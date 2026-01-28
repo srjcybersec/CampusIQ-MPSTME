@@ -54,13 +54,11 @@ export function MainNav() {
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16 md:h-18 gap-4 md:gap-6">
-          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0" data-cursor-hover>
+          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
             <motion.div
               className="relative"
-              whileHover={{ scale: 1.1, rotate: 3 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-[#7C7CFF]/20 to-[#38BDF8]/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Image
                 src="/campusiq-logo.png"
                 alt="CampusIQ Logo"
@@ -99,7 +97,6 @@ export function MainNav() {
                           ? "bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] text-white shadow-lg glow-purple"
                           : "text-[#D4D4D8] hover:text-white hover:bg-[#161616]/50"
                       )}
-                      data-cursor-hover
                     >
                       <Icon className={cn(
                         "w-4 h-4 transition-all duration-300 flex-shrink-0",

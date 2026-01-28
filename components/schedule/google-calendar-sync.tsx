@@ -195,7 +195,6 @@ export function GoogleCalendarSync() {
         body: JSON.stringify({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
-          batch: "K1", // TODO: Get from user profile
           userId: user.uid,
         }),
       });
@@ -347,7 +346,6 @@ export function GoogleCalendarSync() {
               disabled={isConnecting}
               variant="neon"
               className="w-full"
-              data-cursor-hover
             >
               {isConnecting ? (
                 <>
@@ -374,7 +372,6 @@ export function GoogleCalendarSync() {
               disabled={isSyncing}
               variant="neon"
               className="w-full"
-              data-cursor-hover
             >
               {isSyncing ? (
                 <>
@@ -394,7 +391,6 @@ export function GoogleCalendarSync() {
               disabled={isDisconnecting}
               variant="outline"
               className="w-full border-red-500/50 text-red-400 hover:bg-red-500/20 hover:border-red-500"
-              data-cursor-hover
             >
               {isDisconnecting ? (
                 <>

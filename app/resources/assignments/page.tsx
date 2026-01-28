@@ -7,7 +7,6 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/lib/auth/context";
 import { AssignmentDashboard } from "@/components/resources/assignment-dashboard";
 import { MicrosoftTeamsSync } from "@/components/resources/microsoft-teams-sync";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 
 function AssignmentsPageContent() {
   const { user } = useAuth();
@@ -55,7 +54,6 @@ function AssignmentsPageContent() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      <AnimatedBackground />
       <MainNav />
       <main className="container mx-auto px-4 py-8 relative z-20">
         <div className="max-w-7xl mx-auto">

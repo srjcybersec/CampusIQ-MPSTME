@@ -51,7 +51,6 @@ export function ConfessionFeed() {
               variant={selectedCategory === "all" ? "neon" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory("all")}
-              data-cursor-hover
             >
               All
             </Button>
@@ -62,7 +61,6 @@ export function ConfessionFeed() {
                 size="sm"
                 onClick={() => setSelectedCategory(key as ConfessionCategory)}
                 className="flex items-center gap-1 whitespace-nowrap"
-                data-cursor-hover
               >
                 <span>{value.emoji}</span>
                 <span>{value.label}</span>
@@ -76,7 +74,6 @@ export function ConfessionFeed() {
                 disabled={isLoading}
                 className="flex items-center gap-2 text-white hover:text-[#D4D4D8]"
                 title="Refresh"
-                data-cursor-hover
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
                 <span>Refresh</span>
@@ -98,7 +95,7 @@ export function ConfessionFeed() {
         <Card variant="glass">
           <CardContent className="p-6 text-center">
             <p className="text-red-400 mb-4">{error}</p>
-            <Button onClick={loadConfessions} variant="outline" data-cursor-hover>
+            <Button onClick={loadConfessions} variant="outline">
               Try Again
             </Button>
           </CardContent>

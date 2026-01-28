@@ -11,7 +11,6 @@ import { AttendanceTracker } from "@/components/academics/attendance-tracker";
 import { PYQSolver } from "@/components/academics/pyq-solver";
 import { StudentResourceBookChat } from "@/components/academics/student-resource-book-chat";
 import { ResultViewerAnalyzer } from "@/components/academics/result-viewer-analyzer";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 import { Loader2, BookOpen, FileQuestion, HelpCircle } from "lucide-react";
 import { Branch, Semester } from "@/lib/types/pyqs";
 
@@ -57,7 +56,6 @@ function AcademicsPageContent() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      <AnimatedBackground />
       <MainNav />
       
       <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 relative z-20">
@@ -98,7 +96,6 @@ function AcademicsPageContent() {
                 onClick={() => setActiveSection("examination")}
                 variant={activeSection === "examination" ? "default" : "outline"}
                 size="lg"
-                data-cursor-hover
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Examination Policy
@@ -107,7 +104,6 @@ function AcademicsPageContent() {
                 onClick={() => setActiveSection("attendance")}
                 variant={activeSection === "attendance" ? "default" : "outline"}
                 size="lg"
-                data-cursor-hover
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Attendance Tracker
@@ -116,7 +112,6 @@ function AcademicsPageContent() {
                 onClick={() => setActiveSection("student-resource-book")}
                 variant={activeSection === "student-resource-book" ? "default" : "outline"}
                 size="lg"
-                data-cursor-hover
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 Student Resource Book

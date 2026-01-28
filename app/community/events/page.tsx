@@ -59,7 +59,6 @@ function EventsPageContent() {
                 size="sm"
                 onClick={() => window.location.href = '/community'}
                 className="text-[#D4D4D8] hover:text-white"
-                data-cursor-hover
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Community
@@ -113,7 +112,6 @@ function EventsPageContent() {
                           variant="neon"
                           onClick={() => toggleLink(event.id)}
                           className="w-full"
-                          data-cursor-hover
                         >
                           {event.buttonText}
                         </Button>
@@ -129,7 +127,6 @@ function EventsPageContent() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 underline transition-colors break-words"
-                            data-cursor-hover
                           >
                             <span className="text-sm">{event.buttonText}</span>
                             <ExternalLink className="w-4 h-4 flex-shrink-0" />

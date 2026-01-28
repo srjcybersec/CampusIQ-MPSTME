@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, MessageSquare, Calculator, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import { academicEngine } from "@/lib/gemini/client";
+import { useAuth } from "@/lib/auth/context";
+import { TimetableEntry } from "@/lib/data/timetable";
 
 interface Subject {
   id: string;
@@ -48,17 +50,62 @@ Attendance% (In Individual Courses) | Remarks
 80% and above in individual courses | Eligible to appear for Semester End Examinations.
 Below 80% in the individual courses | Students will be required to take re-admission. Students can opt 1. re-admission in the same Semester OR 2. re-admission in the full year of the program in the subsequent academic year`;
 
-const SUBJECTS: Subject[] = [
-  { id: "1", name: "Digital forensics and incident response", maxMissableHours: 15, minAttendancePercent: 80 },
-  { id: "2", name: "System administration", maxMissableHours: 9, minAttendancePercent: 80 },
-  { id: "3", name: "Vulnerabilty assessment and penetration testing", maxMissableHours: 12, minAttendancePercent: 80 },
-  { id: "4", name: "Reverse engineering and malware analysis", maxMissableHours: 12, minAttendancePercent: 80 },
-  { id: "5", name: "Renewable energy sources", maxMissableHours: 9, minAttendancePercent: 80 },
-  { id: "6", name: "Application security testing", maxMissableHours: 9, minAttendancePercent: 80 },
-  { id: "7", name: "Placement training", maxMissableHours: 18, minAttendancePercent: 75 },
-  { id: "8", name: "Interpersonal skills", maxMissableHours: 6, minAttendancePercent: 80 },
-  { id: "9", name: "Introductory course on SAP", maxMissableHours: 9, minAttendancePercent: 80 },
-];
+// Helper function to calculate hours from time range
+function calculateHours(startTime: string, endTime: string): number {
+  const [startHour, startMin] = startTime.split(":").map(Number);
+  const [endHour, endMin] = endTime.split(":").map(Number);
+  const startMinutes = startHour * 60 + startMin;
+  const endMinutes = endHour * 60 + endMin;
+  return (endMinutes - startMinutes) / 60; // Return hours as decimal
+}
+
+// Extract subjects from timetable and calculate frequency per week
+function extractSubjectsFromTimetable(timetableEntries: TimetableEntry[]): Subject[] {
+  // Filter out breaks and elective subjects (optional electives may not be consistent)
+  const validEntries = timetableEntries.filter(
+    (entry) => entry.type !== "break" && entry.type !== "elective"
+  );
+
+  // Group by subject name (case-insensitive)
+  const subjectMap = new Map<string, { name: string; hoursPerWeek: number; type: string }>();
+
+  validEntries.forEach((entry) => {
+    const subjectName = entry.subject.trim();
+    if (!subjectName || subjectName.toLowerCase() === "break") return;
+
+    const hours = calculateHours(entry.startTime, entry.endTime);
+    const key = subjectName.toLowerCase();
+
+    if (subjectMap.has(key)) {
+      const existing = subjectMap.get(key)!;
+      existing.hoursPerWeek += hours;
+    } else {
+      subjectMap.set(key, {
+        name: subjectName,
+        hoursPerWeek: hours,
+        type: entry.type || "lecture",
+      });
+    }
+  });
+
+  // Convert to Subject array
+  // maxMissableHours = hoursPerWeek * 3 (3 weeks total can be missed)
+  const subjects: Subject[] = Array.from(subjectMap.entries()).map(([key, data], index) => {
+    const maxMissableHours = Math.round(data.hoursPerWeek * 3);
+    // Placement training has 75% requirement, others have 80%
+    const minAttendancePercent = data.type === "placement" ? 75 : 80;
+
+    return {
+      id: `subject-${index + 1}`,
+      name: data.name,
+      maxMissableHours,
+      minAttendancePercent,
+    };
+  });
+
+  // Sort alphabetically by subject name
+  return subjects.sort((a, b) => a.name.localeCompare(b.name));
+}
 
 interface Message {
   id: string;
@@ -68,7 +115,10 @@ interface Message {
 }
 
 export function AttendanceTracker() {
+  const { user } = useAuth();
   const [showRules, setShowRules] = useState(true);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState(true);
   const [missedHours, setMissedHours] = useState<Record<string, string>>({});
   const [results, setResults] = useState<AttendanceResult[] | null>(null);
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
@@ -76,6 +126,37 @@ export function AttendanceTracker() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load subjects from timetable
+  const loadSubjects = useCallback(async () => {
+    if (!user?.uid) {
+      setIsLoadingSubjects(false);
+      return;
+    }
+
+    setIsLoadingSubjects(true);
+    try {
+      const response = await fetch(`/api/schedule/get?userId=${user.uid}`);
+      const data = await response.json();
+      
+      if (data.success && data.entries && data.entries.length > 0) {
+        const extractedSubjects = extractSubjectsFromTimetable(data.entries);
+        setSubjects(extractedSubjects);
+      } else {
+        // No timetable uploaded yet
+        setSubjects([]);
+      }
+    } catch (error) {
+      console.error("Error loading subjects from timetable:", error);
+      setSubjects([]);
+    } finally {
+      setIsLoadingSubjects(false);
+    }
+  }, [user?.uid]);
+
+  useEffect(() => {
+    loadSubjects();
+  }, [loadSubjects]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -86,7 +167,12 @@ export function AttendanceTracker() {
   }, [chatMessages]);
 
   const calculateAttendance = () => {
-    const calculatedResults: AttendanceResult[] = SUBJECTS.map((subject) => {
+    if (subjects.length === 0) {
+      alert("Please upload your timetable first to calculate attendance.");
+      return;
+    }
+
+    const calculatedResults: AttendanceResult[] = subjects.map((subject) => {
       // Calculate total hours from max missable hours
       // If 80% required, can miss 20%, so: maxMissable = total * 0.20 => total = maxMissable / 0.20
       // If 75% required, can miss 25%, so: total = maxMissable / 0.25
@@ -139,7 +225,7 @@ export function AttendanceTracker() {
     ]);
 
     try {
-      const summary = await academicEngine.generateAttendanceSummary(results, SUBJECTS);
+      const summary = await academicEngine.generateAttendanceSummary(results, subjects);
       setChatMessages([
         {
           id: "1",
@@ -202,7 +288,7 @@ export function AttendanceTracker() {
       const response = await academicEngine.answerAttendanceQuestion(
         chatInput.trim(),
         results as any,
-        SUBJECTS as any
+        subjects as any
       );
 
       setChatMessages((prev) =>
@@ -274,7 +360,6 @@ export function AttendanceTracker() {
             <Button
               onClick={() => setShowRules(false)}
               variant="neon"
-              data-cursor-hover
             >
               Continue to Attendance Calculator
             </Button>
@@ -291,12 +376,36 @@ export function AttendanceTracker() {
               Attendance Calculator
             </CardTitle>
             <CardDescription className="text-[#D4D4D8]">
-              Enter the number of hours you have missed for each subject
+              {isLoadingSubjects 
+                ? "Loading subjects from your timetable..." 
+                : subjects.length === 0
+                ? "Please upload your timetable in the Schedule tab first to track attendance."
+                : "Enter the number of hours you have missed for each subject"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4 mb-6 max-h-96 overflow-y-auto custom-scrollbar">
-              {SUBJECTS.map((subject) => (
+            {isLoadingSubjects ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+              </div>
+            ) : subjects.length === 0 ? (
+              <div className="text-center py-12">
+                <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-4" />
+                <p className="text-[#D4D4D8] mb-4">
+                  No timetable found. Please upload your timetable in the Schedule tab first.
+                </p>
+                <Button
+                  onClick={() => {
+                    window.location.href = "/schedule";
+                  }}
+                  variant="neon"
+                >
+                  Go to Schedule Tab
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4 mb-6 max-h-96 overflow-y-auto custom-scrollbar">
+                {subjects.map((subject) => (
                 <div
                   key={subject.id}
                   className="p-4 bg-[#161616] border border-[#222222] rounded-lg"
@@ -342,17 +451,19 @@ export function AttendanceTracker() {
                     className="mt-2"
                   />
                 </div>
-              ))}
-            </div>
-            <Button
-              onClick={calculateAttendance}
-              variant="neon"
-              size="lg"
-              className="w-full"
-              data-cursor-hover
-            >
-              Calculate Attendance
-            </Button>
+                ))}
+              </div>
+            )}
+            {subjects.length > 0 && (
+              <Button
+                onClick={calculateAttendance}
+                variant="neon"
+                size="lg"
+                className="w-full mt-6"
+              >
+                Calculate Attendance
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
@@ -494,7 +605,6 @@ export function AttendanceTracker() {
                 onClick={handleChatSend}
                 disabled={isChatLoading || !chatInput.trim()}
                 variant="neon"
-                data-cursor-hover
               >
                 {isChatLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

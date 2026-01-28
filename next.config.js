@@ -8,8 +8,8 @@ const nextConfig = {
   // Don't externalize - let Next.js handle the modules naturally
   // Externalization was causing issues with module resolution
   webpack: (config, { isServer }) => {
-    // Only externalize if absolutely necessary
-    // For now, let webpack handle pdf-parse and pdfjs-dist normally
+    // Don't modify webpack config - let Next.js handle pdfjs-dist naturally
+    // The dynamic import in the code should work without webpack modifications
     return config;
   },
   // Optimize for Vercel

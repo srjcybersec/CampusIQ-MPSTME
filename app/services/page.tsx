@@ -138,7 +138,6 @@ function ServicesPageContent() {
                             <Button
                               variant="neon"
                               onClick={() => toggleLink(service.title)}
-                              data-cursor-hover
                             >
                               {service.buttonText}
                             </Button>
@@ -154,7 +153,6 @@ function ServicesPageContent() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 underline transition-colors"
-                                data-cursor-hover
                               >
                                 <span>{service.linkText}</span>
                                 <ExternalLink className="w-4 h-4" />
@@ -168,7 +166,7 @@ function ServicesPageContent() {
                           )}
                         </div>
                       ) : (
-                        <Button variant="outline" disabled data-cursor-hover>
+                        <Button variant="outline" disabled>
                           Submit Request
                         </Button>
                       )}

@@ -42,7 +42,7 @@ export function CustomCursor() {
         (element.closest && (
           element.closest("button") ||
           element.closest("a") ||
-          element.closest("[data-cursor-hover]")
+          element.closest("[]")
         ))
       ) {
         setIsHovering(true);

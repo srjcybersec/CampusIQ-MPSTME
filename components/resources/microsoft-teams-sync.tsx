@@ -171,7 +171,7 @@ export function MicrosoftTeamsSync({
 
         <div className="flex gap-4">
           {!isConnected ? (
-            <Button onClick={handleConnect} variant="neon" data-cursor-hover>
+            <Button onClick={handleConnect} variant="neon">
               Connect Microsoft Account
             </Button>
           ) : (
@@ -180,7 +180,6 @@ export function MicrosoftTeamsSync({
                 onClick={handleSync}
                 disabled={syncing}
                 variant="neon"
-                data-cursor-hover
               >
                 {syncing ? (
                   <>
@@ -194,7 +193,7 @@ export function MicrosoftTeamsSync({
                   </>
                 )}
               </Button>
-              <Button onClick={handleConnect} variant="outline" data-cursor-hover>
+              <Button onClick={handleConnect} variant="outline">
                 Reconnect Account
               </Button>
             </>

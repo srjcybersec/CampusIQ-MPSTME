@@ -55,7 +55,6 @@ function CommunityPageContent() {
                   variant="neon" 
                   onClick={() => window.location.href = '/community/events'}
                   className="w-full"
-                  data-cursor-hover
                 >
                   View Events
                 </Button>
@@ -115,7 +114,6 @@ function CommunityPageContent() {
                   variant="default"
                   onClick={() => window.location.href = '/community/confessions'}
                   className="w-full"
-                  data-cursor-hover
                 >
                   View & Post Confessions
                 </Button>

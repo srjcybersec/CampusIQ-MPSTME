@@ -85,7 +85,6 @@ function ResourcesPageContent() {
                         variant="outline"
                         onClick={() => !resource.disabled && (window.location.href = resource.href)}
                         disabled={resource.disabled}
-                        data-cursor-hover
                       >
                         {resource.disabled ? "Coming Soon" : resource.title.includes("Notes") ? "Browse Notes" : resource.title.includes("Previous Year Questions") || resource.title.includes("PYQ") ? "Access PYQ Papers" : "View Assignments"}
                       </Button>

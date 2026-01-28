@@ -23,24 +23,18 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <motion.div
         ref={ref}
         className={cn(
-          "rounded-2xl transition-all duration-300",
+          "rounded-xl transition-all duration-200",
           variantClasses[variant],
-          interactive ? "liquid-hover cursor-pointer" : "",
+          interactive ? "cursor-pointer" : "",
           className
         )}
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, delay, ease: [0.4, 0, 0.2, 1] }}
-        whileHover={interactive ? { 
-          y: -4, 
-          scale: 1.02,
-          transition: { duration: 0.3 }
-        } : {}}
-        data-cursor-hover={interactive}
+        transition={{ duration: 0.3, delay, ease: [0.4, 0, 0.2, 1] }}
         {...props}
       >
         {variant === "gradient" && (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#7C7CFF]/5 via-transparent to-[#38BDF8]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#2563eb]/5 via-transparent to-[#6366f1]/5 pointer-events-none" />
         )}
         {props.children}
       </motion.div>

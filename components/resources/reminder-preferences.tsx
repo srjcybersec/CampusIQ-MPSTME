@@ -126,7 +126,6 @@ export function ReminderPreferencesComponent({
               onClick={() =>
                 setPreferences({ ...preferences, enabled: !preferences.enabled })
               }
-              data-cursor-hover
             >
               {preferences.enabled ? "Enabled" : "Disabled"}
             </Button>
@@ -150,7 +149,6 @@ export function ReminderPreferencesComponent({
                         size="sm"
                         onClick={() => toggleChannel(channel)}
                         className="capitalize"
-                        data-cursor-hover
                       >
                         {isSelected && <Check className="w-4 h-4 mr-1" />}
                         {label}
@@ -202,7 +200,6 @@ export function ReminderPreferencesComponent({
                         }
                         size="sm"
                         onClick={() => toggleReminderType(key as keyof ReminderPreferences)}
-                        data-cursor-hover
                       >
                         {preferences[key as keyof ReminderPreferences] ? (
                           <>
@@ -225,7 +222,6 @@ export function ReminderPreferencesComponent({
             disabled={saving}
             variant="neon"
             className="w-full"
-            data-cursor-hover
           >
             {saving ? "Saving..." : "Save Preferences"}
           </Button>

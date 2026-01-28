@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PYQList } from "@/components/resources/pyq-list";
@@ -109,7 +108,6 @@ function PYQsPageContent() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      <AnimatedBackground />
       <MainNav />
 
       <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 relative z-20">

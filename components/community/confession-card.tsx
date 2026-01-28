@@ -144,7 +144,6 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
               className={`flex items-center gap-2 ${
                 isLiked ? "text-red-500 hover:text-red-600" : "text-white hover:text-[#D4D4D8]"
               }`}
-              data-cursor-hover
             >
               <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
               <span>{likesCount}</span>
@@ -158,7 +157,6 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={isDeleting}
                   className="flex items-center gap-2 text-white hover:text-red-600"
-                  data-cursor-hover
                 >
                   <Trash2 className="w-4 h-4" />
                   <span>Delete</span>
@@ -170,7 +168,6 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                 onClick={() => setShowReportModal(true)}
                 disabled={!user}
                 className="flex items-center gap-2 text-white hover:text-red-600"
-                data-cursor-hover
               >
                 <Flag className="w-4 h-4" />
                 <span>Report</span>
@@ -195,7 +192,6 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                   onClick={() => setShowDeleteConfirm(false)}
                   disabled={isDeleting}
                   className="flex-1"
-                  data-cursor-hover
                 >
                   Cancel
                 </Button>
@@ -204,7 +200,6 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                   disabled={isDeleting}
                   variant="neon"
                   className="flex-1"
-                  data-cursor-hover
                 >
                   {isDeleting ? "Deleting..." : "Delete"}
                 </Button>
@@ -247,7 +242,6 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                     setReportReason("");
                   }}
                   className="flex-1"
-                  data-cursor-hover
                 >
                   Cancel
                 </Button>
@@ -256,7 +250,6 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                   disabled={!reportReason || isReporting}
                   variant="neon"
                   className="flex-1"
-                  data-cursor-hover
                 >
                   {isReporting ? "Reporting..." : "Report"}
                 </Button>

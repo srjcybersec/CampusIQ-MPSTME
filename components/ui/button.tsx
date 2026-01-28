@@ -14,22 +14,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <motion.button
         className={cn(
-          "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-300",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C7CFF] focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+          "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2 focus-visible:ring-offset-black",
           "disabled:pointer-events-none disabled:opacity-50",
           "relative overflow-hidden group",
-          "liquid-hover",
           {
-            // Default (Purple to Blue gradient)
-            "bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] text-white glow-purple": variant === "default",
+            // Default (Professional Blue)
+            "bg-[#2563eb] text-white shadow-professional": variant === "default",
             // Outline
-            "border-2 border-[#1a1a1a] bg-[#161616]/50 text-white hover:border-[#7C7CFF]/50 hover:bg-[#161616]": variant === "outline",
+            "border border-[#2a2a2a] bg-[#1a1a1a] text-white": variant === "outline",
             // Ghost
-            "text-[#D4D4D8] hover:text-white hover:bg-[#161616]/50": variant === "ghost",
-            // Neon (Orange to Pink)
-            "bg-gradient-to-r from-[#FB923C] to-[#EC4899] text-white glow-orange": variant === "neon",
-            // AI (Cyan to Purple)
-            "bg-gradient-to-r from-[#22D3EE] to-[#A855F7] text-white glow-blue": variant === "ai",
+            "text-[#a0a0a0] bg-transparent": variant === "ghost",
+            // Neon (Accent Purple)
+            "bg-[#6366f1] text-white shadow-professional": variant === "neon",
+            // AI (Accent Teal)
+            "bg-[#14b8a6] text-white shadow-professional": variant === "ai",
             // Sizes
             "h-8 px-3 text-xs": size === "sm",
             "h-10 px-4 text-sm": size === "md",
@@ -42,23 +41,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           color: variant === "default" || variant === "neon" || variant === "ai" ? "#ffffff" : undefined,
         }}
         ref={ref}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.98 }}
+        whileTap={{ scale: 0.97 }}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        data-cursor-hover
+        transition={{ duration: 0.2 }}
         {...props}
       >
-        {/* Shimmer effect */}
-        {(variant === "default" || variant === "neon" || variant === "ai") && (
-          <motion.span
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            initial={{ x: "-100%" }}
-            whileHover={{ x: "100%" }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-          />
-        )}
         <span className="relative z-10 flex items-center justify-center gap-2">
           {children}
         </span>

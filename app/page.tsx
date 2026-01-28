@@ -138,7 +138,7 @@ export default function Home() {
                     whileHover={{ y: -8, scale: 1.02 }}
                     transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                   >
-                    <Link href={feature.href} data-cursor-hover>
+                    <Link href={feature.href} >
                       <Card
                         variant="glass"
                         interactive

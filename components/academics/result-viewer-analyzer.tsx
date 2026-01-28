@@ -321,7 +321,6 @@ export function ResultViewerAnalyzer() {
             disabled={!uploadFile || !uploadSemester || isUploading}
             variant="neon"
             className="w-full"
-            data-cursor-hover
           >
             {isUploading ? (
               <>
@@ -499,7 +498,6 @@ export function ResultViewerAnalyzer() {
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
                   variant="neon"
-                  data-cursor-hover
                 >
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

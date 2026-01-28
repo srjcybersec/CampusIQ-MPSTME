@@ -54,7 +54,6 @@ function ExtrasPageContent() {
                   variant="neon"
                   onClick={() => window.location.href = '/extras/matrimony'}
                   className="w-full"
-                  data-cursor-hover
                 >
                   <Heart className="w-4 h-4 mr-2" />
                   View Connections

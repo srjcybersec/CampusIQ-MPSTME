@@ -7,7 +7,6 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, UtensilsCrossed, Calendar, ExternalLink, Info } from "lucide-react";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 import { CanteenMenu } from "@/components/campus/canteen-menu";
 
 function CampusPageContent() {
@@ -42,7 +41,6 @@ function CampusPageContent() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      <AnimatedBackground />
       <MainNav />
       
       <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 relative z-20">
@@ -88,7 +86,6 @@ function CampusPageContent() {
                           <Button 
                             onClick={() => setShowCanteenMenu(!showCanteenMenu)}
                             variant="neon"
-                            data-cursor-hover
                             className="w-full"
                           >
                             {showCanteenMenu ? "Hide Menu" : "View Full Menu"}
@@ -109,7 +106,6 @@ function CampusPageContent() {
                           <Button 
                             onClick={() => setShowBookingForm(!showBookingForm)}
                             variant="neon"
-                            data-cursor-hover
                             className="w-full"
                           >
                             {showBookingForm ? "Hide Booking Form" : "Book Discussion Room"}
@@ -145,7 +141,7 @@ function CampusPageContent() {
                           )}
                         </div>
                       ) : (
-                        <Button variant="outline" disabled data-cursor-hover>
+                        <Button variant="outline" disabled>
                           {feature.title.includes("Empty Space") ? "Find Empty Spaces" : "View Availability"}
                         </Button>
                       )}

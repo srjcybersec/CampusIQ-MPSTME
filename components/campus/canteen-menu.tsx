@@ -194,7 +194,6 @@ export function CanteenMenu() {
             variant={selectedCategory === null ? "neon" : "outline"}
             size="sm"
             onClick={() => setSelectedCategory(null)}
-            data-cursor-hover
           >
             All
           </Button>
@@ -204,7 +203,6 @@ export function CanteenMenu() {
               variant={selectedCategory === category ? "neon" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(category)}
-              data-cursor-hover
             >
               {category}
             </Button>

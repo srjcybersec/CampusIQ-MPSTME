@@ -1,41 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCalendarEvent } from "@/lib/google-calendar/client";
-import { TIMETABLE_DATA } from "@/lib/data/timetable";
+import { TimetableEntry } from "@/lib/data/timetable";
 import { format, addDays, startOfWeek } from "date-fns";
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { initializeAdmin } from "@/lib/firebase/admin";
 
-// Initialize Firebase Admin for server-side operations
-let adminDb: any = null;
-try {
-  if (!getApps().length) {
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-
-    if (projectId && clientEmail && privateKey) {
-      initializeApp({
-        credential: cert({
-          projectId,
-          clientEmail,
-          privateKey: privateKey.replace(/\\n/g, "\n"),
-        }),
-      });
-      adminDb = getFirestore();
-    } else {
-      console.warn("Firebase Admin credentials not found. Event ID storage will be skipped.");
-    }
-  } else {
-    try {
-      adminDb = getFirestore();
-    } catch (error) {
-      console.warn("Firebase Admin already initialized but getFirestore failed:", error);
-    }
-  }
-} catch (error) {
-  console.error("Firebase Admin initialization error:", error);
-  // Continue without admin - event ID storage will be skipped
-}
 
 /**
  * POST /api/calendar/sync
@@ -52,7 +20,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const batch = body.batch || "K1"; // Default to K1 batch
     const accessToken = body.accessToken;
     const refreshToken = body.refreshToken;
     const userId = body.userId;
@@ -64,10 +31,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Filter timetable for user's batch
-    const userTimetable = TIMETABLE_DATA.filter(
-      (entry) => !entry.batch || entry.batch === batch
-    );
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User ID required" },
+        { status: 400 }
+      );
+    }
+
+    // Initialize Firebase Admin and fetch user's schedule
+    const { db: adminDb } = await initializeAdmin();
+
+    const scheduleSnapshot = await adminDb
+      .collection("schedules")
+      .where("userId", "==", userId)
+      .get();
+
+    if (scheduleSnapshot.empty) {
+      return NextResponse.json(
+        { error: "No schedule found. Please upload your timetable first." },
+        { status: 404 }
+      );
+    }
+
+    const userTimetable: TimetableEntry[] = scheduleSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        day: data.day,
+        time: data.time,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        subject: data.subject,
+        subjectCode: data.subjectCode || "",
+        faculty: data.faculty || "",
+        facultyInitials: data.facultyInitials || "",
+        room: data.room || "",
+        batch: data.batch,
+        type: data.type || "lecture",
+      } as TimetableEntry;
+    });
 
     // Get current week's Monday
     const today = new Date();
