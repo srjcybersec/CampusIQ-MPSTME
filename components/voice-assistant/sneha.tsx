@@ -142,8 +142,13 @@ export function SNEHA() {
           // Ignore errors on cleanup
         }
       }
+      // Cleanup audio stream
+      if (audioStream) {
+        audioStream.getTracks().forEach(track => track.stop());
+      }
     };
-  }, []); // Remove transcript from dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - recognition setup should only run once, handleCommand is stable
 
   // Handle voice command
   const handleCommand = async (command: string) => {
@@ -660,7 +665,7 @@ export function SNEHA() {
                     <p className="text-xs text-[#D4D4D8] leading-relaxed">
                       <span className="font-semibold text-white">SNEHA</span> (Smart Navigation & Educational Helper Assistant) is your intelligent voice companion. 
                       I can help you navigate the app, check your attendance, view schedules, download PYQs, and much more. 
-                      Just speak naturally and I'll understand!
+                      Just speak naturally and I&apos;ll understand!
                     </p>
                   </div>
                 )}
@@ -721,11 +726,11 @@ export function SNEHA() {
                         <div>
                           <p className="font-semibold text-[#D4D4D8] mb-1">Try saying:</p>
                           <ul className="list-disc list-inside space-y-0.5 ml-2">
-                            <li>"Go to schedule"</li>
-                            <li>"Check my attendance"</li>
-                            <li>"Show my results"</li>
-                            <li>"Open PYQs"</li>
-                            <li>"Download PYQ for AI semester 5"</li>
+                            <li>&quot;Go to schedule&quot;</li>
+                            <li>&quot;Check my attendance&quot;</li>
+                            <li>&quot;Show my results&quot;</li>
+                            <li>&quot;Open PYQs&quot;</li>
+                            <li>&quot;Download PYQ for AI semester 5&quot;</li>
                           </ul>
                         </div>
                       </>
