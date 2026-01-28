@@ -83,11 +83,17 @@ export function useProactiveAssistance() {
 
       // Check if user hasn't checked attendance recently
       const lastCheck = localStorage.getItem(`attendance_last_check_${user.uid}`);
+      const lastAlertShown = localStorage.getItem(`attendance_alert_shown_${user.uid}`);
       const daysSinceCheck = lastCheck 
         ? Math.floor((Date.now() - parseInt(lastCheck)) / (1000 * 60 * 60 * 24))
         : 999;
+      
+      // Only show alert if 7+ days since last check AND not shown in last 24 hours
+      const hoursSinceLastAlert = lastAlertShown
+        ? (Date.now() - parseInt(lastAlertShown)) / (1000 * 60 * 60)
+        : 999;
 
-      if (daysSinceCheck >= 7) {
+      if (daysSinceCheck >= 7 && hoursSinceLastAlert >= 24) {
         alerts.push({
           type: "attendance_warning",
           title: "Time to check your attendance",
@@ -96,6 +102,8 @@ export function useProactiveAssistance() {
           timestamp: new Date(),
           actionUrl: "/academics?section=attendance",
         });
+        // Mark alert as shown
+        localStorage.setItem(`attendance_alert_shown_${user.uid}`, Date.now().toString());
       }
 
       return alerts;

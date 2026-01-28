@@ -88,15 +88,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Check attendance warnings (simplified - can be enhanced)
-    alerts.push({
-      type: "attendance_warning",
-      title: "Weekly Attendance Check",
-      message: "Remember to update your attendance for this week to stay on track!",
-      priority: "medium",
-      timestamp: new Date(),
-      actionUrl: "/academics?section=attendance",
-    });
+    // Note: Attendance warnings are handled client-side to access localStorage
+    // This prevents duplicate alerts from being generated
 
     // Sort by priority and timestamp
     alerts.sort((a, b) => {

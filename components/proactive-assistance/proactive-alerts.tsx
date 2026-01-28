@@ -10,17 +10,39 @@ import { useState, useEffect } from "react";
 
 export function ProactiveAlerts() {
   const { alerts, checkAlerts } = useProactiveAssistance();
+  const router = useRouter();
   
-  // Trigger check when component mounts
+  // Load dismissed alerts from localStorage
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    const stored = localStorage.getItem("dismissed_alerts");
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  });
+
+  // Save dismissed alerts to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dismissed_alerts", JSON.stringify(Array.from(dismissedAlerts)));
+    }
+  }, [dismissedAlerts]);
+
+  // Trigger check when component mounts (only once)
   useEffect(() => {
     checkAlerts();
-  }, [checkAlerts]);
-  const router = useRouter();
-  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const handleDismiss = (alert: ProactiveAlert) => {
-    const alertId = `${alert.type}-${alert.timestamp.getTime()}`;
-    setDismissedAlerts((prev) => new Set(prev).add(alertId));
+    // Use a stable ID based on alert type and content, not timestamp
+    const alertId = `${alert.type}-${alert.title}`;
+    setDismissedAlerts((prev) => {
+      const newSet = new Set(prev).add(alertId);
+      // Persist immediately
+      if (typeof window !== "undefined") {
+        localStorage.setItem("dismissed_alerts", JSON.stringify(Array.from(newSet)));
+      }
+      return newSet;
+    });
   };
 
   const handleAction = (alert: ProactiveAlert) => {
@@ -30,7 +52,8 @@ export function ProactiveAlerts() {
   };
 
   const visibleAlerts = alerts.filter((alert) => {
-    const alertId = `${alert.type}-${alert.timestamp.getTime()}`;
+    // Use stable ID based on type and title, not timestamp
+    const alertId = `${alert.type}-${alert.title}`;
     return !dismissedAlerts.has(alertId);
   });
 
@@ -64,7 +87,7 @@ export function ProactiveAlerts() {
     <div className="fixed top-20 right-4 z-40 max-w-sm space-y-2">
       <AnimatePresence>
         {visibleAlerts.slice(0, 3).map((alert, index) => {
-          const alertId = `${alert.type}-${alert.timestamp.getTime()}`;
+          const alertId = `${alert.type}-${alert.title}`;
           return (
             <motion.div
               key={alertId}
