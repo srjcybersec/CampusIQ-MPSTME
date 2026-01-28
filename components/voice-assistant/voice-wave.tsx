@@ -14,7 +14,7 @@ export function VoiceWave({ isActive, color = "#7C7CFF", bars = 5, audioStream }
   const [heights, setHeights] = useState<number[]>(Array(bars).fill(0.2));
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const dataArrayRef = useRef<Uint8Array | null>(null);
+  const dataArrayRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
