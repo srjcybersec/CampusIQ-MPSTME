@@ -89,6 +89,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize Gemini with fallback model strategy
+    if (!GEMINI_API_KEY) {
+      return NextResponse.json(
+        { error: "Gemini API key is not configured" },
+        { status: 500 }
+      );
+    }
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     
     // Try models in order of preference (vision-capable models)
