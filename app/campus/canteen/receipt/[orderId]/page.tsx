@@ -93,7 +93,7 @@ function ReceiptPageContent() {
 
     // Total
     doc.setFontSize(12);
-    doc.setFont(undefined, "bold");
+    doc.setFont("helvetica", "bold");
     doc.text(`Total: ₹${orderData.total?.toFixed(2)}`, margin, yPos);
     doc.text(`₹${orderData.total?.toFixed(2)}`, pageWidth - margin, yPos, { align: "right" });
     yPos += 10;
