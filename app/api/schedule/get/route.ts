@@ -41,6 +41,17 @@ export async function GET(request: NextRequest) {
       } as TimetableEntry;
     });
 
+    // Sort entries by day, then by startTime
+    entries.sort((a, b) => {
+      // First sort by day
+      const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+      if (dayDiff !== 0) return dayDiff;
+      
+      // Then sort by startTime
+      return a.startTime.localeCompare(b.startTime);
+    });
+
     return NextResponse.json({
       success: true,
       entries,

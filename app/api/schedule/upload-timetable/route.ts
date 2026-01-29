@@ -297,6 +297,17 @@ Example format:
       };
     });
 
+    // Sort entries by day, then by startTime to ensure chronological order
+    normalizedEntries.sort((a, b) => {
+      // First sort by day
+      const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+      if (dayDiff !== 0) return dayDiff;
+      
+      // Then sort by startTime (chronological order)
+      return a.startTime.localeCompare(b.startTime);
+    });
+
     // Initialize Firebase Admin
     const { db: adminDb } = await initializeAdmin();
 

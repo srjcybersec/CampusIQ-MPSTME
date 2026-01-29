@@ -38,7 +38,15 @@ function SchedulePageContent() {
       const response = await fetch(`/api/schedule/get?userId=${user.uid}`);
       const data = await response.json();
       if (data.success) {
-        setTimetableData(data.entries || []);
+        // Entries are already sorted by the API, but ensure they're sorted here too
+        const entries = data.entries || [];
+        const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        entries.sort((a: TimetableEntry, b: TimetableEntry) => {
+          const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+          if (dayDiff !== 0) return dayDiff;
+          return a.startTime.localeCompare(b.startTime);
+        });
+        setTimetableData(entries);
       }
     } catch (error) {
       console.error("Error loading schedule:", error);
@@ -175,10 +183,17 @@ function SchedulePageContent() {
       const data = await response.json();
 
       if (data.success) {
-        // Update local state
-        setTimetableData((prev) =>
-          prev.map((entry) => (entry.id === entryId ? updatedEntry : entry))
-        );
+        // Update local state and maintain sort order
+        setTimetableData((prev) => {
+          const updated = prev.map((entry) => (entry.id === entryId ? updatedEntry : entry));
+          // Sort by day, then by startTime
+          const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+          return updated.sort((a, b) => {
+            const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+            if (dayDiff !== 0) return dayDiff;
+            return a.startTime.localeCompare(b.startTime);
+          });
+        });
       } else {
         throw new Error(data.error || "Failed to update entry");
       }
