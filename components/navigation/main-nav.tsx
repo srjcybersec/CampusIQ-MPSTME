@@ -71,15 +71,15 @@ export function MainNav() {
                 alt="CampusIQ Logo"
                 width={80}
                 height={80}
-                className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 lg:w-16 lg:h-16 object-contain relative z-10"
+                className="w-20 h-20 sm:w-20 sm:h-20 md:w-18 md:h-18 lg:w-16 lg:h-16 object-contain relative z-10"
                 priority
               />
             </motion.div>
             <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl md:text-xl lg:text-xl font-bold gradient-text-purple tracking-tight whitespace-nowrap">
+              <span className="text-2xl sm:text-2xl md:text-xl lg:text-xl font-bold gradient-text-purple tracking-tight whitespace-nowrap">
                 CampusIQ
               </span>
-              <span className="text-xs sm:text-sm md:text-xs lg:text-xs text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap">MPSTME</span>
+              <span className="text-sm sm:text-sm md:text-xs lg:text-xs text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap">MPSTME</span>
             </div>
           </Link>
           
