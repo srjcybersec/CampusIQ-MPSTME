@@ -61,7 +61,7 @@ export function MainNav() {
     >
       <div className="container mx-auto px-3 sm:px-4 md:px-6 max-w-full">
         <div className="flex items-center justify-between h-14 sm:h-16 md:h-18 gap-2 sm:gap-4 md:gap-6">
-          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group flex-shrink-0 z-10">
+          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group flex-shrink-0 z-10 -ml-1 sm:ml-0">
             <motion.div
               className="relative flex items-center justify-center"
               transition={{ duration: 0.3 }}
