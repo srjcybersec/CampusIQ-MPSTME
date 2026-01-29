@@ -63,7 +63,7 @@ export function MainNav() {
         <div className="flex items-center justify-between h-14 sm:h-16 md:h-18 gap-2 sm:gap-4 md:gap-6">
           <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group flex-shrink-0 z-10">
             <motion.div
-              className="relative"
+              className="relative flex items-center justify-center"
               transition={{ duration: 0.3 }}
             >
               <Image
@@ -75,11 +75,11 @@ export function MainNav() {
                 priority
               />
             </motion.div>
-            <div className="flex flex-col">
-              <span className="text-2xl sm:text-2xl md:text-xl lg:text-xl font-bold gradient-text-purple tracking-tight whitespace-nowrap">
+            <div className="flex flex-col justify-center items-start">
+              <span className="text-2xl sm:text-2xl md:text-xl lg:text-xl font-bold gradient-text-purple tracking-tight whitespace-nowrap leading-tight">
                 CampusIQ
               </span>
-              <span className="text-sm sm:text-sm md:text-xs lg:text-xs text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap">MPSTME</span>
+              <span className="text-sm sm:text-sm md:text-xs lg:text-xs text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap leading-tight">MPSTME</span>
             </div>
           </Link>
           
