@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Clock, MapPin, User, MessageSquare, Edit2, X, Trash2, Save } from "lucide-react";
 import { TimetableEntry } from "@/lib/data/timetable";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 
 interface ScheduleDayViewProps {
   entries: TimetableEntry[];
@@ -25,6 +25,35 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange,
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<TimetableEntry>>({});
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+
+  // Update current time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Check if an entry is currently active
+  const isCurrentClass = (entry: TimetableEntry): boolean => {
+    // Only highlight if it's today
+    if (!isSameDay(date, currentTime)) return false;
+    
+    // Check if current time is within the class time range
+    const now = currentTime;
+    const currentHour = now.getHours();
+    const currentMin = now.getMinutes();
+    const currentTimeMinutes = currentHour * 60 + currentMin;
+
+    const [startHour, startMin] = entry.startTime.split(":").map(Number);
+    const [endHour, endMin] = entry.endTime.split(":").map(Number);
+    const startTimeMinutes = startHour * 60 + startMin;
+    const endTimeMinutes = endHour * 60 + endMin;
+
+    return currentTimeMinutes >= startTimeMinutes && currentTimeMinutes < endTimeMinutes;
+  };
 
   const handleEditComment = (entryId: string) => {
     setEditingComment(entryId);
@@ -90,6 +119,10 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange,
   };
 
   const getEntryColor = (entry: TimetableEntry) => {
+    // Highlight current class
+    if (isCurrentClass(entry)) {
+      return "bg-blue-500/30 border-blue-500/70 ring-2 ring-blue-500/50";
+    }
     if (entry.type === "break") return "bg-[#161616] border-[#222222]";
     if (entry.type === "placement") return "bg-blue-500/20 border-blue-500/50";
     if (entry.type === "elective") return "bg-purple-500/20 border-purple-500/50";
@@ -125,8 +158,14 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange,
                   className={`p-4 rounded-lg border transition-calm overflow-hidden ${getEntryColor(entry)}`}
                 >
                   {entry.type === "break" ? (
-                    <div className="flex items-center justify-center">
-                      <span className="text-[#D4D4D8] font-medium">Break</span>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-[#D4D4D8]" />
+                        <span className="text-[#D4D4D8] font-medium">Break</span>
+                      </div>
+                      {entry.time && (
+                        <span className="text-sm text-[#A1A1AA]">{entry.time}</span>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -238,7 +277,7 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange,
                                   </span>
                                 )}
                               </div>
-                              <div className="flex flex-wrap items-center gap-4 text-sm text-[#D4D4D8] mt-2 overflow-hidden">
+                              <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-[#D4D4D8] mt-2 overflow-hidden">
                                 <span className="flex items-center gap-1 flex-shrink-0">
                                   <Clock className="w-4 h-4 flex-shrink-0" />
                                   <span className="whitespace-nowrap">{entry.time}</span>
@@ -250,9 +289,15 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange,
                                   </span>
                                 )}
                                 {entry.faculty && (
-                                  <span className="flex items-center gap-1 min-w-0 flex-1">
+                                  <span className="flex items-center gap-1 min-w-0 flex-shrink-0">
                                     <User className="w-4 h-4 flex-shrink-0" />
-                                    <span className="truncate">{entry.faculty}</span>
+                                    <span className="truncate max-w-[200px]">{entry.faculty}</span>
+                                  </span>
+                                )}
+                                {isCurrentClass(entry) && (
+                                  <span className="flex items-center gap-1 flex-shrink-0 text-blue-400 font-medium">
+                                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                                    Now
                                   </span>
                                 )}
                               </div>
