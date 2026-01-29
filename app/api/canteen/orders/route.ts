@@ -21,10 +21,18 @@ export async function GET(request: NextRequest) {
       .where("userId", "==", userId)
       .get();
 
-    const orders = ordersSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    const orders = ordersSnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt || null,
+      };
+    }) as Array<{
+      id: string;
+      createdAt?: string | null;
+      [key: string]: any;
+    }>;
 
     // Sort by creation date (newest first) - client-side
     orders.sort((a, b) => {
