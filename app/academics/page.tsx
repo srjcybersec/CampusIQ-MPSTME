@@ -24,24 +24,15 @@ function AcademicsPageContent() {
   const loadPYQs = useCallback(async () => {
     setIsLoadingPyqs(true);
     try {
-      // Load branches
+      // Load branches first (fast, lightweight)
       const branchesRes = await fetch("/api/pyqs?action=branches");
       const branchesData = await branchesRes.json();
       setBranches(branchesData.branches || []);
 
-      // Load all PYQs
-      const pyqsRes = await fetch("/api/pyqs");
-      const pyqsData = await pyqsRes.json();
-      if (pyqsData.success) {
-        setPyqs(pyqsData.pyqs || []);
-        
-        // Extract unique subjects
-        const uniqueSubjects = new Set<string>();
-        pyqsData.pyqs?.forEach((pyq: any) => {
-          if (pyq.subject) uniqueSubjects.add(pyq.subject);
-        });
-        setSubjects(Array.from(uniqueSubjects).sort());
-      }
+      // Don't load all PYQs upfront - let the component handle filtering
+      // This makes initial load much faster
+      setPyqs([]);
+      setSubjects([]);
     } catch (error) {
       console.error("Error loading PYQs:", error);
     } finally {

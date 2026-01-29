@@ -20,7 +20,7 @@ interface PYQSolverProps {
   subjects: string[];
 }
 
-export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
+export function PYQSolver({ pyqs: initialPyqs, branches, subjects: initialSubjects }: PYQSolverProps) {
   const [selectedPyq, setSelectedPyq] = useState<PYQDocument | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -29,6 +29,10 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
   const [filterBranch, setFilterBranch] = useState<Branch | "">("");
   const [filterSemester, setFilterSemester] = useState<Semester | "">("");
   const [filterSubject, setFilterSubject] = useState<string>("");
+  const [pyqs, setPyqs] = useState<PYQDocument[]>(initialPyqs);
+  const [subjects, setSubjects] = useState<string[]>(initialSubjects);
+  const [isLoadingPyqs, setIsLoadingPyqs] = useState(false);
+  const [hasLoadedPyqs, setHasLoadedPyqs] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -174,7 +178,50 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
     ]);
   };
 
-  // Filter PYQs based on selected branch/semester/subject
+  // Load PYQs when filters are applied (lazy loading)
+  useEffect(() => {
+    const loadFilteredPyqs = async () => {
+      // Only load if we have at least one filter
+      if (!filterBranch && !filterSemester && !filterSubject) {
+        if (!hasLoadedPyqs) {
+          setPyqs([]);
+          setSubjects([]);
+        }
+        return;
+      }
+
+      setIsLoadingPyqs(true);
+      try {
+        const params = new URLSearchParams();
+        if (filterBranch) params.append("branch", filterBranch);
+        if (filterSemester) params.append("semester", filterSemester);
+        if (filterSubject) params.append("subject", filterSubject);
+
+        const response = await fetch(`/api/pyqs?${params.toString()}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setPyqs(data.pyqs || []);
+          
+          // Extract unique subjects from filtered results
+          const uniqueSubjects = new Set<string>();
+          data.pyqs?.forEach((pyq: any) => {
+            if (pyq.subject) uniqueSubjects.add(pyq.subject);
+          });
+          setSubjects(Array.from(uniqueSubjects).sort());
+          setHasLoadedPyqs(true);
+        }
+      } catch (error) {
+        console.error("Error loading filtered PYQs:", error);
+      } finally {
+        setIsLoadingPyqs(false);
+      }
+    };
+
+    loadFilteredPyqs();
+  }, [filterBranch, filterSemester, filterSubject, hasLoadedPyqs]);
+
+  // Filter PYQs based on selected branch/semester/subject (client-side filtering)
   const filteredPyqs = pyqs.filter((pyq) => {
     if (filterBranch && pyq.branch !== filterBranch) return false;
     if (filterSemester && pyq.semester !== filterSemester) return false;
@@ -251,9 +298,16 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
 
           {/* PYQ List */}
           <div className="max-h-48 overflow-y-auto space-y-2">
-            {filteredPyqs.length === 0 ? (
+            {isLoadingPyqs ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 animate-spin text-blue-400 mr-2" />
+                <p className="text-[#D4D4D8] text-sm">Loading PYQs...</p>
+              </div>
+            ) : filteredPyqs.length === 0 ? (
               <p className="text-[#D4D4D8] text-sm text-center py-4">
-                No PYQs found. Try adjusting your filters.
+                {filterBranch || filterSemester || filterSubject
+                  ? "No PYQs found. Try adjusting your filters."
+                  : "Select filters above to load PYQ papers."}
               </p>
             ) : (
               filteredPyqs.map((pyq) => (
@@ -304,13 +358,22 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
               <CardContent className="p-0 flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* PDF Viewer Container */}
                 <div className="flex-1 min-h-[400px] lg:min-h-[500px] lg:h-[calc(100vh-20rem)] overflow-hidden relative bg-[#0a0a0a]">
-                  <iframe
-                    src={`${selectedPyq.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
-                    className="w-full h-full border-0"
-                    title="PYQ Paper Viewer"
-                    allow="fullscreen"
+                  {/* Use object tag for better PDF rendering */}
+                  <object
+                    data={`${selectedPyq.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                    type="application/pdf"
+                    className="w-full h-full"
                     style={{ minHeight: "400px" }}
-                  />
+                  >
+                    {/* Fallback iframe */}
+                    <iframe
+                      src={`${selectedPyq.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                      className="w-full h-full border-0"
+                      title="PYQ Paper Viewer"
+                      allow="fullscreen"
+                      style={{ minHeight: "400px" }}
+                    />
+                  </object>
                 </div>
                 {/* PDF Controls */}
                 <div className="p-3 border-t border-[#222222] bg-[#161616] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 flex-shrink-0">
