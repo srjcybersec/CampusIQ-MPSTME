@@ -161,7 +161,7 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange,
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-[#D4D4D8]" />
-                        <span className="text-[#D4D4D8] font-medium">Break</span>
+                        <span className="text-[#D4D4D8] font-medium">{entry.subject || "Break"}</span>
                       </div>
                       {entry.time && (
                         <span className="text-sm text-[#A1A1AA]">{entry.time}</span>

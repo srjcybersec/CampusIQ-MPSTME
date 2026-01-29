@@ -277,19 +277,23 @@ Example format:
     const normalizedEntries: TimetableEntry[] = extractedEntries.map((entry, index) => {
       const { startTime, endTime } = parseTimeRange(entry.time || `${entry.startTime}-${entry.endTime}`);
       
+      // For breaks, ensure subject is set to "Break"
+      const isBreak = entry.type === "break" || entry.subject?.toLowerCase().includes("break");
+      const subject = isBreak ? "Break" : (entry.subject || "Unknown");
+      
       return {
         id: `${userId}-${normalizeDay(entry.day).toLowerCase()}-${index}`,
         day: normalizeDay(entry.day),
         time: entry.time || `${startTime}-${endTime}`,
         startTime,
         endTime,
-        subject: entry.subject || "Unknown",
-        subjectCode: entry.subjectCode || "",
+        subject: subject,
+        subjectCode: entry.subjectCode || (isBreak ? "BREAK" : ""),
         faculty: entry.faculty || "",
         facultyInitials: entry.facultyInitials || "",
         room: entry.room || "",
         batch: entry.batch as "K1" | "K2" | undefined,
-        type: entry.type || "lecture",
+        type: (isBreak ? "break" : entry.type) || "lecture",
       };
     });
 
