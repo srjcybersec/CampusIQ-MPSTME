@@ -18,8 +18,10 @@ import {
   Sparkles,
   LogOut,
   User,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/lib/hooks/use-cart";
 
 const navItems = [
   { href: "/academics", label: "Academics", icon: BookOpen },
@@ -35,6 +37,7 @@ export function MainNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const { itemCount } = useCart();
 
   const handleLogout = async () => {
     try {
@@ -124,6 +127,22 @@ export function MainNav() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 }}
               >
+                {itemCount > 0 && (
+                  <Link href="/campus/canteen/checkout">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-[#D4D4D8] hover:text-white p-2 sm:p-2.5 relative"
+                    >
+                      <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                      {itemCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-[#7C7CFF] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                          {itemCount > 9 ? "9+" : itemCount}
+                        </span>
+                      )}
+                    </Button>
+                  </Link>
+                )}
                 <div className="hidden xl:flex items-center gap-2.5 text-sm text-[#D4D4D8] glass-card px-3 md:px-4 h-9 md:h-10 rounded-lg md:rounded-xl">
                   <motion.div
                     className="w-2 h-2 bg-green-500 rounded-full"

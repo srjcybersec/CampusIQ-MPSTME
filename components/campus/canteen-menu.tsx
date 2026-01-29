@@ -4,8 +4,10 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Plus, ShoppingCart, Receipt } from "lucide-react";
 import { motion } from "framer-motion";
+import { useCart } from "@/lib/hooks/use-cart";
+import { useRouter } from "next/navigation";
 
 interface MenuItem {
   name: string;
@@ -133,6 +135,8 @@ const categories = Array.from(new Set(menuItems.map(item => item.category))).sor
 export function CanteenMenu() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { addItem, itemCount } = useCart();
+  const router = useRouter();
 
   const filteredItems = useMemo(() => {
     let filtered = menuItems;
@@ -166,6 +170,28 @@ export function CanteenMenu() {
 
   return (
     <div className="space-y-4">
+      {/* Cart and Orders Buttons */}
+      <div className="flex justify-between items-center gap-2">
+        <Button
+          onClick={() => router.push("/campus/canteen/orders")}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Receipt className="w-4 h-4" />
+          My Orders
+        </Button>
+        {itemCount > 0 && (
+          <Button
+            onClick={() => router.push("/campus/canteen/checkout")}
+            variant="neon"
+            className="flex items-center gap-2"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Cart ({itemCount})
+          </Button>
+        )}
+      </div>
+
       {/* Search and Filters */}
       <div className="space-y-4">
         {/* Search Bar */}
@@ -232,10 +258,20 @@ export function CanteenMenu() {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.2, delay: index * 0.02 }}
-                        className="flex items-center justify-between p-3 bg-[#161616] border border-[#222222] rounded-lg hover:border-[#333333] transition-colors"
+                        className="flex items-center justify-between p-3 bg-[#161616] border border-[#222222] rounded-lg hover:border-[#333333] transition-colors group"
                       >
-                        <span className="text-white text-sm flex-1">{item.name}</span>
-                        <span className="text-blue-400 font-semibold ml-4">₹{item.price}</span>
+                        <div className="flex-1">
+                          <span className="text-white text-sm">{item.name}</span>
+                          <span className="text-blue-400 font-semibold ml-4">₹{item.price}</span>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => addItem({ name: item.name, price: item.price, category: item.category })}
+                          className="ml-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
                       </motion.div>
                     ))}
                   </div>

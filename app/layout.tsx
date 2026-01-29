@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/context";
+import { CartProvider } from "@/lib/hooks/use-cart";
 import { SNEHA } from "@/components/voice-assistant/sneha";
 import { ProactiveAlerts } from "@/components/proactive-assistance/proactive-alerts";
 
@@ -49,9 +50,11 @@ export default function RootLayout({
       </head>
       <body className="antialiased relative">
         <AuthProvider>
-          {children}
-          <SNEHA />
-          <ProactiveAlerts />
+          <CartProvider>
+            {children}
+            <SNEHA />
+            <ProactiveAlerts />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

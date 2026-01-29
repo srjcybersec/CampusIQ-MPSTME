@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -10,6 +11,7 @@ import { MapPin, UtensilsCrossed, Calendar, ExternalLink, Info } from "lucide-re
 import { CanteenMenu } from "@/components/campus/canteen-menu";
 
 function CampusPageContent() {
+  const router = useRouter();
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showCanteenMenu, setShowCanteenMenu] = useState(false);
   const features = [
@@ -83,13 +85,22 @@ function CampusPageContent() {
                       <p className="text-[#D4D4D8] mb-4">{feature.content}</p>
                       {feature.title === "Canteen Menu" ? (
                         <div className="space-y-4">
-                          <Button 
-                            onClick={() => setShowCanteenMenu(!showCanteenMenu)}
-                            variant="neon"
-                            className="w-full"
-                          >
-                            {showCanteenMenu ? "Hide Menu" : "View Full Menu"}
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={() => setShowCanteenMenu(!showCanteenMenu)}
+                              variant="neon"
+                              className="flex-1"
+                            >
+                              {showCanteenMenu ? "Hide Menu" : "View Full Menu"}
+                            </Button>
+                            <Button
+                              onClick={() => router.push("/campus/canteen/orders")}
+                              variant="outline"
+                              className="flex-1"
+                            >
+                              My Orders
+                            </Button>
+                          </div>
                           
                           {showCanteenMenu && (
                             <motion.div
