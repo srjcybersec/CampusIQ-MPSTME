@@ -69,126 +69,6 @@ function normalizeDay(day: string): "Monday" | "Tuesday" | "Wednesday" | "Thursd
   return "Monday"; // Default
 }
 
-// Common subject name corrections and typo fixes
-const subjectCorrections: Record<string, string> = {
-  // Common typos
-  "unkown": "Unknown",
-  "unknwon": "Unknown",
-  "unknow": "Unknown",
-  "unkonwn": "Unknown",
-  "unnown": "Unknown",
-  "unknowm": "Unknown",
-  "unkonw": "Unknown",
-  // Common subject abbreviations and variations
-  "ai": "Artificial Intelligence",
-  "ml": "Machine Learning",
-  "ds": "Data Structures",
-  "dbms": "Database Management System",
-  "os": "Operating System",
-  "cn": "Computer Networks",
-  "se": "Software Engineering",
-  "wt": "Web Technologies",
-  "wp": "Web Programming",
-  "df": "Digital Forensics",
-  "dfir": "Digital Forensics",
-  "cyber": "Cybersecurity",
-  "cyber security": "Cybersecurity",
-  "cyber security fundamentals": "Cybersecurity Fundamentals",
-  "web progra": "Web Programming",
-  "web program": "Web Programming",
-  "web programing": "Web Programming",
-  "theoretical": "Theoretical Computer Science",
-  "theoretical cs": "Theoretical Computer Science",
-  "tcs": "Theoretical Computer Science",
-  "database": "Database Management System",
-  "database management": "Database Management System",
-  "data structures": "Data Structures",
-  "data structure": "Data Structures",
-  "operating system": "Operating System",
-  "computer networks": "Computer Networks",
-  "software engineering": "Software Engineering",
-  "machine learning": "Machine Learning",
-  "artificial intelligence": "Artificial Intelligence",
-};
-
-// Clean and correct subject names
-function cleanSubjectName(subject: string): string {
-  if (!subject || subject.trim().length === 0) {
-    return "";
-  }
-
-  let cleaned = subject.trim();
-
-  // Remove common prefixes/suffixes that might be OCR errors
-  cleaned = cleaned.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
-
-  // Check for exact matches in corrections
-  const lowerCleaned = cleaned.toLowerCase();
-  if (subjectCorrections[lowerCleaned]) {
-    return subjectCorrections[lowerCleaned];
-  }
-
-  // Check for partial matches (common typos)
-  for (const [typo, correct] of Object.entries(subjectCorrections)) {
-    if (lowerCleaned.includes(typo) || typo.includes(lowerCleaned)) {
-      return correct;
-    }
-  }
-
-  // Fix common OCR errors
-  cleaned = cleaned.replace(/[0O]/g, (match, offset) => {
-    // If it's in the middle of a word, likely 'O', if at start/end might be '0'
-    return offset === 0 || offset === cleaned.length - 1 ? match : "O";
-  });
-  cleaned = cleaned.replace(/[1Il]/g, (match, offset) => {
-    // In subject names, 'I' is more common than '1' or 'l'
-    return "I";
-  });
-
-  // Capitalize properly (Title Case)
-  cleaned = cleaned
-    .split(/\s+/)
-    .map((word) => {
-      if (word.length === 0) return word;
-      // Keep acronyms uppercase (2+ consecutive uppercase letters)
-      if (/^[A-Z]{2,}$/.test(word)) return word;
-      // Capitalize first letter, lowercase rest
-      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    })
-    .join(" ");
-
-  return cleaned;
-}
-
-// Validate and clean extracted entries
-function validateAndCleanEntry(entry: ExtractedScheduleEntry): ExtractedScheduleEntry | null {
-  // Skip entries with invalid or missing subject
-  if (!entry.subject || entry.subject.trim().length === 0) {
-    return null;
-  }
-
-  // Clean subject name
-  const cleanedSubject = cleanSubjectName(entry.subject);
-
-  // Reject if still empty or "Unknown" after cleaning
-  if (!cleanedSubject || cleanedSubject.toLowerCase() === "unknown") {
-    return null;
-  }
-
-  // Clean other fields
-  const cleaned: ExtractedScheduleEntry = {
-    ...entry,
-    subject: cleanedSubject,
-    subjectCode: entry.subjectCode?.trim() || "",
-    faculty: entry.faculty?.trim() || "",
-    facultyInitials: entry.facultyInitials?.trim() || "",
-    room: entry.room?.trim() || "",
-    batch: entry.batch?.trim() || "",
-  };
-
-  return cleaned;
-}
-
 export async function POST(request: NextRequest) {
   try {
     const { image, mimeType, userId } = await request.json();
@@ -249,24 +129,12 @@ export async function POST(request: NextRequest) {
     // Prepare the prompt
     const prompt = `You are analyzing a college timetable image. Extract all schedule entries from this timetable and return them as a JSON array.
 
-CRITICAL ACCURACY REQUIREMENTS:
-1. Read subject names CAREFULLY and ACCURATELY from the image
-2. DO NOT use "Unknown" or placeholder text - if you cannot read a subject clearly, skip that entry
-3. Pay close attention to OCR errors - common mistakes include:
-   - '0' vs 'O' (zero vs letter O)
-   - '1' vs 'I' vs 'l' (one vs capital I vs lowercase L)
-   - Missing or extra spaces
-   - Similar-looking letters (rn vs m, cl vs d, etc.)
-4. If text is unclear or ambiguous, try to infer from context (subject codes, room numbers, patterns)
-5. Verify subject names match the subject codes when both are present
-6. For breaks or empty slots, use type "break" and leave subject empty
-
 For each entry, extract:
 - day: Day of the week (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)
 - time: Time range in format "HH:MM-HH:MM" (24-hour format)
 - startTime: Start time in format "HH:MM"
 - endTime: End time in format "HH:MM"
-- subject: Full subject name (MUST be accurate - do not use "Unknown")
+- subject: Full subject name
 - subjectCode: Subject code/abbreviation (if available)
 - faculty: Professor/teacher name (if available)
 - facultyInitials: Faculty initials (if available)
@@ -276,13 +144,11 @@ For each entry, extract:
 
 Important:
 1. Extract ALL entries from the timetable, including breaks
-2. For breaks, set type to "break" and leave subject field empty (not "Unknown")
+2. For breaks, set type to "break" and leave other fields empty
 3. Ensure times are in 24-hour format (HH:MM)
 4. If a subject appears multiple times on the same day, create separate entries
 5. If batch information is present (like K1/K2), include it
-6. Double-check subject names for accuracy - read them letter by letter
-7. If you cannot clearly read a subject name, DO NOT include that entry
-8. Return ONLY valid JSON array, no markdown, no explanations
+6. Return ONLY valid JSON array, no markdown, no explanations
 
 Example format:
 [
@@ -298,14 +164,6 @@ Example format:
     "room": "CR-507",
     "batch": "K1",
     "type": "lecture"
-  },
-  {
-    "day": "Monday",
-    "time": "10:00-11:00",
-    "startTime": "10:00",
-    "endTime": "11:00",
-    "subject": "",
-    "type": "break"
   }
 ]`;
 
@@ -415,31 +273,25 @@ Example format:
 
     const extractedEntries: ExtractedScheduleEntry[] = JSON.parse(jsonText);
 
-    // Validate, clean, and normalize entries
-    const normalizedEntries: TimetableEntry[] = extractedEntries
-      .map((entry) => validateAndCleanEntry(entry))
-      .filter((entry): entry is ExtractedScheduleEntry => entry !== null)
-      .map((entry, index) => {
-        const { startTime, endTime } = parseTimeRange(entry.time || `${entry.startTime}-${entry.endTime}`);
-        
-        // For breaks, ensure subject is empty
-        const subject = entry.type === "break" ? "" : entry.subject;
-        
-        return {
-          id: `${userId}-${normalizeDay(entry.day).toLowerCase()}-${index}`,
-          day: normalizeDay(entry.day),
-          time: entry.time || `${startTime}-${endTime}`,
-          startTime,
-          endTime,
-          subject: subject || "",
-          subjectCode: entry.subjectCode || "",
-          faculty: entry.faculty || "",
-          facultyInitials: entry.facultyInitials || "",
-          room: entry.room || "",
-          batch: entry.batch as "K1" | "K2" | undefined,
-          type: entry.type || "lecture",
-        };
-      });
+    // Normalize and validate entries
+    const normalizedEntries: TimetableEntry[] = extractedEntries.map((entry, index) => {
+      const { startTime, endTime } = parseTimeRange(entry.time || `${entry.startTime}-${entry.endTime}`);
+      
+      return {
+        id: `${userId}-${normalizeDay(entry.day).toLowerCase()}-${index}`,
+        day: normalizeDay(entry.day),
+        time: entry.time || `${startTime}-${endTime}`,
+        startTime,
+        endTime,
+        subject: entry.subject || "Unknown",
+        subjectCode: entry.subjectCode || "",
+        faculty: entry.faculty || "",
+        facultyInitials: entry.facultyInitials || "",
+        room: entry.room || "",
+        batch: entry.batch as "K1" | "K2" | undefined,
+        type: entry.type || "lecture",
+      };
+    });
 
     // Initialize Firebase Admin
     const { db: adminDb } = await initializeAdmin();

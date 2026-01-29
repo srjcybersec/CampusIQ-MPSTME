@@ -158,6 +158,64 @@ function SchedulePageContent() {
     }
   };
 
+  const handleEntryUpdate = async (entryId: string, updatedEntry: TimetableEntry) => {
+    if (!user?.uid) return;
+
+    try {
+      const response = await fetch("/api/schedule/update-entry", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entryId,
+          userId: user.uid,
+          entryData: updatedEntry,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state
+        setTimetableData((prev) =>
+          prev.map((entry) => (entry.id === entryId ? updatedEntry : entry))
+        );
+      } else {
+        throw new Error(data.error || "Failed to update entry");
+      }
+    } catch (error: any) {
+      console.error("Error updating entry:", error);
+      alert(`Failed to update entry: ${error.message}`);
+    }
+  };
+
+  const handleEntryDelete = async (entryId: string) => {
+    if (!user?.uid) return;
+
+    try {
+      const response = await fetch(`/api/schedule/delete-entry?entryId=${entryId}&userId=${user.uid}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state
+        setTimetableData((prev) => prev.filter((entry) => entry.id !== entryId));
+        // Remove comment if exists
+        setComments((prev) => {
+          const newComments = { ...prev };
+          delete newComments[entryId];
+          return newComments;
+        });
+      } else {
+        throw new Error(data.error || "Failed to delete entry");
+      }
+    } catch (error: any) {
+      console.error("Error deleting entry:", error);
+      alert(`Failed to delete entry: ${error.message}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       <MainNav />
@@ -260,6 +318,8 @@ function SchedulePageContent() {
                   date={selected.date}
                   comments={comments}
                   onCommentChange={handleCommentChange}
+                  onEntryUpdate={handleEntryUpdate}
+                  onEntryDelete={handleEntryDelete}
                 />
                 
                 {/* Google Calendar Sync */}
