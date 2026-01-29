@@ -19,7 +19,7 @@ const menuItems: MenuItem[] = [
   // BREAKFAST
   { name: "TOAST WITH BUTTER", price: 23, category: "BREAKFAST" },
   { name: "TOAST, BUTTER & JAM", price: 27, category: "BREAKFAST" },
-  { name: "UPMA", price: 10, category: "BREAKFAST" },
+  { name: "UPMA", price: 1, category: "BREAKFAST" },
   { name: "POTATO POHA", price: 32, category: "BREAKFAST" },
   { name: "VADA PAV", price: 17, category: "BREAKFAST" },
   { name: "MISSAL PAV", price: 38, category: "BREAKFAST" },
