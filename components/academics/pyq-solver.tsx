@@ -285,54 +285,61 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
 
         {/* PDF Viewer and Chat Interface */}
         {selectedPyq && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 mt-4">
             {/* PDF Viewer */}
-            <Card variant="glass" className="lg:sticky lg:top-4 lg:h-[calc(100vh-12rem)]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileQuestion className="w-5 h-5 text-blue-400" />
-                  PYQ Paper
-                </CardTitle>
-                <CardDescription className="truncate" title={selectedPyq.fileName}>
-                  {selectedPyq.fileName}
-                </CardDescription>
+            <Card variant="glass" className="lg:sticky lg:top-4 flex flex-col order-1">
+              <CardHeader className="flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="flex items-center gap-2">
+                      <FileQuestion className="w-5 h-5 text-blue-400" />
+                      PYQ Paper
+                    </CardTitle>
+                    <CardDescription className="truncate mt-1" title={selectedPyq.fileName}>
+                      {selectedPyq.fileName}
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="p-0 h-[calc(100%-5rem)] overflow-hidden flex flex-col">
-                <div className="flex-1 overflow-hidden relative">
+              <CardContent className="p-0 flex-1 flex flex-col min-h-0 overflow-hidden">
+                {/* PDF Viewer Container */}
+                <div className="flex-1 min-h-[400px] lg:min-h-[500px] lg:h-[calc(100vh-20rem)] overflow-hidden relative bg-[#0a0a0a]">
                   <iframe
-                    src={selectedPyq.fileUrl}
+                    src={`${selectedPyq.fileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
                     className="w-full h-full border-0"
                     title="PYQ Paper Viewer"
                     allow="fullscreen"
+                    style={{ minHeight: "400px" }}
                   />
                 </div>
-                <div className="p-2 border-t border-[#222222] bg-[#161616] flex items-center justify-between">
+                {/* PDF Controls */}
+                <div className="p-3 border-t border-[#222222] bg-[#161616] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 flex-shrink-0">
                   <a
                     href={selectedPyq.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                    className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
                   >
                     <FileQuestion className="w-3 h-3" />
                     Open in new tab
                   </a>
                   <span className="text-xs text-[#A1A1AA]">
-                    {selectedPyq.branch} • Sem {selectedPyq.semester}
+                    {selectedPyq.branch} • Sem {selectedPyq.semester} • {selectedPyq.subject}
                   </span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Chat Interface */}
-            <Card variant="glass" className="flex flex-col lg:h-[calc(100vh-12rem)]">
+            <Card variant="glass" className="flex flex-col order-2 lg:h-[calc(100vh-12rem)]">
               <CardHeader className="flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <CardTitle className="flex items-center gap-2">
                       <FileQuestion className="w-5 h-5 text-purple-400" />
                       PYQ Solver Chat
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="mt-1">
                       Ask questions about the paper
                     </CardDescription>
                   </div>
@@ -340,6 +347,7 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
                     variant="ghost"
                     size="sm"
                     onClick={handleClearChat}
+                    className="flex-shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -347,7 +355,7 @@ export function PYQSolver({ pyqs, branches, subjects }: PYQSolverProps) {
               </CardHeader>
               <CardContent className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Messages */}
-                <div className="space-y-4 mb-4 flex-1 overflow-y-auto pr-2 min-h-0 max-h-full">
+                <div className="space-y-4 mb-4 flex-1 overflow-y-auto pr-2 min-h-[300px] lg:min-h-0">
                   {messages.map((message) => (
                     <div
                       key={message.id}
