@@ -7,11 +7,6 @@ import { useAuth } from "@/lib/auth/context";
 
 export function FacultyDashboard() {
   const { user } = useAuth();
-  const quickActions = [
-    { href: "/academics", label: "Class Management", icon: Users, color: "blue" },
-    { href: "/resources", label: "Course Materials", icon: FileText, color: "purple" },
-    { href: "/schedule", label: "Schedule", icon: BarChart3, color: "green" },
-  ];
 
   return (
     <div className="space-y-6">
@@ -33,22 +28,6 @@ export function FacultyDashboard() {
             <p className="text-purple-100 mt-2">Manage your classes and students</p>
           </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {quickActions.map((action) => {
-          const Icon = action.icon;
-          return (
-            <Link key={action.href} href={action.href}>
-              <Card className="hover:shadow-premium transition-calm cursor-pointer border-2 border-transparent hover:border-purple-200">
-                <CardHeader>
-                  <Icon className={`w-8 h-8 text-${action.color}-600 mb-2`} />
-                  <CardTitle>{action.label}</CardTitle>
-                </CardHeader>
-              </Card>
-            </Link>
-          );
-        })}
       </div>
     </div>
   );

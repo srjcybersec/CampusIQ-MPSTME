@@ -18,7 +18,7 @@ export default function Home() {
       href: "/academics", 
       label: "Academics", 
       icon: BookOpen, 
-      description: "AI-powered rule explanations and academic intelligence",
+      description: "Track attendance, view results, understand examination policies, and get AI-powered academic assistance. Features include attendance calculator, result analyzer, and policy Q&A.",
       gradient: "from-[#7C7CFF] to-[#38BDF8]",
       glow: "glow-purple"
     },
@@ -26,7 +26,7 @@ export default function Home() {
       href: "/schedule", 
       label: "Schedule", 
       icon: Calendar, 
-      description: "Unified timeline and smart reminders",
+      description: "Upload your timetable, view your weekly schedule, and get smart reminders for upcoming classes. Manage your academic calendar with ease.",
       gradient: "from-[#7C7CFF] to-[#38BDF8]",
       glow: "glow-blue"
     },
@@ -34,7 +34,7 @@ export default function Home() {
       href: "/campus", 
       label: "Campus", 
       icon: MapPin, 
-      description: "Empty space finder and infrastructure intelligence",
+      description: "Find empty spaces, book library discussion rooms, browse canteen menu, and order food online. Complete campus infrastructure intelligence at your fingertips.",
       gradient: "from-[#22D3EE] to-[#A855F7]",
       glow: "glow-blue"
     },
@@ -42,7 +42,7 @@ export default function Home() {
       href: "/resources", 
       label: "Resources", 
       icon: FolderOpen, 
-      description: "Notes, assignments, and PYQ repository",
+      description: "Access notes, manage assignments, browse PYQ papers with AI solver, and download study materials. Your complete academic resource hub.",
       gradient: "from-[#FB923C] to-[#EC4899]",
       glow: "glow-orange"
     },
@@ -50,7 +50,7 @@ export default function Home() {
       href: "/community", 
       label: "Community", 
       icon: Users, 
-      description: "Events and campus engagement",
+      description: "View campus events, participate in discussions, and stay connected with the MPSTME community. Engage with fellow students and faculty.",
       gradient: "from-[#22D3EE] to-[#A855F7]",
       glow: "glow-pink"
     },
@@ -58,7 +58,7 @@ export default function Home() {
       href: "/services", 
       label: "Services", 
       icon: Settings, 
-      description: "Administrative services made simple",
+      description: "Access administrative services, manage your profile, and configure app settings. Streamlined administrative processes made simple.",
       gradient: "from-[#7C7CFF] to-[#38BDF8]",
       glow: "glow-purple"
     },
@@ -66,7 +66,7 @@ export default function Home() {
       href: "/extras", 
       label: "Extras", 
       icon: Sparkles, 
-      description: "Experimental features",
+      description: "Explore experimental features and additional tools. Discover new functionalities and special features designed to enhance your campus experience.",
       gradient: "from-[#FB923C] to-[#EC4899]",
       glow: "glow-orange"
     },
