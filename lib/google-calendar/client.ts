@@ -11,12 +11,28 @@ const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 export function getOAuth2Client(): OAuth2Client {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/api/auth/google/callback";
+  
+  // Determine redirect URI based on environment
+  let redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  if (!redirectUri) {
+    // Auto-detect based on environment
+    if (process.env.VERCEL_URL) {
+      // Production/Vercel
+      redirectUri = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
+    } else if (process.env.NEXT_PUBLIC_APP_URL) {
+      // Custom production URL
+      redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`;
+    } else {
+      // Local development
+      redirectUri = "http://localhost:3000/api/auth/google/callback";
+    }
+  }
 
   if (!clientId || !clientSecret) {
     throw new Error("Google OAuth credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env");
   }
 
+  console.log("Using redirect URI:", redirectUri);
   return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 }
 

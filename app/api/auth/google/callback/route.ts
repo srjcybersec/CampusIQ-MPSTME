@@ -15,16 +15,24 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get("error");
     const state = searchParams.get("state"); // Can contain user ID
 
+    // Get the origin from headers (works for both localhost and production)
+    const origin = request.headers.get("origin") || 
+                   request.headers.get("referer")?.split("/").slice(0, 3).join("/") ||
+                   request.nextUrl.origin ||
+                   (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+
+    const baseUrl = origin.replace(/\/$/, ""); // Remove trailing slash
+
     if (error) {
-      return NextResponse.redirect(
-        new URL(`/schedule?error=${encodeURIComponent(error)}`, request.url)
-      );
+      const redirectUrl = `${baseUrl}/schedule?error=${encodeURIComponent(error)}`;
+      console.log("Redirecting to:", redirectUrl);
+      return NextResponse.redirect(redirectUrl);
     }
 
     if (!code) {
-      return NextResponse.redirect(
-        new URL("/schedule?error=no_code", request.url)
-      );
+      const redirectUrl = `${baseUrl}/schedule?error=no_code`;
+      console.log("Redirecting to:", redirectUrl);
+      return NextResponse.redirect(redirectUrl);
     }
 
     // Exchange code for tokens
@@ -44,13 +52,18 @@ export async function GET(request: NextRequest) {
     });
 
     // Redirect back to schedule page
-    return NextResponse.redirect(
-      new URL(`/schedule?${params.toString()}`, request.url)
-    );
+    const redirectUrl = `${baseUrl}/schedule?${params.toString()}`;
+    console.log("Redirecting to:", redirectUrl);
+    return NextResponse.redirect(redirectUrl);
   } catch (error: any) {
     console.error("Error in OAuth callback:", error);
-    return NextResponse.redirect(
-      new URL(`/schedule?error=${encodeURIComponent(error.message)}`, request.url)
-    );
+    const origin = request.headers.get("origin") || 
+                   request.headers.get("referer")?.split("/").slice(0, 3).join("/") ||
+                   request.nextUrl.origin ||
+                   (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000");
+    const baseUrl = origin.replace(/\/$/, "");
+    const redirectUrl = `${baseUrl}/schedule?error=${encodeURIComponent(error.message)}`;
+    console.log("Error redirecting to:", redirectUrl);
+    return NextResponse.redirect(redirectUrl);
   }
 }
