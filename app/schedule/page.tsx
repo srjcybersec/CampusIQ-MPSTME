@@ -190,53 +190,17 @@ function SchedulePageContent() {
               
               {/* Delete Timetable Button - Only show when timetable exists */}
               {!isLoadingSchedule && timetableData.length > 0 && (
-                <div className="flex items-center gap-2">
-                  {showDeleteConfirm ? (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center gap-2 bg-red-500/20 border border-red-500/50 rounded-lg px-4 py-2"
-                    >
-                      <AlertCircle className="w-4 h-4 text-red-400" />
-                      <span className="text-sm text-red-400">Delete timetable?</span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowDeleteConfirm(false)}
-                        disabled={isDeleting}
-                        className="h-7 px-2 text-xs"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleDeleteTimetable}
-                        disabled={isDeleting}
-                        className="h-7 px-2 text-xs bg-red-500 hover:bg-red-600 text-white"
-                      >
-                        {isDeleting ? (
-                          <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            Deleting...
-                          </>
-                        ) : (
-                          "Confirm"
-                        )}
-                      </Button>
-                    </motion.div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowDeleteConfirm(true)}
-                      disabled={isDeleting}
-                      className="text-red-400 border-red-500/50 hover:bg-red-500/20 hover:text-red-300"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Remove Timetable
-                    </Button>
-                  )}
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isDeleting}
+                  className="text-red-400 border-red-500/50 hover:bg-red-500/20 hover:text-red-300 flex-shrink-0"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Remove Timetable</span>
+                  <span className="sm:hidden">Remove</span>
+                </Button>
               )}
             </div>
           </motion.div>
@@ -314,6 +278,53 @@ function SchedulePageContent() {
           )}
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#161616] border border-red-500/50 rounded-xl p-6 max-w-md w-full shadow-xl"
+          >
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-6 h-6 text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-white mb-2">Delete Timetable?</h3>
+                <p className="text-sm text-[#D4D4D8]">
+                  Are you sure you want to delete your timetable? This will remove all schedule entries and comments. This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 order-2 sm:order-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteTimetable}
+                disabled={isDeleting}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white order-1 sm:order-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Confirm Delete"
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
