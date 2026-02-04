@@ -54,10 +54,10 @@ export function MainNav() {
 
   return (
     <motion.nav
-      className="sticky top-0 z-50 glass-nav"
+      className="sticky top-0 z-50 glass-nav border-b border-[#262626]"
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+      transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
     >
       <div className="container mx-auto px-3 sm:px-4 md:px-6 max-w-full">
         <div className="flex items-center justify-between h-14 sm:h-16 md:h-18 gap-2 sm:gap-4 md:gap-6">
@@ -76,10 +76,10 @@ export function MainNav() {
               />
             </motion.div>
             <div className="flex flex-col justify-center items-start">
-              <span className="text-2xl sm:text-2xl md:text-xl lg:text-xl font-bold gradient-text-purple tracking-tight whitespace-nowrap leading-tight">
+              <span className="text-2xl sm:text-2xl md:text-xl lg:text-xl font-bold gradient-text-primary tracking-tight whitespace-nowrap leading-tight">
                 CampusIQ
               </span>
-              <span className="text-sm sm:text-sm md:text-xs lg:text-xs text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap leading-tight">MPSTME</span>
+              <span className="text-sm sm:text-sm md:text-xs lg:text-xs text-[#a3a3a3] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap leading-tight">MPSTME</span>
             </div>
           </Link>
           
@@ -100,23 +100,24 @@ export function MainNav() {
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-1 sm:gap-2 md:gap-2.5 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap relative group flex-shrink-0",
+                        "flex items-center gap-1.5 sm:gap-2 md:gap-2.5 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap relative group flex-shrink-0",
                         isActive
-                          ? "bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] text-white shadow-lg glow-purple"
-                          : "text-[#D4D4D8] hover:text-white hover:bg-[#161616]/50"
+                          ? "bg-[#3b82f6] text-white shadow-md-modern"
+                          : "text-[#a3a3a3] hover:text-white hover:bg-[#151515]"
                       )}
                     >
                       <Icon className={cn(
-                        "w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-300 flex-shrink-0",
-                        isActive ? "scale-110 rotate-0" : "group-hover:scale-110 group-hover:rotate-12"
+                        "w-4 h-4 sm:w-4 sm:h-4 transition-all duration-300 flex-shrink-0",
+                        isActive ? "scale-105" : "group-hover:scale-105"
                       )} />
                       <span className="hidden lg:inline relative">
                         {item.label}
                       </span>
                       {isActive && (
-                        <motion.span
-                          className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white/80 rounded-full"
+                        <motion.div
+                          className="absolute inset-0 bg-[#3b82f6] rounded-xl -z-10"
                           layoutId="activeIndicator"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                         />
                       )}
                     </Link>
@@ -181,14 +182,14 @@ export function MainNav() {
                     </Button>
                   </Link>
                 )}
-                <div className="hidden xl:flex items-center gap-2.5 text-sm text-[#D4D4D8] glass-card px-3 md:px-4 h-9 md:h-10 rounded-lg md:rounded-xl">
+                <div className="hidden xl:flex items-center gap-2.5 text-sm text-[#a3a3a3] glass-card px-4 h-10 rounded-xl">
                   <motion.div
-                    className="w-2 h-2 bg-green-500 rounded-full"
+                    className="w-2 h-2 bg-[#10b981] rounded-full"
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   />
-                  <User className="w-4 h-4 text-[#7C7CFF]" />
-                  <span className="max-w-[120px] truncate font-semibold text-white">{user.email}</span>
+                  <User className="w-4 h-4 text-[#3b82f6]" />
+                  <span className="max-w-[120px] truncate font-medium text-white">{user.email}</span>
                 </div>
                 <Button
                   variant="ghost"
@@ -234,10 +235,10 @@ export function MainNav() {
                           href={item.href}
                           onClick={() => setMobileMenuOpen(false)}
                           className={cn(
-                            "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300",
+                            "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-300",
                             isActive
-                              ? "bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] text-white shadow-lg"
-                              : "text-[#D4D4D8] hover:text-white hover:bg-[#161616]/50"
+                              ? "bg-[#3b82f6] text-white shadow-md-modern"
+                              : "text-[#a3a3a3] hover:text-white hover:bg-[#151515]"
                           )}
                         >
                           <Icon className="w-5 h-5 flex-shrink-0" />
@@ -248,15 +249,15 @@ export function MainNav() {
                     
                     {user && (
                       <>
-                        <div className="border-t border-[#1a1a1a] my-2 pt-2">
-                          <div className="flex items-center gap-3 px-4 py-2 text-sm text-[#D4D4D8]">
-                            <User className="w-4 h-4 text-[#7C7CFF]" />
+                        <div className="border-t border-[#262626] my-2 pt-2">
+                          <div className="flex items-center gap-3 px-4 py-2 text-sm text-[#a3a3a3]">
+                            <User className="w-4 h-4 text-[#3b82f6]" />
                             <span className="truncate">{user.email}</span>
                           </div>
                         </div>
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-300"
+                          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-[#ef4444] hover:text-[#f87171] hover:bg-[#ef4444]/10 transition-all duration-300"
                         >
                           <LogOut className="w-5 h-5 flex-shrink-0" />
                           <span>Sign Out</span>

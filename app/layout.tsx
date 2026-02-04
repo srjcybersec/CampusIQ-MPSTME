@@ -4,7 +4,6 @@ import { AuthProvider } from "@/lib/auth/context";
 import { CartProvider } from "@/lib/hooks/use-cart";
 import { SNEHA } from "@/components/voice-assistant/sneha";
 import { ProactiveAlerts } from "@/components/proactive-assistance/proactive-alerts";
-import { Snowfall } from "@/components/ui/snowfall";
 
 export const metadata: Metadata = {
   title: "CampusIQ - MPSTME | Your Campus Intelligence System",
@@ -50,7 +49,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="CampusIQ" />
       </head>
       <body className="antialiased relative">
-        <Snowfall />
         <AuthProvider>
           <CartProvider>
             {children}

@@ -16,41 +16,48 @@ export function StudentDashboard() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      {/* Premium Welcome Card - Sci-Fi Style */}
+      {/* Modern Welcome Card */}
       <motion.div
-        className="relative bg-gradient-to-br from-[#2563eb] via-[#3b82f6] to-[#2563eb] rounded-xl p-8 md:p-12 text-white shadow-elevated overflow-hidden"
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        className="relative glass-card p-8 md:p-10 overflow-hidden"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
       >
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#3b82f6]/10 via-transparent to-[#6366f1]/10 pointer-events-none" />
         
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
           <motion.div
-            className="w-16 h-16 md:w-20 md:h-20 bg-white/20 rounded-2xl md:rounded-3xl flex items-center justify-center backdrop-blur-xl shadow-2xl border border-white/20"
+            className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-[#3b82f6] to-[#6366f1] rounded-2xl flex items-center justify-center shadow-lg-modern"
+            whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ duration: 0.3 }}
           >
-            <GraduationCap className="w-8 h-8 md:w-10 md:h-10" />
+            <GraduationCap className="w-8 h-8 md:w-10 md:h-10 text-white" />
           </motion.div>
           <div className="flex-1 min-w-0 w-full">
             <motion.h2
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 tracking-tight break-words overflow-wrap-anywhere"
+              className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 tracking-tight text-white"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <span className="block">Welcome Back</span>
-              {user?.email && (
-                <span className="block text-lg sm:text-xl md:text-2xl lg:text-3xl mt-1 truncate max-w-full">
-                  {user.email}
-                </span>
-              )}
-              <span className="inline-block ml-1">👋</span>
+              Welcome Back
             </motion.h2>
+            {user?.email && (
+              <motion.p
+                className="text-lg sm:text-xl md:text-2xl text-[#a3a3a3] mb-3 truncate max-w-full"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                {user.email}
+              </motion.p>
+            )}
             <motion.p
-              className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed"
+              className="text-base sm:text-lg text-[#737373] leading-relaxed"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
               Your academic command center at MPSTME
             </motion.p>
