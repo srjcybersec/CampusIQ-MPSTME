@@ -1,10 +1,12 @@
 import { initializeApp, getApps, cert, App } from "firebase-admin/app";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
 import { getStorage, Storage } from "firebase-admin/storage";
+import { getAuth, Auth } from "firebase-admin/auth";
 
 let adminApp: App | null = null;
 let adminDb: Firestore | null = null;
 let adminStorage: Storage | null = null;
+let adminAuth: Auth | null = null;
 
 export async function initializeAdmin(): Promise<{ db: Firestore; storage: Storage }> {
   if (adminDb && adminStorage) {
@@ -52,6 +54,7 @@ export async function initializeAdmin(): Promise<{ db: Firestore; storage: Stora
 
     adminDb = getFirestore(adminApp);
     adminStorage = getStorage(adminApp);
+    adminAuth = getAuth(adminApp);
     
     return { db: adminDb, storage: adminStorage };
   } catch (error: any) {
@@ -69,4 +72,15 @@ export async function getAdminDb(): Promise<Firestore> {
 export async function getAdminStorage(): Promise<Storage> {
   const { storage } = await initializeAdmin();
   return storage;
+}
+
+export async function getAdminAuth(): Promise<Auth> {
+  if (adminAuth) {
+    return adminAuth;
+  }
+  await initializeAdmin();
+  if (!adminAuth) {
+    throw new Error("Failed to initialize Firebase Admin Auth");
+  }
+  return adminAuth;
 }

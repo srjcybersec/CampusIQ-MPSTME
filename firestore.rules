@@ -54,6 +54,34 @@ service cloud.firestore {
       // Allow creating user profile on first login
       allow create: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Username reservations - written only by the server (Admin SDK).
+    // Public read is allowed so the signup form can check availability.
+    match /usernames/{username} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // SAP ID reservations - fully locked; only the server (Admin SDK) touches these.
+    match /sapIds/{sapId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // Email verification OTP codes - fully locked; only the server (Admin SDK)
+    // reads/writes these. Codes are stored hashed and expire quickly.
+    match /emailVerifications/{uid} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // Pending (pre-verification) registrations - fully locked; only the server
+    // (Admin SDK) touches these. Holds profile data + a hashed OTP until the
+    // account is created on successful verification.
+    match /pendingRegistrations/{email} {
+      allow read: if false;
+      allow write: if false;
+    }
     
     // Users can read/write their own Google Calendar tokens
     match /googleCalendarTokens/{userId} {
@@ -209,6 +237,14 @@ service cloud.firestore {
     
     // Results - users can read/write their own results
     match /results/{resultId} {
+      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    
+    // Canteen Orders - users can read/write their own orders
+    match /canteenOrders/{orderId} {
       allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
       allow update: if request.auth != null && resource.data.userId == request.auth.uid;

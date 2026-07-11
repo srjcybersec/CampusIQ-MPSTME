@@ -86,8 +86,14 @@ async function getResultText(resultId: string): Promise<string> {
   return pdfText;
 }
 
+import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
+
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting for Gemini API calls
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.GEMINI);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { resultId, question, conversationHistory } = await request.json();
 
     if (!resultId || !question) {

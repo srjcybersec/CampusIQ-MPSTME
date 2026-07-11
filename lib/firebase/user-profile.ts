@@ -5,6 +5,14 @@ export interface UserProfile {
   uid: string;
   email: string;
   role: "student" | "faculty";
+  username?: string;
+  usernameLower?: string;
+  sapId?: string;
+  name?: string;
+  program?: string;
+  branch?: string;
+  year?: string;
+  phone?: string | null;
   createdAt: any;
   updatedAt: any;
 }

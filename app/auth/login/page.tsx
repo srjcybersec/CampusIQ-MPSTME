@@ -2,30 +2,34 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/lib/firebase/config";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { createOrUpdateUserProfile } from "@/lib/firebase/user-profile";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useAuth } from "@/lib/auth/context";
-import { GraduationCap, User, Lock, Mail } from "lucide-react";
+import { ALLOWED_EMAIL_DOMAIN } from "@/lib/auth/registration";
+import { Lock, Mail } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState<"student" | "faculty">("student");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
   const { user } = useAuth();
 
-  // Redirect if already logged in
+  // Redirect if already logged in (respecting verification state).
   useEffect(() => {
     if (user) {
-      router.push("/");
+      if (user.emailVerified) {
+        router.push("/");
+      } else {
+        router.push("/auth/verify-email");
+      }
     }
   }, [user, router]);
 
@@ -35,18 +39,30 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      // Create or update user profile with selected role
-      await createOrUpdateUserProfile(user.uid, user.email || email, userType);
-      
-      // Redirect will happen via useEffect in ProtectedRoute
+      const normalizedEmail = email.trim().toLowerCase();
+
+      // Layer 1: only official MPSTME emails may sign in.
+      if (!normalizedEmail.endsWith(`@${ALLOWED_EMAIL_DOMAIN}`)) {
+        setError(`Only official MPSTME emails (@${ALLOWED_EMAIL_DOMAIN}) can access CampusIQ.`);
+        setLoading(false);
+        return;
+      }
+
+      const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, password);
+      const signedInUser = userCredential.user;
+
+      // Layer 2: email must be verified before using the app.
+      // The verify-email page is the single place that sends the email.
+      if (!signedInUser.emailVerified) {
+        router.push("/auth/verify-email");
+        return;
+      }
+
       router.push("/");
     } catch (err: any) {
       console.error("Login error:", err);
-      if (err.code === "auth/user-not-found") {
-        setError("No account found with this email address.");
+      if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
+        setError("No account found or incorrect credentials. Please check and try again.");
       } else if (err.code === "auth/wrong-password") {
         setError("Incorrect password. Please try again.");
       } else if (err.code === "auth/invalid-email") {
@@ -56,6 +72,8 @@ export default function LoginPage() {
       } else {
         setError(err.message || "Failed to sign in. Please check your credentials.");
       }
+      // Ensure we don't leave a half-signed-in session on error paths.
+      try { await signOut(auth); } catch {}
     } finally {
       setLoading(false);
     }
@@ -106,57 +124,9 @@ export default function LoginPage() {
           <Card variant="glass" className="shadow-premium">
           <CardHeader>
             <CardTitle>Welcome Back</CardTitle>
-            <CardDescription>Choose your account type and sign in</CardDescription>
+            <CardDescription>Sign in with your MPSTME email</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* User Type Selection */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <motion.button
-                type="button"
-                onClick={() => setUserType("student")}
-                className={`p-5 rounded-xl border-2 transition-all duration-300 hover:scale-105 active:scale-95 relative overflow-hidden group ${
-                  userType === "student"
-                    ? "border-blue-500 bg-blue-500/20 shadow-premium"
-                    : "border-[#222222] bg-[#161616] hover:border-blue-500/50 hover:shadow-soft"
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {userType === "student" && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
-                )}
-                <User className={`w-7 h-7 mx-auto mb-2 relative z-10 transition-transform duration-300 ${userType === "student" ? "text-blue-400 scale-110" : "text-[#D4D4D8] group-hover:scale-110"}`} />
-                <p className={`font-semibold relative z-10 ${userType === "student" ? "text-white" : "text-[#D4D4D8]"}`}>
-                  Student
-                </p>
-                {userType === "student" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                )}
-              </motion.button>
-              <motion.button
-                type="button"
-                onClick={() => setUserType("faculty")}
-                className={`p-5 rounded-xl border-2 transition-all duration-300 hover:scale-105 active:scale-95 relative overflow-hidden group ${
-                  userType === "faculty"
-                    ? "border-purple-500 bg-purple-500/20 shadow-premium"
-                    : "border-[#222222] bg-[#161616] hover:border-purple-500/50 hover:shadow-soft"
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {userType === "faculty" && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10"></div>
-                )}
-                <GraduationCap className={`w-7 h-7 mx-auto mb-2 relative z-10 transition-transform duration-300 ${userType === "faculty" ? "text-purple-400 scale-110" : "text-[#D4D4D8] group-hover:scale-110"}`} />
-                <p className={`font-semibold relative z-10 ${userType === "faculty" ? "text-white" : "text-[#D4D4D8]"}`}>
-                  Faculty
-                </p>
-                {userType === "faculty" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-blue-500"></div>
-                )}
-              </motion.button>
-            </div>
-
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
@@ -169,7 +139,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="your.email@college.edu"
+                  placeholder={`your.name@${ALLOWED_EMAIL_DOMAIN}`}
                   className="w-full"
                 />
               </div>
@@ -194,12 +164,15 @@ export default function LoginPage() {
                 </div>
               )}
               <Button type="submit" disabled={loading} variant="neon" className="w-full">
-                {loading ? "Signing in..." : `Sign in as ${userType === "student" ? "Student" : "Faculty"}`}
+                {loading ? "Signing in..." : "Sign in"}
               </Button>
             </form>
 
-            <p className="text-xs text-[#D4D4D8] text-center mt-6">
-              Signing in as <strong className="text-white">{userType === "student" ? "Student" : "Faculty"}</strong>
+            <p className="text-sm text-[#D4D4D8] text-center mt-6">
+              New to CampusIQ?{" "}
+              <Link href="/auth/signup" className="text-[#7C7CFF] hover:text-[#38BDF8] font-semibold">
+                Create an account
+              </Link>
             </p>
           </CardContent>
         </Card>

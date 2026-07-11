@@ -56,12 +56,18 @@ function getAdminDb(): Firestore | null {
   }
 }
 
+import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
+
 /**
  * POST /api/pyqs/solve
  * Solve questions from PYQ papers - user types questions manually
  */
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting for Gemini API calls
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.GEMINI);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { pyqId, question, conversationHistory } = await request.json();
 
     if (!pyqId) {

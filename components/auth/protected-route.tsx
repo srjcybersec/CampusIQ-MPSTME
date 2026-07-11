@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth/context";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { ALLOWED_EMAIL_DOMAIN } from "@/lib/auth/registration";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,11 +17,19 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   const { user, loading, userRole } = useAuth();
   const router = useRouter();
 
+  const isAllowedDomain = !!user?.email?.toLowerCase().endsWith(`@${ALLOWED_EMAIL_DOMAIN}`);
+
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return;
+    if (!user) {
       router.push("/auth/login");
+    } else if (!isAllowedDomain) {
+      // Non-MPSTME account somehow signed in — block it.
+      router.push("/auth/login");
+    } else if (!user.emailVerified) {
+      router.push("/auth/verify-email");
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isAllowedDomain]);
 
   if (loading) {
     return (
@@ -44,7 +53,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     );
   }
 
-  if (!user) {
+  if (!user || !isAllowedDomain || !user.emailVerified) {
     return null; // Will redirect
   }
 

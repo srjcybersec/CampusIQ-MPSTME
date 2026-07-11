@@ -69,6 +69,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Semester required" }, { status: 400 });
     }
 
+    // Validate file size (50MB max)
+    const { validateFileSize, validateFileType } = await import("@/lib/utils/validation");
+    const sizeValidation = validateFileSize(file, 50);
+    if (!sizeValidation.valid) {
+      return NextResponse.json(
+        { error: sizeValidation.error },
+        { status: 400 }
+      );
+    }
+
+    // Validate file type (PDF only for results)
+    const typeValidation = validateFileType(file, ["application/pdf"]);
+    if (!typeValidation.valid) {
+      return NextResponse.json(
+        { error: "Only PDF files are allowed for results upload" },
+        { status: 400 }
+      );
+    }
+
     const fileExtension = file.name.split(".").pop();
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 15);

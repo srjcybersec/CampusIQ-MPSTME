@@ -68,8 +68,14 @@ try {
   console.error("Firebase Admin initialization error:", error);
 }
 
+import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
+
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting for file uploads
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.UPLOAD);
+    if (rateLimitResponse) return rateLimitResponse;
+
     if (!adminStorage) {
       return NextResponse.json(
         { error: "Storage service not configured. Please check Firebase Admin credentials." },
@@ -84,6 +90,32 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { error: "No file provided" },
+        { status: 400 }
+      );
+    }
+
+    // Validate file size (50MB max)
+    const { validateFileSize, validateFileType } = await import("@/lib/utils/validation");
+    const sizeValidation = validateFileSize(file, 50);
+    if (!sizeValidation.valid) {
+      return NextResponse.json(
+        { error: sizeValidation.error },
+        { status: 400 }
+      );
+    }
+
+    // Validate file type
+    const typeValidation = validateFileType(file, [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ]);
+    if (!typeValidation.valid) {
+      return NextResponse.json(
+        { error: typeValidation.error },
         { status: 400 }
       );
     }

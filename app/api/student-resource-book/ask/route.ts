@@ -153,12 +153,18 @@ async function getStudentResourceBookText(): Promise<string> {
   }
 }
 
+import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
+
 /**
  * POST /api/student-resource-book/ask
  * Answer questions about the Student Resource Book PDF
  */
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting for Gemini API calls
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.GEMINI);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { question, conversationHistory } = await request.json();
 
     if (!question) {

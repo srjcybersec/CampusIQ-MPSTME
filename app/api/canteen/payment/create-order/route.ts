@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { getAdminDb } from "@/lib/firebase/admin";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting for payment endpoints
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.PAYMENT);
+    if (rateLimitResponse) return rateLimitResponse;
+
     const body = await request.json();
     const { orderId, amount, userId, items, upiId } = body;
 

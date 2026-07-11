@@ -1,17 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get("userId");
+    const requestUserId = searchParams.get("userId");
 
-    if (!userId) {
+    // Verify authentication and get userId
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, requestUserId);
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
+
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.READ, userId);
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Fetch user's orders
     // Note: We fetch without orderBy to avoid composite index requirement, then sort client-side
