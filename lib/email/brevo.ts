@@ -65,24 +65,13 @@ export function buildOtpEmail(code: string, name?: string): { subject: string; h
   const subject = "Verify your CampusIQ account";
 
   const htmlContent = `
-  <div style="margin:0;padding:0;background:#0b0b0f;font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
-    <div style="max-width:480px;margin:0 auto;padding:32px 24px;">
-      <div style="text-align:center;margin-bottom:24px;">
-        <h1 style="color:#ffffff;font-size:22px;margin:0;">CampusIQ <span style="color:#7C7CFF;">MPSTME</span></h1>
-      </div>
-      <div style="background:#141419;border:1px solid #222;border-radius:16px;padding:28px 24px;color:#D4D4D8;">
-        <p style="margin:0 0 12px;font-size:15px;">${greeting}</p>
-        <p style="margin:0 0 20px;font-size:15px;">Use the code below to verify your email address and finish setting up your account.</p>
-        <div style="text-align:center;margin:24px 0;">
-          <div style="display:inline-block;background:#0b0b0f;border:1px solid #7C7CFF;border-radius:12px;padding:16px 28px;">
-            <span style="color:#ffffff;font-size:34px;font-weight:700;letter-spacing:10px;">${code}</span>
-          </div>
-        </div>
-        <p style="margin:0 0 8px;font-size:13px;color:#9a9aa5;">This code expires in 10 minutes. Enter it on the verification screen in the app.</p>
-        <p style="margin:0;font-size:13px;color:#9a9aa5;">If you didn't request this, you can safely ignore this email.</p>
-      </div>
-      <p style="text-align:center;color:#5a5a63;font-size:12px;margin-top:20px;">© CampusIQ · MPSTME</p>
-    </div>
+  <div style="font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;max-width:520px;margin:0 auto;padding:24px;">
+    <p style="margin:0 0 12px;font-size:15px;">${greeting}</p>
+    <p style="margin:0 0 16px;font-size:15px;">Your CampusIQ verification code is:</p>
+    <p style="margin:0 0 20px;font-size:32px;font-weight:700;letter-spacing:8px;">${code}</p>
+    <p style="margin:0 0 8px;font-size:14px;color:#444;">Enter this code on the signup screen. It expires in 10 minutes.</p>
+    <p style="margin:0;font-size:14px;color:#444;">If you did not request this, you can ignore this email.</p>
+    <p style="margin:24px 0 0;font-size:12px;color:#777;">CampusIQ · MPSTME</p>
   </div>`;
 
   const textContent = `${name ? `Hi ${name},` : "Hi there,"}\n\nYour CampusIQ verification code is: ${code}\n\nThis code expires in 10 minutes. Enter it on the verification screen in the app.\n\nIf you didn't request this, you can ignore this email.\n\n— CampusIQ · MPSTME`;

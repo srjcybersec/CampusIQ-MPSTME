@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -22,9 +21,11 @@ import {
   ShoppingCart,
   Menu,
   X,
+  MessageSquarePlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/hooks/use-cart";
+import { CampusIQBrand } from "@/components/brand/campusiq-brand";
 
 const navItems = [
   { href: "/academics", label: "Academics", icon: BookOpen },
@@ -61,27 +62,9 @@ export function MainNav() {
       transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
     >
       <div className="container mx-auto px-3 sm:px-4 md:px-6 max-w-full">
-        <div className="flex items-center justify-between h-14 sm:h-16 md:h-18 gap-2 sm:gap-4 md:gap-6">
-          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group flex-shrink-0 z-10 -ml-1 sm:ml-0">
-            <motion.div
-              className="relative flex items-center justify-center"
-              transition={{ duration: 0.3 }}
-            >
-              <Image
-                src="/campusiq-logo.png"
-                alt="CampusIQ Logo"
-                width={80}
-                height={80}
-                className="w-20 h-20 sm:w-20 sm:h-20 md:w-18 md:h-18 lg:w-16 lg:h-16 object-contain relative z-10"
-                priority
-              />
-            </motion.div>
-            <div className="flex flex-col justify-center items-start">
-              <span className="text-2xl sm:text-2xl md:text-xl lg:text-xl font-bold gradient-text-purple tracking-tight whitespace-nowrap leading-tight">
-                CampusIQ
-              </span>
-              <span className="text-sm sm:text-sm md:text-xs lg:text-xs text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium whitespace-nowrap leading-tight">MPSTME</span>
-            </div>
+        <div className="flex items-center justify-between h-16 sm:h-[4.5rem] md:h-20 gap-2 sm:gap-4 md:gap-6">
+          <Link href="/" className="group flex-shrink-0 z-10 -ml-1 sm:ml-0">
+            <CampusIQBrand variant="nav" />
           </Link>
           
           {/* Desktop Navigation */}
@@ -182,6 +165,20 @@ export function MainNav() {
                     </Button>
                   </Link>
                 )}
+                <Link href="/feedback">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "text-[#D4D4D8] hover:text-white p-2 sm:p-2.5",
+                      pathname === "/feedback" && "text-[#7C7CFF]"
+                    )}
+                    title="Beta feedback"
+                  >
+                    <MessageSquarePlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <span className="hidden lg:inline">Feedback</span>
+                  </Button>
+                </Link>
                 <div className="hidden xl:flex items-center gap-2.5 text-sm text-[#D4D4D8] glass-card px-3 md:px-4 h-9 md:h-10 rounded-lg md:rounded-xl">
                   <motion.div
                     className="w-2 h-2 bg-green-500 rounded-full"
@@ -247,6 +244,20 @@ export function MainNav() {
                       );
                     })}
                     
+                    <Link
+                      href="/feedback"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300",
+                        pathname === "/feedback"
+                          ? "bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] text-white shadow-lg"
+                          : "text-[#D4D4D8] hover:text-white hover:bg-[#161616]/50"
+                      )}
+                    >
+                      <MessageSquarePlus className="w-5 h-5 flex-shrink-0" />
+                      <span>Beta Feedback</span>
+                    </Link>
+
                     {user && (
                       <>
                         <div className="border-t border-[#1a1a1a] my-2 pt-2">

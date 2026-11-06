@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
+import { useAuth } from "@/lib/auth/context";
 import { MailCheck, RefreshCw, Loader2 } from "lucide-react";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [code, setCode] = useState("");
   const [verifying, setVerifying] = useState(false);
@@ -25,7 +27,8 @@ export default function VerifyEmailPage() {
   const sendCode = async (isAuto: boolean) => {
     const current = auth.currentUser;
     if (!current) {
-      router.push("/auth/login");
+      // Session not restored yet — don't bounce to login (avoids a redirect
+      // loop on slower/mobile connections). The mount effect handles routing.
       return;
     }
     if (!isAuto) setResending(true);
@@ -66,13 +69,17 @@ export default function VerifyEmailPage() {
   };
 
   useEffect(() => {
-    const current = auth.currentUser;
-    if (!current) {
+    // Wait for Firebase to finish restoring the session before deciding
+    // where to route. This prevents a login <-> verify-email redirect loop
+    // (the black-screen "glitch" cycle) on mobile / slow connections.
+    if (loading) return;
+
+    if (!user) {
       router.push("/auth/login");
       return;
     }
-    setEmail(current.email || "");
-    if (current.emailVerified) {
+    setEmail(user.email || "");
+    if (user.emailVerified) {
       router.push("/");
       return;
     }
@@ -83,7 +90,7 @@ export default function VerifyEmailPage() {
       sendCode(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -99,7 +106,8 @@ export default function VerifyEmailPage() {
     try {
       const current = auth.currentUser;
       if (!current) {
-        router.push("/auth/login");
+        setError("Your session expired. Please sign in again.");
+        setVerifying(false);
         return;
       }
       const token = await current.getIdToken();
@@ -133,6 +141,21 @@ export default function VerifyEmailPage() {
     await signOut(auth);
     router.push("/auth/login");
   };
+
+  // While the session is restoring (or we're about to redirect), show a stable
+  // loader instead of flashing the form — prevents the mobile "glitch" cycle.
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-14 h-14 bg-gradient-to-r from-[#7C7CFF] to-[#38BDF8] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="w-7 h-7 text-white animate-spin" />
+          </div>
+          <p className="text-[#D4D4D8]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center p-4 safe-padding">

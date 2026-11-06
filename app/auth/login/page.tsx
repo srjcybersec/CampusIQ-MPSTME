@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useAuth } from "@/lib/auth/context";
 import { ALLOWED_EMAIL_DOMAIN } from "@/lib/auth/registration";
 import { Lock, Mail } from "lucide-react";
+import { CampusIQBrand } from "@/components/brand/campusiq-brand";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -89,29 +89,12 @@ export default function LoginPage() {
           transition={{ duration: 0.6 }}
         >
           <motion.div
-            className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6"
+            className="flex items-center justify-center mb-4 sm:mb-6"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <motion.div
-              className="relative"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Image
-                src="/campusiq-logo.png"
-                alt="CampusIQ Logo"
-                width={64}
-                height={64}
-                className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                priority
-              />
-            </motion.div>
-            <div className="text-left">
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">CampusIQ</h1>
-              <p className="text-xs sm:text-sm text-[#D4D4D8] -mt-0.5 sm:-mt-1 font-medium">MPSTME</p>
-            </div>
+            <CampusIQBrand variant="auth" />
           </motion.div>
           <p className="text-[#D4D4D8] text-lg">Sign in to your account</p>
         </motion.div>

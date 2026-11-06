@@ -42,7 +42,7 @@ export default function Home() {
       href: "/resources", 
       label: "Resources", 
       icon: FolderOpen, 
-      description: "Access notes, manage assignments, browse PYQ papers with AI solver, and download study materials. Your complete academic resource hub.",
+      description: "Access notes, manage assignments, browse and download PYQ papers, and find study materials. Your complete academic resource hub.",
       gradient: "from-[#FB923C] to-[#EC4899]",
       glow: "glow-orange"
     },

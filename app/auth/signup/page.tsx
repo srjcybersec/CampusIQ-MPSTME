@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,7 @@ import {
   type RegistrationInput,
 } from "@/lib/auth/registration";
 import { Mail, Lock, User, IdCard, AtSign, Phone, GraduationCap, BookOpen, CheckCircle2, XCircle, Loader2, MailCheck, RefreshCw } from "lucide-react";
+import { CampusIQBrand } from "@/components/brand/campusiq-brand";
 
 type FormState = RegistrationInput & { confirmPassword: string };
 type Step = "form" | "otp" | "done";
@@ -233,12 +233,8 @@ export default function SignupPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Image src="/campusiq-logo.png" alt="CampusIQ Logo" width={64} height={64} className="w-12 h-12 sm:w-14 sm:h-14 object-contain" priority />
-            <div className="text-left">
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">CampusIQ</h1>
-              <p className="text-xs sm:text-sm text-[#D4D4D8] -mt-0.5 font-medium">MPSTME</p>
-            </div>
+          <div className="flex items-center justify-center mb-4">
+            <CampusIQBrand variant="auth" />
           </div>
           <p className="text-[#D4D4D8] text-lg">Create your student account</p>
         </motion.div>
@@ -270,6 +266,11 @@ export default function SignupPage() {
                     <span className="text-white font-semibold break-all">{form.email}</span>.
                     Your account is created only after you enter it.
                   </CardDescription>
+                  <p className="text-xs text-[#9a9aa5] text-center mt-3 leading-relaxed">
+                    Not in your inbox? MPSTME email often puts external mail in{" "}
+                    <span className="text-[#D4D4D8] font-medium">Quarantine</span> (Microsoft Defender).
+                    Open Outlook → Security → Quarantine → release the CampusIQ email, then enter the code here.
+                  </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {message && (
