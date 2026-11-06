@@ -4,7 +4,8 @@ out
 build
 coverage
 .firebase
-PYQs
+# Only ignore the root PDF zip folder — NOT app/api/pyqs or app/resources/pyqs
+/PYQs/
 *.zip
 .env
 .env.*
