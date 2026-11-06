@@ -1,16 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeAdmin } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 export async function DELETE(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const entryId = searchParams.get("entryId");
-    const userId = searchParams.get("userId");
 
-    if (!entryId || !userId) {
+    if (!entryId) {
       return NextResponse.json(
-        { error: "Missing required fields: entryId and userId" },
+        { error: "Missing required fields: entryId" },
         { status: 400 }
+      );
+    }
+
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, searchParams.get("userId"));
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 

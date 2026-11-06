@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeAdmin } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 export async function DELETE(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get("userId");
 
-    if (!userId) {
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, searchParams.get("userId"));
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "Missing userId parameter" },
-        { status: 400 }
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 
@@ -39,6 +42,13 @@ export async function DELETE(request: NextRequest) {
       commentsBatch.delete(doc.ref);
     });
     await commentsBatch.commit();
+
+    // Delete batch preference metadata
+    try {
+      await adminDb.collection("scheduleMeta").doc(userId).delete();
+    } catch (metaError) {
+      console.warn("Could not delete schedule meta:", metaError);
+    }
 
     return NextResponse.json({
       success: true,

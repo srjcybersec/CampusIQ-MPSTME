@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useCallback } from "react";
+import { useState, useEffect, Suspense, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -13,12 +13,16 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Loader2, Trash2, AlertCircle } from "lucide-react";
 import { format, addDays, startOfWeek, eachDayOfInterval, isSameDay } from "date-fns";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 
 function SchedulePageContent() {
   const { user } = useAuth();
   const [selectedDay, setSelectedDay] = useState<string>("today");
   const [comments, setComments] = useState<Record<string, string>>({});
   const [timetableData, setTimetableData] = useState<TimetableEntry[]>([]);
+  const [availableBatches, setAvailableBatches] = useState<string[]>([]);
+  const [selectedBatch, setSelectedBatch] = useState<string | null>(null);
+  const [isSavingBatch, setIsSavingBatch] = useState(false);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -35,7 +39,7 @@ function SchedulePageContent() {
 
     setIsLoadingSchedule(true);
     try {
-      const response = await fetch(`/api/schedule/get?userId=${user.uid}`);
+      const response = await authedFetch(`/api/schedule/get?userId=${user.uid}`);
       const data = await response.json();
       if (data.success) {
         // Entries are already sorted by the API, but ensure they're sorted here too
@@ -47,6 +51,8 @@ function SchedulePageContent() {
           return a.startTime.localeCompare(b.startTime);
         });
         setTimetableData(entries);
+        setAvailableBatches(data.availableBatches || []);
+        setSelectedBatch(data.batch ?? null);
       }
     } catch (error) {
       console.error("Error loading schedule:", error);
@@ -59,19 +65,43 @@ function SchedulePageContent() {
     loadSchedule();
   }, [loadSchedule]);
 
+  // Filter entries by the selected batch: keep common classes (no batch) plus the
+  // ones matching the chosen batch. When no batch is selected, show everything.
+  const visibleEntries = useMemo(() => {
+    if (!selectedBatch) return timetableData;
+    return timetableData.filter((entry) => !entry.batch || entry.batch === selectedBatch);
+  }, [timetableData, selectedBatch]);
+
   // Get today's schedule
-  const todaySchedule = timetableData.filter(
+  const todaySchedule = visibleEntries.filter(
     (entry) => entry.day === todayDayName
   ).sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  // Get this week's schedule (Monday to Friday)
+  // Get this week's schedule (Monday to Saturday — supports working Saturdays)
   const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Monday
-  const weekDays = eachDayOfInterval({ start: weekStart, end: addDays(weekStart, 4) }); // Mon-Fri
+  const weekDays = eachDayOfInterval({ start: weekStart, end: addDays(weekStart, 5) }); // Mon-Sat
 
   const getDaySchedule = (dayName: string) => {
-    return timetableData.filter(
+    return visibleEntries.filter(
       (entry) => entry.day === dayName
     ).sort((a, b) => a.startTime.localeCompare(b.startTime));
+  };
+
+  const handleBatchSelect = async (batch: string | null) => {
+    setSelectedBatch(batch);
+    if (!user?.uid) return;
+    setIsSavingBatch(true);
+    try {
+      await authedFetch("/api/schedule/set-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.uid, batch }),
+      });
+    } catch (error) {
+      console.error("Error saving batch preference:", error);
+    } finally {
+      setIsSavingBatch(false);
+    }
   };
 
   const handleCommentChange = async (entryId: string, comment: string) => {
@@ -83,7 +113,7 @@ function SchedulePageContent() {
     // Save to Firestore
     if (user?.uid) {
       try {
-        await fetch("/api/schedule/save-comment", {
+        await authedFetch("/api/schedule/save-comment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -104,7 +134,7 @@ function SchedulePageContent() {
     
     const loadComments = async () => {
       try {
-        const response = await fetch(`/api/schedule/get-comments?userId=${user.uid}`);
+        const response = await authedFetch(`/api/schedule/get-comments?userId=${user.uid}`);
         const data = await response.json();
         if (data.success && data.comments) {
           setComments(data.comments);
@@ -142,7 +172,7 @@ function SchedulePageContent() {
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`/api/schedule/delete?userId=${user.uid}`, {
+      const response = await authedFetch(`/api/schedule/delete?userId=${user.uid}`, {
         method: "DELETE",
       });
 
@@ -170,7 +200,7 @@ function SchedulePageContent() {
     if (!user?.uid) return;
 
     try {
-      const response = await fetch("/api/schedule/update-entry", {
+      const response = await authedFetch("/api/schedule/update-entry", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -207,7 +237,7 @@ function SchedulePageContent() {
     if (!user?.uid) return;
 
     try {
-      const response = await fetch(`/api/schedule/delete-entry?entryId=${entryId}&userId=${user.uid}`, {
+      const response = await authedFetch(`/api/schedule/delete-entry?entryId=${entryId}&userId=${user.uid}`, {
         method: "DELETE",
       });
 
@@ -278,6 +308,50 @@ function SchedulePageContent() {
             </div>
           </motion.div>
 
+          {/* Batch Selector - only when the timetable has batch-specific classes */}
+          {!isLoadingSchedule && timetableData.length > 0 && availableBatches.length > 0 && (
+            <motion.div
+              className="mb-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.05 }}
+            >
+              <div className="p-4 rounded-xl border border-[#22D3EE]/30 bg-[#22D3EE]/5">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div className="flex-shrink-0">
+                    <p className="text-sm font-semibold text-white">Your Batch</p>
+                    <p className="text-xs text-[#A1A1AA]">
+                      {selectedBatch
+                        ? "Showing your batch's classes only"
+                        : "Pick your batch to hide the other batch's classes"}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 sm:ml-auto">
+                    {availableBatches.map((b) => (
+                      <Button
+                        key={b}
+                        size="sm"
+                        variant={selectedBatch === b ? "default" : "outline"}
+                        onClick={() => handleBatchSelect(b)}
+                        disabled={isSavingBatch}
+                      >
+                        {b}
+                      </Button>
+                    ))}
+                    <Button
+                      size="sm"
+                      variant={selectedBatch === null ? "default" : "outline"}
+                      onClick={() => handleBatchSelect(null)}
+                      disabled={isSavingBatch}
+                    >
+                      Show all
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {/* Day Selector */}
           <motion.div
             className="mb-6 flex flex-wrap gap-2"
@@ -347,7 +421,7 @@ function SchedulePageContent() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
               >
-                <ScheduleChat timetable={timetableData} />
+                <ScheduleChat timetable={visibleEntries} />
               </motion.div>
             </div>
           )}

@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, MessageSquare, Calendar } from "lucide-react";
-import { academicEngine } from "@/lib/gemini/client";
+import { useAuth } from "@/lib/auth/context";
+import { getFriendlyAiError } from "@/lib/ai/client-gemini-guard";
 import { TimetableEntry } from "@/lib/data/timetable";
 
 interface Message {
@@ -20,6 +21,7 @@ interface ScheduleChatProps {
 }
 
 export function ScheduleChat({ timetable }: ScheduleChatProps) {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -65,15 +67,28 @@ export function ScheduleChat({ timetable }: ScheduleChatProps) {
     ]);
 
     try {
-      const response = await academicEngine.answerScheduleQuestion(input.trim(), timetable);
-      
+      const res = await fetch("/api/schedule/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: input.trim(),
+          timetable,
+          userId: user?.uid,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || getFriendlyAiError(data));
+      }
+
       setMessages((prev) =>
         prev
           .filter((msg) => msg.id !== loadingMessageId)
           .concat({
             id: Date.now().toString(),
             role: "assistant",
-            content: response,
+            content: data.answer,
           })
       );
     } catch (error: any) {
@@ -83,7 +98,7 @@ export function ScheduleChat({ timetable }: ScheduleChatProps) {
           .concat({
             id: Date.now().toString(),
             role: "assistant",
-            content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+            content: error.message || "Sorry, I couldn't answer that. Please try again.",
           })
       );
     } finally {

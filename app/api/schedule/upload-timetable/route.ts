@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { initializeAdmin } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 import { TimetableEntry } from "@/lib/data/timetable";
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+export const runtime = "nodejs";
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
-if (!GEMINI_API_KEY) {
-  throw new Error("NEXT_PUBLIC_GEMINI_API_KEY is not set");
-}
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 interface ExtractedScheduleEntry {
   day: string;
@@ -69,24 +70,45 @@ function normalizeDay(day: string): "Monday" | "Tuesday" | "Wednesday" | "Thursd
   return "Monday"; // Default
 }
 
+// Normalize batch labels: uppercase, strip spaces/punctuation. "k 1" -> "K1", "(K2)" -> "K2"
+function normalizeBatch(batch?: string): string | undefined {
+  if (!batch) return undefined;
+  const cleaned = batch.toUpperCase().replace(/[^A-Z0-9]/g, "").trim();
+  return cleaned || undefined;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { image, mimeType, userId } = await request.json();
+    const { image, mimeType, userId: bodyUserId, batch: requestedBatch } = await request.json();
 
-    if (!image || !userId) {
+    if (!image) {
       return NextResponse.json(
-        { error: "Missing required fields: image and userId" },
+        { error: "Missing required fields: image" },
         { status: 400 }
       );
     }
 
-    // Validate that it's an image file
-    if (!mimeType || !mimeType.startsWith("image/")) {
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, bodyUserId);
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "Only image files (JPG, PNG, WebP) are supported. Please upload an image of your timetable." },
+        { error: error.message || "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    // Accept images and PDFs (Gemini vision can read both)
+    const isImage = mimeType?.startsWith("image/");
+    const isPdf = mimeType === "application/pdf";
+    if (!mimeType || (!isImage && !isPdf)) {
+      return NextResponse.json(
+        { error: "Only image (JPG, PNG, WebP) or PDF files are supported. Please upload your timetable." },
         { status: 400 }
       );
     }
+
+    const userBatch = normalizeBatch(requestedBatch);
 
     // Initialize Gemini with fallback model strategy
     if (!GEMINI_API_KEY) {
@@ -96,171 +118,94 @@ export async function POST(request: NextRequest) {
       );
     }
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    
-    // Try models in order of preference (vision-capable models)
-    const modelsToTry = [
-      "gemini-2.5-flash",      // Primary - fastest, supports vision
-      "gemini-2.5-pro",        // Fallback - more capable
-      "gemini-2.0-flash",      // Fallback
-      "gemini-1.5-pro",        // Fallback
-      "gemini-1.5-flash",      // Fallback
-    ];
 
-    let model;
-    let lastError: any = null;
+    // gemini-2.0-flash is quota-limited on this key — use flash-latest / 2.5-pro as fallbacks
+    const MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro"];
 
-    for (const modelName of modelsToTry) {
-      try {
-        model = genAI.getGenerativeModel({ model: modelName });
-        // Test if model is accessible by checking if it exists
-        // We'll catch errors during actual generation
-        break;
-      } catch (error: any) {
-        console.warn(`Model ${modelName} initialization failed:`, error.message);
-        lastError = error;
-        continue;
-      }
-    }
+    const prompt = `Extract this college timetable into a JSON array. MPSTME/NMIMS style grid.
 
-    if (!model) {
-      throw new Error(`No available Gemini model found. Last error: ${lastError?.message || "Unknown error"}`);
-    }
+READ METHOD: Process ONE DAY AT A TIME (Mon→Sat), left-to-right through each time slot.
+- Use exact time labels from the grid header (24-hour: afternoon 1:00 = 13:00).
+- SPLIT CELLS: if a slot has K1/K2 halves with different subjects, output separate entries per batch.
+- Whole-division classes: batch = "".
+- Merged multi-hour cells = one entry spanning full time range.
+- Use the legend at bottom for full subject names and faculty names.
+- Include Saturday if present. Include BREAK/PROJECT DAY entries.
 
-    // Prepare the prompt
-    const prompt = `You are analyzing a college timetable image. Extract all schedule entries from this timetable and return them as a JSON array.
+Each entry fields: day, time, startTime, endTime, subject, subjectCode, faculty, facultyInitials, room, batch, type (lecture|lab|break|placement|elective).
 
-For each entry, extract:
-- day: Day of the week (Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)
-- time: Time range in format "HH:MM-HH:MM" (24-hour format)
-- startTime: Start time in format "HH:MM"
-- endTime: End time in format "HH:MM"
-- subject: Full subject name
-- subjectCode: Subject code/abbreviation (if available)
-- faculty: Professor/teacher name (if available)
-- facultyInitials: Faculty initials (if available)
-- room: Classroom/room number (if available)
-- batch: Batch number like K1, K2, etc. (if applicable)
-- type: Type of class - "lecture", "lab", "break", "placement", or "elective" (if identifiable)
+Return ONLY a JSON array, no markdown.`;
 
-Important:
-1. Extract ALL entries from the timetable, including breaks
-2. For breaks, set type to "break" and leave other fields empty
-3. Ensure times are in 24-hour format (HH:MM)
-4. If a subject appears multiple times on the same day, create separate entries
-5. If batch information is present (like K1/K2), include it
-6. Return ONLY valid JSON array, no markdown, no explanations
-
-Example format:
-[
-  {
-    "day": "Monday",
-    "time": "09:00-10:00",
-    "startTime": "09:00",
-    "endTime": "10:00",
-    "subject": "Digital Forensics",
-    "subjectCode": "DFIR",
-    "faculty": "Prof. John Doe",
-    "facultyInitials": "JDO",
-    "room": "CR-507",
-    "batch": "K1",
-    "type": "lecture"
-  }
-]`;
-
-    // Process image with Gemini Vision
-    const imagePart = {
+    const filePart = {
       inlineData: {
         data: image,
         mimeType: mimeType || "image/jpeg",
       },
     };
 
-    // Helper function to generate content with retry logic
-    const generateWithRetry = async (modelInstance: any, modelName: string, maxRetries: number = 3): Promise<string> => {
-      let lastError: any = null;
-      
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-          const result = await modelInstance.generateContent([prompt, imagePart]);
-          const response = await result.response;
-          const text = response.text();
-          if (text) {
-            return text;
-          }
-        } catch (error: any) {
-          lastError = error;
-          const isOverloaded = error.message?.includes("overloaded") || 
-                              error.message?.includes("503") ||
-                              error.status === 503;
-          
-          if (isOverloaded && attempt < maxRetries - 1) {
-            // Exponential backoff: wait 1s, 2s, 4s
-            const delay = Math.pow(2, attempt) * 1000;
-            console.log(`Model ${modelName} overloaded, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
-          }
-          
-          // If not overloaded or last retry, throw immediately
-          throw error;
-        }
-      }
-      
-      throw lastError || new Error("Max retries exceeded");
+    const isRetryable = (error: any) => {
+      const msg = error?.message || "";
+      return (
+        msg.includes("overloaded") ||
+        msg.includes("503") ||
+        msg.includes("429") ||
+        msg.includes("quota") ||
+        error?.status === 503 ||
+        error?.status === 429
+      );
     };
 
-    // Try to generate content, with fallback to other models if needed
-    let text: string = "";
-    let generationError: any = null;
-    
-    try {
-      text = await generateWithRetry(model, modelsToTry[0]);
-      console.log(`✅ Successfully used primary model: ${modelsToTry[0]}`);
-    } catch (error: any) {
-      // If the first model fails, try fallback models
-      const isOverloaded = error.message?.includes("overloaded") || 
-                          error.message?.includes("503") ||
-                          error.status === 503;
-      
-      console.warn(`Primary model failed:`, error.message);
-      generationError = error;
-      
-      // If overloaded, wait a bit before trying fallbacks
-      if (isOverloaded) {
-        console.log("Primary model overloaded, waiting before trying fallbacks...");
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-      
-      for (const modelName of modelsToTry.slice(1)) {
+    let lastGeminiError: any = null;
+
+    const tryGenerate = async (modelName: string, useJsonMode: boolean): Promise<string | null> => {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: useJsonMode
+          ? { responseMimeType: "application/json", temperature: 0.1 }
+          : { temperature: 0.1 },
+      });
+
+      for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          const fallbackModel = genAI.getGenerativeModel({ model: modelName });
-          text = await generateWithRetry(fallbackModel, modelName, 2); // Fewer retries for fallbacks
-          console.log(`✅ Successfully used fallback model: ${modelName}`);
-          generationError = null; // Clear error on success
-          break;
-        } catch (fallbackError: any) {
-          console.warn(`Fallback model ${modelName} failed:`, fallbackError.message);
-          generationError = fallbackError;
-          continue;
+          const result = await model.generateContent([prompt, filePart]);
+          const responseText = result.response.text()?.trim();
+          if (responseText) {
+            console.log(`[Timetable] Extracted using ${modelName} (json=${useJsonMode})`);
+            return responseText;
+          }
+          console.warn(`[Timetable] ${modelName} returned empty response`);
+        } catch (error: any) {
+          lastGeminiError = error;
+          console.warn(`[Timetable] ${modelName} attempt ${attempt + 1} failed:`, error.message);
+          if (isRetryable(error) && attempt === 0) {
+            await new Promise((r) => setTimeout(r, 2000));
+            continue;
+          }
+          return null;
         }
       }
-      
-      // If all models failed, provide user-friendly error message
-      if (!text && generationError) {
-        const isOverloadedError = generationError.message?.includes("overloaded") || 
-                                  generationError.message?.includes("503") ||
-                                  generationError.status === 503;
-        
-        if (isOverloadedError) {
-          throw new Error("The AI service is currently overloaded. Please wait a moment and try again. This usually resolves within a few seconds.");
-        }
-        
-        throw new Error(`Failed to process timetable image. ${generationError.message || "Please try again later."}`);
-      }
+      return null;
+    };
+
+    let text: string | null = null;
+
+    for (const modelName of MODELS) {
+      text = await tryGenerate(modelName, true);
+      if (text) break;
+      text = await tryGenerate(modelName, false);
+      if (text) break;
     }
-    
+
     if (!text) {
-      throw new Error("Failed to generate content from timetable image. Please try again.");
+      const reason = lastGeminiError?.message || "";
+      if (reason.includes("429") || reason.toLowerCase().includes("quota")) {
+        throw new Error(
+          "AI service is busy right now (rate limit). Please wait 30 seconds and try again."
+        );
+      }
+      throw new Error(
+        "Could not read your timetable. Make sure the photo is clear, well-lit, and shows the full grid including the time column and legend."
+      );
     }
 
     // Parse JSON from response (remove markdown code blocks if present)
@@ -292,10 +237,19 @@ Example format:
         faculty: entry.faculty || "",
         facultyInitials: entry.facultyInitials || "",
         room: entry.room || "",
-        batch: entry.batch as "K1" | "K2" | undefined,
+        batch: normalizeBatch(entry.batch),
         type: (isBreak ? "break" : entry.type) || "lecture",
       };
     });
+
+    // Collect the distinct batches found so the UI can offer a batch filter
+    const availableBatches = Array.from(
+      new Set(
+        normalizedEntries
+          .map((e) => e.batch)
+          .filter((b): b is string => !!b)
+      )
+    ).sort();
 
     // Sort entries by day, then by startTime to ensure chronological order
     normalizedEntries.sort((a, b) => {
@@ -327,20 +281,45 @@ Example format:
     const { FieldValue } = await import("firebase-admin/firestore");
     const savePromises = normalizedEntries.map((entry) => {
       const docRef = adminDb.collection("schedules").doc();
-      return docRef.set({
-        ...entry,
+      const { batch: entryBatch, ...entryRest } = entry;
+      const firestoreData: Record<string, unknown> = {
+        ...entryRest,
         userId,
         createdAt: FieldValue.serverTimestamp(),
         updatedAt: FieldValue.serverTimestamp(),
-      });
+      };
+      if (entryBatch) firestoreData.batch = entryBatch;
+      return docRef.set(firestoreData);
     });
 
     await Promise.all(savePromises);
+
+    // Persist the user's batch preference (only if it is one that actually exists,
+    // otherwise fall back to the first detected batch or leave unset)
+    let effectiveBatch = userBatch;
+    if (effectiveBatch && availableBatches.length > 0 && !availableBatches.includes(effectiveBatch)) {
+      effectiveBatch = undefined; // requested batch not found in this timetable
+    }
+
+    await adminDb
+      .collection("scheduleMeta")
+      .doc(userId)
+      .set(
+        {
+          userId,
+          batch: effectiveBatch || null,
+          availableBatches,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
 
     return NextResponse.json({
       success: true,
       entriesCount: normalizedEntries.length,
       entries: normalizedEntries,
+      availableBatches,
+      batch: effectiveBatch || null,
     });
   } catch (error: any) {
     console.error("Error processing timetable:", error);

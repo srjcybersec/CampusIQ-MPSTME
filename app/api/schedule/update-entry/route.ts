@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeAdmin } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 import { TimetableEntry } from "@/lib/data/timetable";
 
 export async function PUT(request: NextRequest) {
   try {
-    const { entryId, userId, entryData } = await request.json();
+    const { entryId, userId: bodyUserId, entryData } = await request.json();
 
-    if (!entryId || !userId) {
+    if (!entryId) {
       return NextResponse.json(
-        { error: "Missing required fields: entryId and userId" },
+        { error: "Missing required fields: entryId" },
         { status: 400 }
+      );
+    }
+
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, bodyUserId);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 

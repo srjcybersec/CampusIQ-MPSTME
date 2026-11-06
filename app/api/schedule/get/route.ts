@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeAdmin } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 import { TimetableEntry } from "@/lib/data/timetable";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get("userId");
 
-    if (!userId) {
+    // Use the verified token uid so a user can only read their own schedule.
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, searchParams.get("userId"));
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "Missing userId parameter" },
-        { status: 400 }
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 
@@ -52,9 +56,32 @@ export async function GET(request: NextRequest) {
       return a.startTime.localeCompare(b.startTime);
     });
 
+    // Load batch preference / available batches
+    let batch: string | null = null;
+    let availableBatches: string[] = [];
+    try {
+      const metaDoc = await adminDb.collection("scheduleMeta").doc(userId).get();
+      if (metaDoc.exists) {
+        const meta = metaDoc.data() || {};
+        batch = meta.batch ?? null;
+        availableBatches = Array.isArray(meta.availableBatches) ? meta.availableBatches : [];
+      }
+    } catch (metaError) {
+      console.warn("Could not load schedule meta:", metaError);
+    }
+
+    // Fallback: derive available batches from the entries if meta is missing
+    if (availableBatches.length === 0) {
+      availableBatches = Array.from(
+        new Set(entries.map((e) => e.batch).filter((b): b is string => !!b))
+      ).sort();
+    }
+
     return NextResponse.json({
       success: true,
       entries,
+      batch,
+      availableBatches,
     });
   } catch (error: any) {
     console.error("Error fetching schedule:", error);

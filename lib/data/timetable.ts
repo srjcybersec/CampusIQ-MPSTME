@@ -17,7 +17,7 @@ export interface TimetableEntry {
   faculty: string;
   facultyInitials: string;
   room: string;
-  batch?: "K1" | "K2"; // Batch designation for parallel classes
+  batch?: string; // Batch designation for parallel classes (e.g. K1, K2, K3, A1)
   type?: "lecture" | "lab" | "break" | "placement" | "elective";
 }
 

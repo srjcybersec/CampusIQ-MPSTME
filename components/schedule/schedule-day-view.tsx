@@ -212,7 +212,7 @@ export function ScheduleDayView({ entries, day, date, comments, onCommentChange,
                               <label className="text-xs text-[#D4D4D8] mb-1 block">Batch</label>
                               <Input
                                 value={editFormData.batch || ""}
-                                onChange={(e) => setEditFormData({ ...editFormData, batch: e.target.value as "K1" | "K2" })}
+                                onChange={(e) => setEditFormData({ ...editFormData, batch: e.target.value })}
                                 className="bg-[#161616] border-[#222222] text-white"
                                 placeholder="K1, K2, etc."
                               />

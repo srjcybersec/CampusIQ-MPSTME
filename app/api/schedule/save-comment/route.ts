@@ -1,25 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeAdmin } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, entryId, comment } = await request.json();
+    const { userId: bodyUserId, entryId, comment } = await request.json();
 
-    if (!userId || !entryId) {
+    if (!entryId) {
       return NextResponse.json(
-        { error: "Missing required fields: userId and entryId" },
+        { error: "Missing required fields: entryId" },
         { status: 400 }
+      );
+    }
+
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, bodyUserId);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 
     // Initialize Firebase Admin
     const { db: adminDb } = await initializeAdmin();
 
-    // Save comment to schedule entry
+    // Only let a user comment on their OWN schedule entry.
     const scheduleRef = adminDb.collection("schedules").doc(entryId);
+    const entryDoc = await scheduleRef.get();
+    if (!entryDoc.exists) {
+      return NextResponse.json({ error: "Entry not found" }, { status: 404 });
+    }
+    if (entryDoc.data()?.userId !== userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { FieldValue } = await import("firebase-admin/firestore");
     await scheduleRef.update({
-      comment: comment || "",
+      comment: typeof comment === "string" ? comment : "",
       updatedAt: FieldValue.serverTimestamp(),
     });
 

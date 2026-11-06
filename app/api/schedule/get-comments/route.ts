@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeAdmin } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get("userId");
 
-    if (!userId) {
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, searchParams.get("userId"));
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "Missing userId parameter" },
-        { status: 400 }
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 
