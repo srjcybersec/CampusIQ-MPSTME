@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 export async function GET(
   request: NextRequest,
@@ -15,6 +16,17 @@ export async function GET(
       );
     }
 
+    // Require a valid token — orders contain personal data (items, UPI id).
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const adminDb = await getAdminDb();
     const orderDoc = await adminDb.collection("canteenOrders").doc(orderId).get();
 
@@ -25,8 +37,15 @@ export async function GET(
       );
     }
 
+    const data = orderDoc.data()!;
+
+    // Ownership check — prevents reading someone else's order by guessing its id
+    if (data.userId !== userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     return NextResponse.json(
-      { id: orderDoc.id, ...orderDoc.data() },
+      { id: orderDoc.id, ...data },
       { status: 200 }
     );
   } catch (error) {

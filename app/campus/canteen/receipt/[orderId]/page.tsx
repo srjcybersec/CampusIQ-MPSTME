@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 import { Download, ArrowLeft, Printer, Receipt } from "lucide-react";
 import { motion } from "framer-motion";
 import jsPDF from "jspdf";
@@ -22,7 +23,7 @@ function ReceiptPageContent() {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await fetch(`/api/canteen/orders/${orderId}`);
+        const response = await authedFetch(`/api/canteen/orders/${orderId}`);
         if (response.ok) {
           const data = await response.json();
           setOrderData(data);
@@ -34,10 +35,10 @@ function ReceiptPageContent() {
       }
     };
 
-    if (orderId) {
+    if (orderId && user) {
       fetchOrder();
     }
-  }, [orderId]);
+  }, [orderId, user]);
 
   const downloadReceipt = () => {
     if (!orderData) return;

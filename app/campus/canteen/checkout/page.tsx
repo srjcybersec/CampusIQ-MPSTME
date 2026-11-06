@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/lib/hooks/use-cart";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 import { Minus, Plus, X, CreditCard, ArrowLeft, Receipt } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -59,9 +60,8 @@ function CheckoutPageContent() {
         createdAt: new Date().toISOString(),
       };
 
-      const orderResponse = await fetch("/api/canteen/orders/create", {
+      const orderResponse = await authedFetch("/api/canteen/orders/create", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       });
 
@@ -72,14 +72,11 @@ function CheckoutPageContent() {
       const { orderId } = await orderResponse.json();
 
       // Create Razorpay order
-      const paymentResponse = await fetch("/api/canteen/payment/create-order", {
+      const paymentResponse = await authedFetch("/api/canteen/payment/create-order", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId,
-          amount: total,
           userId: user?.uid,
-          items: items,
           upiId: upiId.trim(),
         }),
       });
@@ -110,9 +107,8 @@ function CheckoutPageContent() {
         },
         handler: async function (response: any) {
           // Verify payment on server
-          const verifyResponse = await fetch("/api/canteen/payment/verify", {
+          const verifyResponse = await authedFetch("/api/canteen/payment/verify", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,

@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 import { ArrowLeft, Receipt, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -35,7 +36,7 @@ function OrdersPageContent() {
       if (!user?.uid) return;
 
       try {
-        const response = await fetch(`/api/canteen/orders?userId=${user.uid}`);
+        const response = await authedFetch(`/api/canteen/orders?userId=${user.uid}`);
         if (response.ok) {
           const data = await response.json();
           console.log("Fetched orders:", data); // Debug log
