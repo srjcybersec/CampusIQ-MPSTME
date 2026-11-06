@@ -1,7 +1,13 @@
 {
-  "name": "gdg-hackathon-mvp",
-  "version": "0.1.0",
+  "name": "campusiq-mpstme",
+  "version": "1.0.0",
   "private": true,
+  "description": "CampusIQ: the AI-powered operating system for MPSTME students",
+  "homepage": "https://www.campusiqmpstme.space/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/srjcybersec/CampusIQ-MPSTME.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

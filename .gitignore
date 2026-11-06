@@ -45,4 +45,6 @@ firebase-debug.log
 firestore-debug.log
 
 # PYQ zip files (too large for git)
-PYQs/
+/PYQs/
+.env*
+!.env.example
