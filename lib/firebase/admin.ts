@@ -53,6 +53,7 @@ export async function initializeAdmin(): Promise<{ db: Firestore; storage: Stora
     }
 
     adminDb = getFirestore(adminApp);
+    adminDb.settings({ ignoreUndefinedProperties: true });
     adminStorage = getStorage(adminApp);
     adminAuth = getAuth(adminApp);
     

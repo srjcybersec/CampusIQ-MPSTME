@@ -153,7 +153,7 @@ async function getStudentResourceBookText(): Promise<string> {
   }
 }
 
-import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
+import { applyGeminiRateLimits, geminiApiErrorResponse } from "@/lib/ai/gemini-rate-limit";
 
 /**
  * POST /api/student-resource-book/ask
@@ -161,11 +161,10 @@ import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
  */
 export async function POST(request: NextRequest) {
   try {
-    // Apply rate limiting for Gemini API calls
-    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.GEMINI);
-    if (rateLimitResponse) return rateLimitResponse;
+    const { question, conversationHistory, userId } = await request.json();
 
-    const { question, conversationHistory } = await request.json();
+    const rateLimitResponse = applyGeminiRateLimits(request, userId);
+    if (rateLimitResponse) return rateLimitResponse;
 
     if (!question) {
       return NextResponse.json(
@@ -279,9 +278,6 @@ Please provide a helpful answer based on the Student Resource Book:`;
     });
   } catch (error: any) {
     console.error("Error answering Student Resource Book question:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to answer question" },
-      { status: 500 }
-    );
+    return geminiApiErrorResponse(error);
   }
 }

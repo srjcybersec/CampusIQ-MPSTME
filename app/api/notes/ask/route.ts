@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { academicEngine } from "@/lib/gemini/client";
+import { applyGeminiRateLimits, geminiApiErrorResponse } from "@/lib/ai/gemini-rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
-    const { question, fileContent, fileName, title, summary, keyTopics, conversationHistory } = await request.json();
+    const { question, fileContent, fileName, title, summary, keyTopics, conversationHistory, userId } =
+      await request.json();
 
     if (!question) {
       return NextResponse.json(
@@ -11,6 +13,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const rateLimitResponse = applyGeminiRateLimits(request, userId);
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Build context for the question
     let context = "";
@@ -66,9 +71,6 @@ Provide your answer:`;
     });
   } catch (error: any) {
     console.error("Error answering question:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to answer question" },
-      { status: 500 }
-    );
+    return geminiApiErrorResponse(error);
   }
 }

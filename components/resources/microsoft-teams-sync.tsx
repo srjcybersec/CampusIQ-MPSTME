@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2, XCircle, Loader2, RefreshCw } from "lucide-react";
 import { saveMicrosoftTokens } from "@/lib/firebase/assignments";
 import { Timestamp } from "firebase/firestore";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 
 interface MicrosoftTeamsSyncProps {
   isConnected: boolean;
@@ -102,7 +103,7 @@ export function MicrosoftTeamsSync({
     setSyncStatus(null);
 
     try {
-      const response = await fetch("/api/assignments/sync", {
+      const response = await authedFetch("/api/assignments/sync", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

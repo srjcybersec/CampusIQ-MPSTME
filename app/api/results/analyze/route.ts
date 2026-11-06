@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { extractTextFromStoragePDF } from "@/lib/utils/pdf-ocr";
+import { getStorage } from "firebase-admin/storage";
+import { applyGeminiRateLimits, geminiApiErrorResponse } from "@/lib/ai/gemini-rate-limit";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
-let adminDb: any = null;
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
+let adminDb: ReturnType<typeof getFirestore> | null = null;
 
 function initializeAdmin() {
   if (adminDb) return;
@@ -19,19 +24,13 @@ function initializeAdmin() {
         let formattedPrivateKey = privateKey;
         try {
           const parsed = JSON.parse(privateKey);
-          if (typeof parsed === "string") {
-            formattedPrivateKey = parsed;
-          }
+          if (typeof parsed === "string") formattedPrivateKey = parsed;
         } catch {}
         formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, "\n");
         formattedPrivateKey = formattedPrivateKey.replace(/\\\\n/g, "\n");
 
         initializeApp({
-          credential: cert({
-            projectId,
-            clientEmail,
-            privateKey: formattedPrivateKey,
-          }),
+          credential: cert({ projectId, clientEmail, privateKey: formattedPrivateKey }),
           storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
         });
       }
@@ -42,59 +41,118 @@ function initializeAdmin() {
   }
 }
 
-// Cache for PDF text
-let cachedPdfText: Record<string, { text: string; time: number }> = {};
-const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
+async function downloadResultPdf(storagePath: string): Promise<Buffer> {
+  const storage = getStorage();
+  const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.replace(/^gs:\/\//, "") || "";
+  if (!bucketName) throw new Error("Firebase Storage bucket not configured");
 
-async function getResultText(resultId: string): Promise<string> {
-  initializeAdmin();
-  if (!adminDb) {
-    throw new Error("Database not configured");
-  }
+  const [buffer] = await storage.bucket(bucketName).file(storagePath).download();
+  return Buffer.from(buffer);
+}
 
-  // Check cache
-  const cached = cachedPdfText[resultId];
-  if (cached && Date.now() - cached.time < CACHE_DURATION) {
-    return cached.text;
-  }
+const MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.0-flash",
+  "gemini-flash-latest",
+  "gemini-pro-latest",
+];
 
-  const resultDoc = await adminDb.collection("results").doc(resultId).get();
-  if (!resultDoc.exists) {
-    throw new Error("Result not found");
-  }
+function buildPrompt(
+  resultData: { semester?: string; fileName?: string },
+  question: string,
+  conversationHistory?: Array<{ role: string; content: string }>,
+  pdfText?: string
+): string {
+  let prompt = `You are an AI assistant helping a student analyze their academic results/marksheet.
 
-  const resultData = resultDoc.data();
-  let pdfText = "";
+STUDENT'S RESULT INFORMATION:
+- Semester: ${resultData.semester || "Unknown"}
+- File Name: ${resultData.fileName || "Unknown"}`;
 
-  // Try to use extracted text from Firestore first
-  if (resultData.extractedText && resultData.extractedText.length > 100) {
-    pdfText = resultData.extractedText;
-    console.log(`Using cached extracted text: ${pdfText.length} characters`);
+  if (pdfText) {
+    const maxLen = 150000;
+    prompt += `\n\nRESULT PDF TEXT (${pdfText.length} characters):\n${pdfText.substring(0, maxLen)}${pdfText.length > maxLen ? "\n\n[Content truncated...]" : ""}`;
   } else {
-    // Extract from PDF if not available
+    prompt += `\n\nThe student's marksheet PDF is attached. Read it carefully to answer questions.`;
+  }
+
+  if (conversationHistory?.length) {
+    prompt += `\n\nPREVIOUS CONVERSATION:\n${conversationHistory.map((msg) =>
+      `${msg.role === "user" ? "Student" : "Assistant"}: ${msg.content}`
+    ).join("\n")}`;
+  }
+
+  prompt += `\n\nSTUDENT'S QUESTION: ${question}
+
+INSTRUCTIONS:
+1. Answer based on the marksheet content (text or attached PDF).
+2. For CGPA questions, calculate from actual grades and credits shown.
+3. Be specific with actionable insights.
+4. Use conversation history for follow-up context.
+5. Do NOT use markdown formatting. Plain text only.
+
+Please provide a helpful answer:`;
+
+  return prompt;
+}
+
+async function askGeminiText(prompt: string): Promise<string> {
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  if (!apiKey) throw new Error("Gemini API key is missing");
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  let lastError: Error | null = null;
+
+  for (const modelName of MODELS) {
     try {
-      pdfText = await extractTextFromStoragePDF(resultData.storagePath);
-      console.log(`Extracted text from PDF: ${pdfText.length} characters`);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const answer = result.response.text();
+      if (answer?.trim()) return answer;
+      throw new Error("Empty response from Gemini API");
     } catch (error: any) {
-      throw new Error(`Failed to extract text from PDF: ${error.message}`);
+      lastError = error;
+      console.warn(`Model ${modelName} failed:`, error.message);
     }
   }
 
-  // Cache the result
-  cachedPdfText[resultId] = { text: pdfText, time: Date.now() };
-
-  return pdfText;
+  throw new Error(`Failed to get answer: ${lastError?.message || "All models failed"}`);
 }
 
-import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
+async function askGeminiVision(prompt: string, pdfBuffer: Buffer): Promise<string> {
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  if (!apiKey) throw new Error("Gemini API key is missing");
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const pdfPart = {
+    inlineData: {
+      data: pdfBuffer.toString("base64"),
+      mimeType: "application/pdf",
+    },
+  };
+
+  let lastError: Error | null = null;
+
+  for (const modelName of MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent([prompt, pdfPart]);
+      const answer = result.response.text();
+      if (answer?.trim()) return answer;
+      throw new Error("Empty response from Gemini API");
+    } catch (error: any) {
+      lastError = error;
+      console.warn(`Vision model ${modelName} failed:`, error.message);
+    }
+  }
+
+  throw new Error(`Failed to get answer: ${lastError?.message || "All models failed"}`);
+}
 
 export async function POST(request: NextRequest) {
   try {
-    // Apply rate limiting for Gemini API calls
-    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.GEMINI);
-    if (rateLimitResponse) return rateLimitResponse;
-
-    const { resultId, question, conversationHistory } = await request.json();
+    const { resultId, question, conversationHistory, userId: bodyUserId } = await request.json();
 
     if (!resultId || !question) {
       return NextResponse.json(
@@ -103,10 +161,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get result data and PDF text
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, bodyUserId);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const rateLimitResponse = applyGeminiRateLimits(request, userId);
+    if (rateLimitResponse) return rateLimitResponse;
+
     initializeAdmin();
     if (!adminDb) {
-      throw new Error("Database not configured");
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
     }
 
     const resultDoc = await adminDb.collection("results").doc(resultId).get();
@@ -114,111 +184,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Result not found" }, { status: 404 });
     }
 
-    const resultData = resultDoc.data();
-    let pdfText: string;
+    const resultData = resultDoc.data()!;
 
-    try {
-      pdfText = await getResultText(resultId);
-    } catch (error: any) {
-      return NextResponse.json(
-        { error: `Failed to load result: ${error.message}` },
-        { status: 500 }
-      );
+    // Only the owner can analyze their marksheet.
+    if (resultData.userId !== userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    const extractedText = (resultData.extractedText as string) || "";
 
-    if (!pdfText || pdfText.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Could not extract text from result PDF" },
-        { status: 500 }
-      );
-    }
+    let answer: string;
 
-    // Build context
-    const maxContextLength = 150000;
-    let context = `You are an AI assistant helping a student analyze their academic results.
-
-STUDENT'S RESULT INFORMATION:
-- Semester: ${resultData.semester}
-- File Name: ${resultData.fileName}
-
-RESULT PDF CONTENT (${pdfText.length} characters extracted):
-${pdfText.substring(0, maxContextLength)}${pdfText.length > maxContextLength ? "\n\n[Content truncated for length...]" : ""}`;
-
-    // Include conversation history
-    let historyContext = "";
-    if (conversationHistory && conversationHistory.length > 0) {
-      historyContext = `\n\nPREVIOUS CONVERSATION:\n${conversationHistory.map((msg: any) => 
-        `${msg.role === "user" ? "Student" : "Assistant"}: ${msg.content}`
-      ).join("\n")}\n\n`;
-    }
-
-    const prompt = `${context}
-
-${historyContext}
-
-STUDENT'S QUESTION: ${question}
-
-INSTRUCTIONS:
-1. Answer the question based on the result PDF content provided above.
-2. For CGPA-related questions (e.g., "how much do I need to score to get CGPA 3.6"), calculate based on:
-   - Current grades and credits from the PDF
-   - Required CGPA target
-   - Number of remaining credits
-   - Provide specific grade/score requirements
-3. For grade analysis, explain performance, trends, strengths, and areas for improvement.
-4. Be specific and provide actionable insights.
-5. Use the conversation history to maintain context for follow-up questions.
-6. IMPORTANT: Do NOT use markdown formatting (no asterisks, underscores, or markdown symbols). Use plain text only.
-
-Please provide a helpful answer based on the result PDF:`;
-
-    // Get answer from Gemini
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("Gemini API key is missing");
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const modelsToTry = [
-      "gemini-2.5-flash",
-      "gemini-2.5-pro",
-      "gemini-2.0-flash",
-      "gemini-flash-latest",
-      "gemini-pro-latest",
-    ];
-
-    let lastError: any = null;
-    let answer = "";
-
-    for (const modelName of modelsToTry) {
-      try {
-        const model = genAI.getGenerativeModel({ model: modelName });
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        answer = response.text();
-        
-        if (!answer || answer.trim().length === 0) {
-          throw new Error("Empty response from Gemini API");
-        }
-        
-        break;
-      } catch (error: any) {
-        lastError = error;
-        console.warn(`Model ${modelName} failed:`, error.message);
-        continue;
+    // Prefer cached text when available (fast path, works locally and on Vercel).
+    if (extractedText.trim().length > 100) {
+      const prompt = buildPrompt(resultData, question, conversationHistory, extractedText);
+      answer = await askGeminiText(prompt);
+    } else {
+      // Vercel-safe fallback: send the PDF directly to Gemini Vision.
+      // Local pdf-parse / canvas / tesseract do not work reliably on serverless.
+      if (!resultData.storagePath) {
+        return NextResponse.json(
+          { error: "Result PDF path not found. Please re-upload your marksheet." },
+          { status: 404 }
+        );
       }
-    }
 
-    if (!answer) {
-      throw new Error(`Failed to get answer: ${lastError?.message || "All models failed"}`);
+      const pdfBuffer = await downloadResultPdf(resultData.storagePath as string);
+      const prompt = buildPrompt(resultData, question, conversationHistory);
+      answer = await askGeminiVision(prompt, pdfBuffer);
     }
 
     return NextResponse.json({ success: true, answer });
   } catch (error: any) {
     console.error("Error analyzing result:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to analyze result" },
-      { status: 500 }
-    );
+    return geminiApiErrorResponse(error);
   }
 }

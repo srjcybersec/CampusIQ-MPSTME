@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPendingReminders, markReminderSent, getAssignment } from "@/lib/firebase/assignments";
 import { getReminderPreferences } from "@/lib/firebase/assignments";
 import { ReminderConfig } from "@/lib/types/assignments";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 /**
  * POST /api/assignments/reminders/process
@@ -10,12 +11,15 @@ import { ReminderConfig } from "@/lib/types/assignments";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json();
+    const { userId: bodyUserId } = await request.json();
 
-    if (!userId) {
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, bodyUserId);
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 

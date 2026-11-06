@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 // Lazy initialization of Firebase Admin
 let adminDb: Firestore | null = null;
@@ -47,7 +48,16 @@ function getAdminDb(): Firestore | null {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get("userId") || "default-user";
+
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, searchParams.get("userId"));
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
+      );
+    }
 
     const db = getAdminDb();
     if (!db) {

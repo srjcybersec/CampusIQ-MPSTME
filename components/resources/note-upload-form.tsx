@@ -13,6 +13,8 @@ import {
 } from "@/lib/types/notes";
 import { uploadNote } from "@/lib/firebase/notes";
 import { getUserProfile } from "@/lib/firebase/user-profile";
+import { parseAiApiError } from "@/lib/ai/client-gemini-guard";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 
 const SUBJECTS: Subject[] = [
   "Mathematics",
@@ -101,7 +103,7 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
       formData.append("file", file);
       formData.append("userId", user.uid);
 
-      const uploadResponse = await fetch("/api/notes/upload", {
+      const uploadResponse = await authedFetch("/api/notes/upload", {
         method: "POST",
         body: formData,
       });
@@ -136,10 +138,14 @@ export function NoteUploadForm({ onSuccess }: NoteUploadFormProps) {
               title,
               description: description || "",
               fileContent: fileContent, // Use extracted text from the file
+              userId: user.uid,
             }),
           });
 
-          if (summaryResponse.ok) {
+          if (!summaryResponse.ok) {
+            const errMsg = await parseAiApiError(summaryResponse);
+            console.warn("AI summarization skipped:", errMsg);
+          } else {
             const summaryData = await summaryResponse.json();
             aiSummary = summaryData.summary || "";
             keyTopics = Array.isArray(summaryData.keyTopics) ? summaryData.keyTopics : [];

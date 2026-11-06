@@ -69,6 +69,7 @@ try {
 }
 
 import { applyRateLimit, RATE_LIMITS } from "@/lib/middleware/rate-limit";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -85,7 +86,16 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const userId = formData.get("userId") as string;
+
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, formData.get("userId") as string | null);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
+      );
+    }
 
     if (!file) {
       return NextResponse.json(

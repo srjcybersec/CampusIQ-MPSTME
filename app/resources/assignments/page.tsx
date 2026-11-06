@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 import { AssignmentDashboard } from "@/components/resources/assignment-dashboard";
 import { MicrosoftTeamsSync } from "@/components/resources/microsoft-teams-sync";
 
@@ -23,7 +24,7 @@ function AssignmentsPageContent() {
     // Check if Microsoft account is connected
     const checkConnection = async () => {
       try {
-        const response = await fetch(`/api/assignments/check-connection?userId=${user.uid}`);
+        const response = await authedFetch(`/api/assignments/check-connection?userId=${user.uid}`);
         const data = await response.json();
         setIsConnected(data.connected || false);
       } catch (error) {

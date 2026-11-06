@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { academicEngine } from "@/lib/gemini/client";
+import { applyGeminiRateLimits, geminiApiErrorResponse } from "@/lib/ai/gemini-rate-limit";
 
 /**
  * POST /api/academics/examination-policy/ask
@@ -7,7 +8,7 @@ import { academicEngine } from "@/lib/gemini/client";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { question, conversationHistory } = await request.json();
+    const { question, conversationHistory, userId } = await request.json();
 
     if (!question) {
       return NextResponse.json(
@@ -15,6 +16,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const rateLimitResponse = applyGeminiRateLimits(request, userId);
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Phase 4: Enhance question with conversation history for context
     let enhancedQuestion = question;
@@ -35,9 +39,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error answering Examination Policy question:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to answer question" },
-      { status: 500 }
-    );
+    return geminiApiErrorResponse(error);
   }
 }

@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, MessageSquare, AlertCircle, BookOpen } from "lucide-react";
+import { useAuth } from "@/lib/auth/context";
+import { getFriendlyAiError } from "@/lib/ai/client-gemini-guard";
 
 interface Message {
   id: string;
@@ -14,6 +16,7 @@ interface Message {
 }
 
 export function StudentResourceBookChat() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -76,13 +79,14 @@ export function StudentResourceBookChat() {
         body: JSON.stringify({
           question: userMessage.content,
           conversationHistory,
+          userId: user?.uid,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to get answer");
+        throw new Error(data.message || getFriendlyAiError(data));
       }
 
       // Remove loading message and add response
@@ -103,7 +107,7 @@ export function StudentResourceBookChat() {
           .concat({
             id: Date.now().toString(),
             role: "assistant",
-            content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+            content: error.message || "Sorry, I couldn't answer that. Please try again.",
           })
       );
     } finally {

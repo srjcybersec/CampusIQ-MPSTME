@@ -3,6 +3,7 @@ import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
 import { getFirestore } from "firebase-admin/firestore";
 import { extractTextFromFile } from "@/lib/utils/text-extraction";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 let adminStorage: any = null;
 let adminDb: any = null;
@@ -56,14 +57,20 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const userId = formData.get("userId") as string;
     const semester = formData.get("semester") as string;
+
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, formData.get("userId") as string | null);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
+      );
+    }
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
-    }
-    if (!userId) {
-      return NextResponse.json({ error: "User ID required" }, { status: 400 });
     }
     if (!semester) {
       return NextResponse.json({ error: "Semester required" }, { status: 400 });

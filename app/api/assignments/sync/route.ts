@@ -10,6 +10,7 @@ import {
 import { saveCourse, saveAssignment, updateAssignmentStatus } from "@/lib/firebase/assignments";
 import { Timestamp } from "firebase/firestore";
 import { AssignmentStatus } from "@/lib/types/assignments";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 /**
  * POST /api/assignments/sync
@@ -17,12 +18,15 @@ import { AssignmentStatus } from "@/lib/types/assignments";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json();
+    const { userId: bodyUserId } = await request.json();
 
-    if (!userId) {
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, bodyUserId);
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 

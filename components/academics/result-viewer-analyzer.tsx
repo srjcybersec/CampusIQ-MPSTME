@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, FileText, Upload, X, MessageSquare, GraduationCap } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
+import { getFriendlyAiError } from "@/lib/ai/client-gemini-guard";
 
 interface Message {
   id: string;
@@ -50,7 +52,7 @@ export function ResultViewerAnalyzer() {
     if (!user) return;
     setIsLoadingResults(true);
     try {
-      const response = await fetch(`/api/results?userId=${user.uid}`);
+      const response = await authedFetch(`/api/results?userId=${user.uid}`);
       const data = await response.json();
       if (data.success) {
         setResults(data.results || []);
@@ -93,7 +95,7 @@ export function ResultViewerAnalyzer() {
       formData.append("semester", uploadSemester);
       formData.append("userId", user.uid);
 
-      const response = await fetch("/api/results/upload", {
+      const response = await authedFetch("/api/results/upload", {
         method: "POST",
         body: formData,
       });
@@ -134,7 +136,7 @@ export function ResultViewerAnalyzer() {
     if (!confirm("Are you sure you want to delete this result?")) return;
 
     try {
-      const response = await fetch("/api/results/delete", {
+      const response = await authedFetch("/api/results/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ resultId }),
@@ -186,20 +188,21 @@ export function ResultViewerAnalyzer() {
           content: msg.content,
         }));
 
-      const response = await fetch("/api/results/analyze", {
+      const response = await authedFetch("/api/results/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           resultId: selectedResult.id,
           question: userMessage.content,
           conversationHistory,
+          userId: user?.uid,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to get answer");
+        throw new Error(data.message || getFriendlyAiError(data));
       }
 
       setMessages((prev) =>
@@ -218,7 +221,7 @@ export function ResultViewerAnalyzer() {
           .concat({
             id: Date.now().toString(),
             role: "assistant",
-            content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+            content: error.message || "Sorry, I couldn't analyze that result. Please try again.",
           })
       );
       setError(error.message);

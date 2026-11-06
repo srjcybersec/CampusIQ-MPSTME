@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { academicEngine } from "@/lib/gemini/client";
+import { applyGeminiRateLimits, geminiApiErrorResponse } from "@/lib/ai/gemini-rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
-    const { fileContent, fileName, title, description } = await request.json();
+    const { fileContent, fileName, title, description, userId } = await request.json();
 
     if (!fileContent && !title && !description) {
       return NextResponse.json(
@@ -11,6 +12,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const rateLimitResponse = applyGeminiRateLimits(request, userId);
+    if (rateLimitResponse) return rateLimitResponse;
 
     // Build prompt for summarization based on available information
     const contentToUse = fileContent && fileContent.trim().length > 0
@@ -89,9 +93,6 @@ Format your response as JSON:
     });
   } catch (error: any) {
     console.error("Error summarizing note:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to summarize note" },
-      { status: 500 }
-    );
+    return geminiApiErrorResponse(error);
   }
 }

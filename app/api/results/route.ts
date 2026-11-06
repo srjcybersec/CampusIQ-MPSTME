@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 let adminDb: any = null;
 
@@ -49,14 +50,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get userId from query params or from auth header
+    // Results are private academic records. The user is taken from the verified
+    // ID token, NOT the query string, so nobody can read another student's
+    // grades by passing ?userId=<someone-else>.
     const { searchParams } = new URL(request.url);
-    let userId = searchParams.get("userId");
-
-    // If no userId in query, try to get from auth header (for future use)
-    // For now, we'll require it in query params
-    if (!userId) {
-      return NextResponse.json({ error: "User ID required" }, { status: 400 });
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, searchParams.get("userId"));
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
+      );
     }
 
     // Fetch results without orderBy to avoid composite index requirement

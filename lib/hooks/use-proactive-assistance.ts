@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 import { TimetableEntry } from "@/lib/data/timetable";
 
 export interface ProactiveAlert {
@@ -70,7 +71,7 @@ export function useProactiveAssistance() {
 
     try {
       // Fetch attendance data
-      const response = await fetch(`/api/schedule/get?userId=${user.uid}`);
+      const response = await authedFetch(`/api/schedule/get?userId=${user.uid}`);
       const data = await response.json();
       
       if (!data.success || !data.entries || data.entries.length === 0) {
@@ -120,7 +121,7 @@ export function useProactiveAssistance() {
     setIsChecking(true);
     try {
       // Fetch timetable
-      const scheduleResponse = await fetch(`/api/schedule/get?userId=${user.uid}`);
+      const scheduleResponse = await authedFetch(`/api/schedule/get?userId=${user.uid}`);
       const scheduleData = await scheduleResponse.json();
 
       const allAlerts: ProactiveAlert[] = [];

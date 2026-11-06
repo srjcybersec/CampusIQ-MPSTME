@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMicrosoftTokens } from "@/lib/firebase/assignments";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 /**
  * GET /api/assignments/check-connection
@@ -8,12 +9,14 @@ import { getMicrosoftTokens } from "@/lib/firebase/assignments";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get("userId");
 
-    if (!userId) {
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, searchParams.get("userId"));
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 

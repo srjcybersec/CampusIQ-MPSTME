@@ -24,8 +24,8 @@ export interface RateLimitConfig {
  * Default rate limits for different endpoint types
  */
 export const RATE_LIMITS = {
-  // Gemini API calls - expensive, limit heavily
-  GEMINI: { maxRequests: 10, windowMs: 60 * 1000 }, // 10 requests per minute
+  // Gemini API calls — see lib/ai/gemini-rate-limit.ts for shared AI limits
+  GEMINI: { maxRequests: 4, windowMs: 60 * 1000 },
   
   // File uploads
   UPLOAD: { maxRequests: 5, windowMs: 60 * 1000 }, // 5 uploads per minute

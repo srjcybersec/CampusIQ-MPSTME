@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 let adminDb: any = null;
 let adminStorage: any = null;
@@ -53,9 +54,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { resultId } = await request.json();
+    const { resultId, userId: bodyUserId } = await request.json();
     if (!resultId) {
       return NextResponse.json({ error: "Result ID required" }, { status: 400 });
+    }
+
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, bodyUserId);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
+      );
     }
 
     const resultDoc = await adminDb.collection("results").doc(resultId).get();
@@ -64,6 +75,12 @@ export async function POST(request: NextRequest) {
     }
 
     const resultData = resultDoc.data();
+
+    // Only the owner can delete their result.
+    if (resultData.userId !== userId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const storagePath = resultData.storagePath;
 
     // Delete from Storage

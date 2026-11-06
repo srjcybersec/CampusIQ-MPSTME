@@ -98,24 +98,15 @@ export async function getAuthenticatedUserId(
   request: NextRequest,
   userIdFromRequest?: string | null
 ): Promise<string> {
-  // First, try to get userId from Authorization header
-  try {
-    const authUserId = await verifyAuthToken(request);
-    
-    // If userId was provided in request, verify it matches
-    if (userIdFromRequest) {
-      verifyUserIdMatch(authUserId, userIdFromRequest);
-    }
-    
-    return authUserId;
-  } catch (error: any) {
-    // If Authorization header fails, check if userId was provided directly
-    // This is a fallback for backward compatibility, but less secure
-    if (userIdFromRequest) {
-      console.warn("Using userId from request without token verification - consider migrating to Authorization header");
-      return userIdFromRequest;
-    }
-    
-    throw error;
+  // A valid Firebase ID token is ALWAYS required. We never trust a raw userId
+  // from the request body/query — doing so would let anyone impersonate another
+  // user simply by passing their uid. The optional userIdFromRequest is only
+  // used as a consistency cross-check against the verified token.
+  const authUserId = await verifyAuthToken(request);
+
+  if (userIdFromRequest) {
+    verifyUserIdMatch(authUserId, userIdFromRequest);
   }
+
+  return authUserId;
 }

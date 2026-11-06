@@ -1,52 +1,21 @@
 rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    // Notes uploads - authenticated users can upload/read their own files
-    match /notes/{userId}/{fileName} {
-      // Allow read if authenticated
-      allow read: if request.auth != null;
-      // Allow write only if the user is uploading to their own folder
-      // and file size is less than 50MB
-      allow write: if request.auth != null 
-                   && request.auth.uid == userId
-                   && request.resource.size < 50 * 1024 * 1024;
-    }
-    
-    // PYQ files - authenticated users can read, only admins can write
-    match /pyqs/{branch}/{semester}/{subject}/{fileName} {
-      // Allow read if authenticated
-      allow read: if request.auth != null;
-      // Allow write only for admin (you can add admin check later)
-      allow write: if false; // Disable writes for now - upload via script only
-    }
-    
-    // Results uploads - authenticated users can upload/read their own files
-    match /results/{userId}/{fileName} {
-      // Allow read if authenticated
-      allow read: if request.auth != null;
-      // Allow write only if the user is uploading to their own folder
-      // and file size is less than 50MB
-      allow write: if request.auth != null 
-                   && request.auth.uid == userId
-                   && request.resource.size < 50 * 1024 * 1024;
-    }
-    
-    // Student Resource Book - authenticated users can read, only admins can write
-    match /student-resource-book/{fileName} {
-      // Allow read if authenticated
-      allow read: if request.auth != null;
-      // Allow write only for admin (you can add admin check later)
-      allow write: if false; // Disable writes for now - upload via Firebase Console or script
-    }
-    
-    // Default: deny all other access
-    match /{allPaths=**} {
-      allow read, write: if false;
-    }
-  }
-}
 service cloud.firestore {
   match /databases/{database}/documents {
+    // True only when an update touches nothing beyond the listed fields.
+    // Used so anyone can bump shared counters (likes/views/downloads) without
+    // being able to rewrite the rest of a document they don't own.
+    function onlyFields(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // True when the signed-in user is one of the two people in a match. Used to
+    // keep matrimony DMs private to their participants.
+    function isMatchParticipant(matchId) {
+      let m = get(/databases/$(database)/documents/matrimonyMatches/$(matchId)).data;
+      return request.auth != null
+        && (m.user1Id == request.auth.uid || m.user2Id == request.auth.uid);
+    }
+
     // Users collection - users can read/write their own document
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
@@ -146,57 +115,95 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Notes - all authenticated users can read, only uploader can delete
+    // Notes - all authenticated users can read; only the uploader can edit/delete.
+    // Anyone may bump the view/download counters.
     match /notes/{noteId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.uploaderId == request.auth.uid;
+      allow update: if request.auth != null && (
+        (resource.data.uploaderId == request.auth.uid
+          && request.resource.data.uploaderId == resource.data.uploaderId)
+        || onlyFields(['views', 'downloads', 'totalRatings', 'averageRating', 'updatedAt'])
+      );
       allow delete: if request.auth != null && resource.data.uploaderId == request.auth.uid;
     }
     
-    // Note ratings - users can read all, write their own
+    // Note ratings - users can read all, write only their own rating doc
     match /noteRatings/{ratingId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
     }
     
-    // Exam Survival Kits - all authenticated users can read/write
+    // Exam Survival Kits - authenticated users can read/create; only the
+    // download counter can be updated by others; deletion via Admin SDK only.
     match /examSurvivalKits/{kitId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && onlyFields(['downloads', 'updatedAt']);
+      allow delete: if false;
     }
     
-    // Allow all authenticated users to read PYQs
+    // PYQs - authenticated users can read/create; only the download counter can
+    // be bumped; deletion/moderation happens via the Admin SDK.
     match /pyqs/{pyqId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null; // Update this for admin-only later
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && onlyFields(['downloadCount', 'updatedAt']);
+      allow delete: if false;
     }
     
-    // Allow all authenticated users to read/write events
+    // Events - public read; authenticated users can create. Edits/deletes are
+    // limited to the creator (falls back to Admin SDK for older docs).
     match /events/{eventId} {
       allow read: if true; // Public read
-      allow write: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null
+        && resource.data.createdBy == request.auth.uid;
     }
     
-    // Allow all authenticated users to read/write confessions
-    // Users can only delete their own confessions
-    match /confessions/{confessionId} {
-      allow read: if true; // Public read
+    // Campus Voices — anonymous student posts. Anyone can bump like/report
+    // counters; only the author can edit the post body or delete it.
+    match /campusVoices/{voiceId} {
+      allow read: if true;
       allow create: if request.auth != null;
-      allow update: if request.auth != null;
+      allow update: if request.auth != null && (
+        resource.data.authorId == request.auth.uid
+        || onlyFields(['likes', 'reports', 'updatedAt'])
+      );
       allow delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
-    
-    // Confession likes - users can read all, write their own
-    match /confessionLikes/{likeId} {
-      allow read: if true; // Public read
-      allow write: if request.auth != null;
+
+    match /campusVoiceLikes/{likeId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update: if false;
     }
-    
-    // Confession reports - users can read all, write their own
+
+    match /campusVoiceReports/{reportId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Legacy confession collections (deprecated, kept read-only)
+    match /confessions/{confessionId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /confessionLikes/{likeId} {
+      allow read: if true;
+      allow write: if false;
+    }
     match /confessionReports/{reportId} {
-      allow read: if true; // Public read (for moderation)
-      allow write: if request.auth != null;
+      allow read: if true;
+      allow write: if false;
     }
     
     // Allow authenticated users to read/write rooms
@@ -205,9 +212,10 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
     
-    // Matrimony profiles - users can read all active profiles, write their own
+    // Matrimony profiles - only signed-in users can browse profiles (they hold
+    // personal data), and you can only write your own.
     match /matrimonyProfiles/{userId} {
-      allow read: if true; // Public read for matching
+      allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
     
@@ -223,16 +231,23 @@ service cloud.firestore {
       );
     }
     
-    // Matrimony chats - users can read/write messages in their matches
+    // Matrimony chats - only the two people in the match can read the thread,
+    // and you can only send messages as yourself. Messages are immutable.
     match /matrimonyChats/{messageId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null;
+      allow read: if request.auth != null && isMatchParticipant(resource.data.matchId);
+      allow create: if request.auth != null
+        && request.resource.data.senderId == request.auth.uid
+        && isMatchParticipant(request.resource.data.matchId);
+      allow update, delete: if false;
     }
     
-    // Matrimony reports - users can write reports
+    // Matrimony reports - a user can file a report as themselves; reads are
+    // reserved for moderation via the Admin SDK.
     match /matrimonyReports/{reportId} {
-      allow read: if request.auth != null; // For moderation
-      allow write: if request.auth != null;
+      allow read: if false;
+      allow create: if request.auth != null
+        && request.resource.data.reporterId == request.auth.uid;
+      allow update, delete: if false;
     }
     
     // Results - users can read/write their own results
@@ -243,12 +258,32 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     
-    // Canteen Orders - users can read/write their own orders
+    // Canteen Orders - readable by the owner only. All writes go through the
+    // server (Admin SDK), which sets status/paymentVerified ONLY after a valid
+    // Razorpay signature. Blocking client writes stops a user from marking
+    // their own order "completed" without actually paying.
     match /canteenOrders/{orderId} {
-      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+
+    // Beta feedback — authenticated users can submit; only admins read via Firebase Console
+    match /betaFeedback/{feedbackId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.email is string
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && request.resource.data.category in ['bug', 'feature', 'confusing', 'general', 'praise']
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 10
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.pagePath is string
+        && request.resource.data.createdAt is timestamp
+        && (!('username' in request.resource.data) || request.resource.data.username is string)
+        && (!('userAgent' in request.resource.data) || request.resource.data.userAgent is string);
+      allow read, update, delete: if false;
     }
   }
 }

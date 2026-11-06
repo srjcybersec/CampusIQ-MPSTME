@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth/context";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "@/lib/firebase/config";
 import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 
 export function GoogleCalendarSync() {
   const { user } = useAuth();
@@ -187,7 +188,7 @@ export function GoogleCalendarSync() {
 
       const tokens = tokensDoc.data();
       
-      const response = await fetch("/api/calendar/sync", {
+      const response = await authedFetch("/api/calendar/sync", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

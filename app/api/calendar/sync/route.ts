@@ -3,6 +3,7 @@ import { createCalendarEvent } from "@/lib/google-calendar/client";
 import { TimetableEntry } from "@/lib/data/timetable";
 import { format, addDays, startOfWeek } from "date-fns";
 import { initializeAdmin } from "@/lib/firebase/admin";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 
 /**
@@ -22,7 +23,6 @@ export async function POST(request: NextRequest) {
     }
     const accessToken = body.accessToken;
     const refreshToken = body.refreshToken;
-    const userId = body.userId;
 
     if (!accessToken) {
       return NextResponse.json(
@@ -31,10 +31,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!userId) {
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, body.userId);
+    } catch (error: any) {
       return NextResponse.json(
-        { error: "User ID required" },
-        { status: 400 }
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 

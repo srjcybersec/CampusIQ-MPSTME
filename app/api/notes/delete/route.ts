@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
 import { getFirestore } from "firebase-admin/firestore";
+import { getAuthenticatedUserId } from "@/lib/middleware/auth";
 
 // Initialize Firebase Admin for server-side operations
 let adminStorage: any = null;
@@ -81,12 +82,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { noteId, userId, fileUrl } = await request.json();
+    const { noteId, userId: bodyUserId, fileUrl } = await request.json();
 
-    if (!noteId || !userId) {
+    if (!noteId) {
       return NextResponse.json(
-        { error: "Note ID and User ID are required" },
+        { error: "Note ID is required" },
         { status: 400 }
+      );
+    }
+
+    let userId: string;
+    try {
+      userId = await getAuthenticatedUserId(request, bodyUserId);
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: error.message || "Authentication required" },
+        { status: 401 }
       );
     }
 

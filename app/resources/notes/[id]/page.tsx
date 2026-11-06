@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { NoteQA } from "@/components/resources/note-qa";
 import {
   FileText,
   Download,
@@ -22,6 +21,7 @@ import {
 import { getNote, getUserRating, rateNote, incrementNoteViews, incrementNoteDownloads } from "@/lib/firebase/notes";
 import { Note } from "@/lib/types/notes";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 import { formatDistanceToNow } from "date-fns";
 
 function NoteDetailContent() {
@@ -138,7 +138,7 @@ function NoteDetailContent() {
 
     setIsDeleting(true);
     try {
-      const response = await fetch("/api/notes/delete", {
+      const response = await authedFetch("/api/notes/delete", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -461,11 +461,6 @@ function NoteDetailContent() {
               </div>
             </CardContent>
           </Card>
-
-          {/* AI Q&A */}
-          <div className="relative z-10">
-            <NoteQA note={note} />
-          </div>
         </div>
       </main>
     </div>

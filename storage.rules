@@ -1,0 +1,39 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Notes uploads - authenticated users can read shared notes; users can only
+    // write into their own folder (max 50MB).
+    match /notes/{userId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 50 * 1024 * 1024;
+    }
+
+    // PYQ files - authenticated users can read; uploads happen via a script/admin.
+    match /pyqs/{branch}/{semester}/{subject}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Results uploads - private academic records: only the owner can read or
+    // write their own files (max 50MB).
+    match /results/{userId}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 50 * 1024 * 1024;
+    }
+
+    // Student Resource Book - authenticated users can read; uploads via console/script.
+    match /student-resource-book/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Default: deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

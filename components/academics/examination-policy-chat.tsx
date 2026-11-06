@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, MessageSquare, AlertCircle } from "lucide-react";
-import { academicEngine } from "@/lib/gemini/client";
+import { getFriendlyAiError } from "@/lib/ai/client-gemini-guard";
+import { useAuth } from "@/lib/auth/context";
 
 interface Message {
   id: string;
@@ -15,6 +16,7 @@ interface Message {
 }
 
 export function ExaminationPolicyChat() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -61,27 +63,37 @@ export function ExaminationPolicyChat() {
     ]);
 
     try {
-      const response = await academicEngine.answerExaminationPolicyQuestion(input.trim());
-      
-      // Remove loading message and add response
+      const res = await fetch("/api/academics/examination-policy/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: input.trim(),
+          userId: user?.uid,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || getFriendlyAiError(data));
+      }
+
       setMessages((prev) =>
         prev
           .filter((msg) => msg.id !== loadingMessageId)
           .concat({
             id: Date.now().toString(),
             role: "assistant",
-            content: response,
+            content: data.answer,
           })
       );
     } catch (error: any) {
-      // Remove loading message and add error
       setMessages((prev) =>
         prev
           .filter((msg) => msg.id !== loadingMessageId)
           .concat({
             id: Date.now().toString(),
             role: "assistant",
-            content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+            content: error.message || "Sorry, I couldn't answer that. Please try again.",
           })
       );
     } finally {
