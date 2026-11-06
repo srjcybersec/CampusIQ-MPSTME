@@ -62,7 +62,7 @@ function CommunityPageContent() {
             </Card>
           </motion.div>
 
-          {/* Confessions Page */}
+          {/* Campus Voices */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -78,15 +78,15 @@ function CommunityPageContent() {
                   >
                     <MessageSquare className="w-6 h-6 text-white" />
                   </motion.div>
-                  Confessions
+                  Campus Voices
                 </CardTitle>
                 <CardDescription>
-                  Anonymous campus confessions and discussions
+                  Anonymous campus thoughts, shout-outs, and gratitude
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-[#D4D4D8] mb-4">
-                  Share your thoughts anonymously. Post confessions in categories like Unsent Messages, College Truths, Almost Confessed, Guilty Pleasures, and Gratitude Notes. All content is moderated for safety.
+                  Share your thoughts anonymously or read curated campus posts — reflections, shout-outs, gratitude notes, and more. All content is moderated for safety.
                 </p>
                 <div className="space-y-2 mb-4">
                   <motion.div
@@ -105,17 +105,17 @@ function CommunityPageContent() {
                     transition={{ duration: 0.2 }}
                   >
                     <p className="text-sm text-white italic">
-                      &quot;Anyone else struggling with the Data Structures assignment? Let&apos;s form a study group!&quot;
+                      &quot;Anyone else forming a study group for Data Structures? Let&apos;s meet in the common area after 5 PM.&quot;
                     </p>
-                    <p className="text-xs text-[#D4D4D8] mt-1">— College Truths</p>
+                    <p className="text-xs text-[#D4D4D8] mt-1">— Campus Truths</p>
                   </motion.div>
                 </div>
                 <Button
                   variant="default"
-                  onClick={() => window.location.href = '/community/confessions'}
+                  onClick={() => window.location.href = '/community/campus-voices'}
                   className="w-full"
                 >
-                  View & Post Confessions
+                  View & Share Campus Voices
                 </Button>
               </CardContent>
             </Card>

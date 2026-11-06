@@ -1,48 +1,47 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ConfessionCard } from "./confession-card";
-import { Confession, ConfessionCategory } from "@/lib/types/confession";
-import { getConfessions } from "@/lib/firebase/confessions";
+import { CampusVoiceCard } from "./campus-voice-card";
+import { CampusVoiceCategory, CAMPUS_VOICE_CATEGORIES, postToItem } from "@/lib/types/campus-voice";
+import { getCuratedCampusVoices } from "@/lib/data/campus-voices";
+import { getCampusVoicePosts } from "@/lib/firebase/campus-voices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CONFESSION_CATEGORIES } from "@/lib/types/confession";
 import { RefreshCw, Loader2 } from "lucide-react";
 
-export function ConfessionFeed() {
-  const [confessions, setConfessions] = useState<Confession[]>([]);
+export function CampusVoiceFeed() {
+  const [selectedCategory, setSelectedCategory] = useState<CampusVoiceCategory | "all">("all");
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<ConfessionCategory | "all">("all");
   const [error, setError] = useState<string | null>(null);
+  const [voices, setVoices] = useState<ReturnType<typeof getCuratedCampusVoices>>([]);
 
-  const loadConfessions = useCallback(async () => {
+  const loadVoices = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await getConfessions(
-        selectedCategory === "all" ? undefined : selectedCategory,
-        50
+      const category = selectedCategory === "all" ? undefined : selectedCategory;
+      const curated = getCuratedCampusVoices(category);
+      const live = await getCampusVoicePosts(category, 50);
+      const liveItems = live.map(postToItem);
+
+      const merged = [...liveItems, ...curated].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
-      setConfessions(data);
+      setVoices(merged);
     } catch (err: any) {
-      setError(err.message || "Failed to load confessions");
-      console.error("Error loading confessions:", err);
+      setError(err.message || "Failed to load posts");
+      console.error("Error loading campus voices:", err);
     } finally {
       setIsLoading(false);
     }
   }, [selectedCategory]);
 
   useEffect(() => {
-    loadConfessions();
-  }, [loadConfessions]);
-
-  const handleUpdate = () => {
-    loadConfessions();
-  };
+    loadVoices();
+  }, [loadVoices]);
 
   return (
     <div className="space-y-4">
-      {/* Category Filter */}
       <Card variant="glass">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 flex-wrap">
@@ -54,12 +53,12 @@ export function ConfessionFeed() {
             >
               All
             </Button>
-            {Object.entries(CONFESSION_CATEGORIES).map(([key, value]) => (
+            {Object.entries(CAMPUS_VOICE_CATEGORIES).map(([key, value]) => (
               <Button
                 key={key}
                 variant={selectedCategory === key ? "neon" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategory(key as ConfessionCategory)}
+                onClick={() => setSelectedCategory(key as CampusVoiceCategory)}
                 className="flex items-center gap-1 whitespace-nowrap"
               >
                 <span>{value.emoji}</span>
@@ -70,7 +69,7 @@ export function ConfessionFeed() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={loadConfessions}
+                onClick={loadVoices}
                 disabled={isLoading}
                 className="flex items-center gap-2 text-white hover:text-[#D4D4D8]"
                 title="Refresh"
@@ -83,45 +82,36 @@ export function ConfessionFeed() {
         </CardContent>
       </Card>
 
-      {/* Loading State */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-[#D4D4D8]" />
         </div>
       )}
 
-      {/* Error State */}
       {error && !isLoading && (
         <Card variant="glass">
           <CardContent className="p-6 text-center">
             <p className="text-red-400 mb-4">{error}</p>
-            <Button onClick={loadConfessions} variant="outline">
+            <Button onClick={loadVoices} variant="outline">
               Try Again
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Confessions List */}
       {!isLoading && !error && (
         <>
-          {confessions.length === 0 ? (
+          {voices.length === 0 ? (
             <Card variant="glass">
               <CardContent className="p-12 text-center">
-                <p className="text-white mb-2">No confessions yet</p>
-                <p className="text-sm text-[#D4D4D8]">
-                  Be the first to share your thoughts!
-                </p>
+                <p className="text-white mb-2">No posts in this category yet</p>
+                <p className="text-sm text-[#D4D4D8]">Be the first to share your voice!</p>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-4">
-              {confessions.map((confession) => (
-                <ConfessionCard
-                  key={confession.id}
-                  confession={confession}
-                  onUpdate={handleUpdate}
-                />
+              {voices.map((voice) => (
+                <CampusVoiceCard key={voice.id} voice={voice} onUpdate={loadVoices} />
               ))}
             </div>
           )}

@@ -1,6 +1,6 @@
 /**
  * Content Moderation Utility
- * Checks for prohibited content in confessions
+ * Checks for prohibited content in campus voice posts
  */
 
 const PROHIBITED_PATTERNS = [
@@ -35,11 +35,11 @@ export function moderateContent(content: string): ModerationResult {
 
   // Length check
   if (content.length < MIN_LENGTH) {
-    errors.push(`Confession must be at least ${MIN_LENGTH} characters long`);
+    errors.push(`Post must be at least ${MIN_LENGTH} characters long`);
   }
   
   if (content.length > MAX_LENGTH) {
-    errors.push(`Confession must be less than ${MAX_LENGTH} characters`);
+    errors.push(`Post must be less than ${MAX_LENGTH} characters`);
   }
 
   // Check for prohibited patterns

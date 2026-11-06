@@ -3,21 +3,35 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Confession, CONFESSION_CATEGORIES, REPORT_REASONS } from "@/lib/types/confession";
-import { likeConfession, hasUserLiked, reportConfession, deleteConfession } from "@/lib/firebase/confessions";
+import {
+  CampusVoiceItem,
+  CAMPUS_VOICE_CATEGORIES,
+  REPORT_REASONS,
+} from "@/lib/types/campus-voice";
+import {
+  likeCampusVoice,
+  hasUserLikedVoice,
+  reportCampusVoice,
+  deleteCampusVoice,
+} from "@/lib/firebase/campus-voices";
 import { useAuth } from "@/lib/auth/context";
 import { Heart, Flag, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-interface ConfessionCardProps {
-  confession: Confession;
+interface CampusVoiceCardProps {
+  voice: CampusVoiceItem;
   onUpdate?: () => void;
 }
 
-export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
+function curatedLikeKey(voiceId: string, userId: string) {
+  return `campus-voice-like:${userId}:${voiceId}`;
+}
+
+export function CampusVoiceCard({ voice, onUpdate }: CampusVoiceCardProps) {
   const { user } = useAuth();
+  const categoryInfo = CAMPUS_VOICE_CATEGORIES[voice.category];
   const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(confession.likes);
+  const [likesCount, setLikesCount] = useState(voice.likes);
   const [isLiking, setIsLiking] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
@@ -25,35 +39,47 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const categoryInfo = CONFESSION_CATEGORIES[confession.category];
-
   const checkLikeStatus = useCallback(async () => {
     if (!user) return;
+    if (voice.isCurated) {
+      setIsLiked(localStorage.getItem(curatedLikeKey(voice.id, user.uid)) === "1");
+      return;
+    }
     try {
-      const liked = await hasUserLiked(confession.id, user.uid);
-      setIsLiked(liked);
+      setIsLiked(await hasUserLikedVoice(voice.id, user.uid));
     } catch (error) {
       console.error("Error checking like status:", error);
     }
-  }, [user, confession.id]);
+  }, [user, voice.id, voice.isCurated]);
+
+  useEffect(() => {
+    checkLikeStatus();
+  }, [checkLikeStatus]);
 
   const handleLike = async () => {
     if (!user) {
-      alert("Please log in to like confessions");
+      alert("Please log in to like posts");
       return;
     }
-
     if (isLiking) return;
 
     setIsLiking(true);
     try {
-      await likeConfession(confession.id, user.uid);
-      setIsLiked(!isLiked);
-      setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
-      if (onUpdate) onUpdate();
+      if (voice.isCurated) {
+        const key = curatedLikeKey(voice.id, user.uid);
+        const next = !isLiked;
+        setIsLiked(next);
+        setLikesCount((prev) => (next ? prev + 1 : Math.max(voice.likes, prev - 1)));
+        if (next) localStorage.setItem(key, "1");
+        else localStorage.removeItem(key);
+      } else {
+        await likeCampusVoice(voice.id, user.uid);
+        setIsLiked(!isLiked);
+        setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+        onUpdate?.();
+      }
     } catch (error: any) {
-      console.error("Error liking confession:", error);
-      alert(error.message || "Failed to like confession");
+      alert(error.message || "Failed to like post");
     } finally {
       setIsLiking(false);
     }
@@ -61,10 +87,9 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
 
   const handleReport = async () => {
     if (!user) {
-      alert("Please log in to report confessions");
+      alert("Please log in to report posts");
       return;
     }
-
     if (!reportReason) {
       alert("Please select a reason for reporting");
       return;
@@ -72,69 +97,54 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
 
     setIsReporting(true);
     try {
-      await reportConfession(confession.id, user.uid, reportReason);
-      alert("Thank you for reporting. We'll review this confession.");
+      if (voice.isCurated) {
+        alert("Thank you for your report. We'll review this post.");
+      } else {
+        await reportCampusVoice(voice.id, user.uid, reportReason);
+        alert("Thank you for reporting. We'll review this post.");
+        onUpdate?.();
+      }
       setShowReportModal(false);
       setReportReason("");
-      if (onUpdate) onUpdate();
     } catch (error: any) {
-      alert(error.message || "Failed to report confession");
+      alert(error.message || "Failed to report post");
     } finally {
       setIsReporting(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!user) {
-      alert("Please log in to delete confessions");
-      return;
-    }
+    if (!user || voice.isCurated) return;
 
     setIsDeleting(true);
     try {
-      await deleteConfession(confession.id, user.uid);
-      alert("Confession deleted successfully");
-      if (onUpdate) onUpdate();
+      await deleteCampusVoice(voice.id, user.uid);
+      onUpdate?.();
     } catch (error: any) {
-      alert(error.message || "Failed to delete confession");
+      alert(error.message || "Failed to delete post");
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
   };
 
-  const isAuthor = user && confession.authorId === user.uid;
-
-  const getTimeAgo = () => {
-    try {
-      const timestamp = confession.createdAt?.toDate?.() || new Date(confession.createdAt);
-      return formatDistanceToNow(timestamp, { addSuffix: true });
-    } catch {
-      return "recently";
-    }
-  };
+  const isAuthor = !voice.isCurated && user && voice.authorId === user.uid;
+  const timeAgo = formatDistanceToNow(new Date(voice.createdAt), { addSuffix: true });
 
   return (
     <>
       <Card className="shadow-soft hover:shadow-premium transition-all duration-300">
         <CardContent className="p-5">
-          {/* Category Badge */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="text-xl">{categoryInfo.emoji}</span>
-              <span className="text-sm font-medium text-white">
-                {categoryInfo.label}
-              </span>
+              <span className="text-sm font-medium text-white">{categoryInfo.label}</span>
             </div>
-            <span className="text-xs text-[#D4D4D8]">{getTimeAgo()}</span>
+            <span className="text-xs text-[#D4D4D8]">{timeAgo}</span>
           </div>
 
-          {/* Content */}
-          <p className="text-white mb-4 leading-relaxed whitespace-pre-wrap">
-            {confession.content}
-          </p>
+          <p className="text-white mb-4 leading-relaxed whitespace-pre-wrap">{voice.content}</p>
 
-          {/* Actions */}
           <div className="flex items-center justify-between pt-3 border-t border-[#222222]">
             <Button
               variant="ghost"
@@ -177,30 +187,19 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <Card variant="glass" className="max-w-md w-full">
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4 text-white">Delete Confession</h3>
+              <h3 className="text-lg font-semibold mb-4 text-white">Delete Post</h3>
               <p className="text-sm text-[#D4D4D8] mb-4">
-                Are you sure you want to delete this confession? This action cannot be undone.
+                Are you sure you want to delete this post? This cannot be undone.
               </p>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  disabled={isDeleting}
-                  className="flex-1"
-                >
+                <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} disabled={isDeleting} className="flex-1">
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  variant="neon"
-                  className="flex-1"
-                >
+                <Button onClick={handleDelete} disabled={isDeleting} variant="neon" className="flex-1">
                   {isDeleting ? "Deleting..." : "Delete"}
                 </Button>
               </div>
@@ -209,15 +208,12 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
         </div>
       )}
 
-      {/* Report Modal */}
       {showReportModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <Card variant="glass" className="max-w-md w-full">
             <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4 text-white">Report Confession</h3>
-              <p className="text-sm text-[#D4D4D8] mb-4">
-                Why are you reporting this confession?
-              </p>
+              <h3 className="text-lg font-semibold mb-4 text-white">Report Post</h3>
+              <p className="text-sm text-[#D4D4D8] mb-4">Why are you reporting this post?</p>
               <div className="space-y-2 mb-4">
                 {REPORT_REASONS.map((reason) => (
                   <button
@@ -245,12 +241,7 @@ export function ConfessionCard({ confession, onUpdate }: ConfessionCardProps) {
                 >
                   Cancel
                 </Button>
-                <Button
-                  onClick={handleReport}
-                  disabled={!reportReason || isReporting}
-                  variant="neon"
-                  className="flex-1"
-                >
+                <Button onClick={handleReport} disabled={!reportReason || isReporting} variant="neon" className="flex-1">
                   {isReporting ? "Reporting..." : "Report"}
                 </Button>
               </div>
