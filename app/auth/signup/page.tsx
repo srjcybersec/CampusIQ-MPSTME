@@ -17,10 +17,12 @@ import {
   ALLOWED_EMAIL_DOMAIN,
   validateRegistration,
   normalizeUsername,
+  SIGNUPS_OPEN,
   type RegistrationInput,
 } from "@/lib/auth/registration";
 import { Mail, Lock, User, IdCard, AtSign, Phone, GraduationCap, BookOpen, CheckCircle2, XCircle, Loader2, MailCheck, RefreshCw } from "lucide-react";
 import { CampusIQBrand } from "@/components/brand/campusiq-brand";
+import { SignupsClosedNotice } from "@/components/auth/signups-closed-notice";
 
 type FormState = RegistrationInput & { confirmPassword: string };
 type Step = "form" | "otp" | "done";
@@ -39,6 +41,34 @@ const initialForm: FormState = {
 };
 
 export default function SignupPage() {
+  return SIGNUPS_OPEN ? <SignupForm /> : <SignupsClosed />;
+}
+
+function SignupsClosed() {
+  return (
+    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center p-3 sm:p-4 safe-padding">
+      <div className="w-full max-w-md relative z-10">
+        <div className="flex items-center justify-center mb-6">
+          <CampusIQBrand variant="auth" />
+        </div>
+        <Card variant="glass" className="shadow-premium">
+          <CardHeader>
+            <CardTitle>Sign-ups closed</CardTitle>
+            <CardDescription>We are not accepting new accounts right now.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <SignupsClosedNotice />
+            <Link href="/auth/login" className="block">
+              <Button variant="neon" className="w-full">Go to sign in</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function SignupForm() {
   const router = useRouter();
   const { user } = useAuth();
   const [step, setStep] = useState<Step>("form");

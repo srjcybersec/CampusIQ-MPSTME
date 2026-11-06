@@ -7,6 +7,13 @@
 // Only MPSTME students (official college email domain) may register.
 export const ALLOWED_EMAIL_DOMAIN = "nmims.in";
 
+// New account creation is closed unless NEXT_PUBLIC_SIGNUPS_OPEN is "true".
+// Enforced by the registration API routes; the UI reads it to show a notice.
+export const SIGNUPS_OPEN = process.env.NEXT_PUBLIC_SIGNUPS_OPEN === "true";
+
+export const SIGNUPS_CLOSED_MESSAGE =
+  "New account sign-ups are temporarily closed. Existing users can continue to sign in.";
+
 // Programs offered at MPSTME (extend as needed).
 export const PROGRAMS = [
   "MBA Tech",

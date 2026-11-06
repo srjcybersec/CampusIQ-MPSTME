@@ -3,6 +3,8 @@ import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
 import {
   normalizeUsername,
   validateRegistration,
+  SIGNUPS_OPEN,
+  SIGNUPS_CLOSED_MESSAGE,
   type RegistrationInput,
 } from "@/lib/auth/registration";
 import { resolveReservation } from "@/lib/auth/reservations";
@@ -18,6 +20,10 @@ export const dynamic = "force-dynamic";
  * the code. NO account is created here.
  */
 export async function POST(request: NextRequest) {
+  if (!SIGNUPS_OPEN) {
+    return NextResponse.json({ error: SIGNUPS_CLOSED_MESSAGE }, { status: 403 });
+  }
+
   try {
     const body = (await request.json()) as Partial<RegistrationInput>;
 

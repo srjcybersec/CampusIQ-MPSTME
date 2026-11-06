@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
-import { validatePassword } from "@/lib/auth/registration";
+import { validatePassword, SIGNUPS_OPEN, SIGNUPS_CLOSED_MESSAGE } from "@/lib/auth/registration";
 import { resolveReservation } from "@/lib/auth/reservations";
 import { verifyPendingOtp, pendingRegistrationRef } from "@/lib/auth/pending-registration";
 
@@ -14,6 +14,10 @@ export const dynamic = "force-dynamic";
  * reserves the username + SAP ID, and writes the profile — atomically.
  */
 export async function POST(request: NextRequest) {
+  if (!SIGNUPS_OPEN) {
+    return NextResponse.json({ error: SIGNUPS_CLOSED_MESSAGE }, { status: 403 });
+  }
+
   let createdUid: string | null = null;
 
   try {

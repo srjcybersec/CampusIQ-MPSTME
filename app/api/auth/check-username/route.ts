@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
-import { normalizeUsername, validateUsername } from "@/lib/auth/registration";
+import { normalizeUsername, validateUsername, SIGNUPS_OPEN, SIGNUPS_CLOSED_MESSAGE } from "@/lib/auth/registration";
 
 /**
  * Live username availability check for the signup form.
  * GET /api/auth/check-username?username=someone
  */
 export async function GET(request: NextRequest) {
+  if (!SIGNUPS_OPEN) {
+    return NextResponse.json({ error: SIGNUPS_CLOSED_MESSAGE }, { status: 403 });
+  }
+
   try {
     const username = request.nextUrl.searchParams.get("username") || "";
 

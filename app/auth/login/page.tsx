@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { auth } from "@/lib/firebase/config";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { useAuth } from "@/lib/auth/context";
-import { ALLOWED_EMAIL_DOMAIN } from "@/lib/auth/registration";
+import { ALLOWED_EMAIL_DOMAIN, SIGNUPS_OPEN } from "@/lib/auth/registration";
 import { Lock, Mail } from "lucide-react";
 import { CampusIQBrand } from "@/components/brand/campusiq-brand";
+import { SignupsClosedNotice } from "@/components/auth/signups-closed-notice";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -110,6 +111,7 @@ export default function LoginPage() {
             <CardDescription>Sign in with your MPSTME email</CardDescription>
           </CardHeader>
           <CardContent>
+            {!SIGNUPS_OPEN && <SignupsClosedNotice className="mb-5" />}
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
@@ -151,12 +153,14 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <p className="text-sm text-[#D4D4D8] text-center mt-6">
-              New to CampusIQ?{" "}
-              <Link href="/auth/signup" className="text-[#7C7CFF] hover:text-[#38BDF8] font-semibold">
-                Create an account
-              </Link>
-            </p>
+            {SIGNUPS_OPEN && (
+              <p className="text-sm text-[#D4D4D8] text-center mt-6">
+                New to CampusIQ?{" "}
+                <Link href="/auth/signup" className="text-[#7C7CFF] hover:text-[#38BDF8] font-semibold">
+                  Create an account
+                </Link>
+              </p>
+            )}
           </CardContent>
         </Card>
         </motion.div>
