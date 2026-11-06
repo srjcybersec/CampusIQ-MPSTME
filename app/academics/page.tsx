@@ -1,54 +1,46 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { MainNav } from "@/components/navigation/main-nav";
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExaminationPolicyChat } from "@/components/academics/examination-policy-chat";
 import { AttendanceTracker } from "@/components/academics/attendance-tracker";
-import { PYQSolver } from "@/components/academics/pyq-solver";
 import { StudentResourceBookChat } from "@/components/academics/student-resource-book-chat";
 import { ResultViewerAnalyzer } from "@/components/academics/result-viewer-analyzer";
-import { Loader2, BookOpen, FileQuestion, HelpCircle } from "lucide-react";
-import { Branch, Semester } from "@/lib/types/pyqs";
+import { Loader2, BookOpen } from "lucide-react";
 
 function AcademicsPageContent() {
+  const searchParams = useSearchParams();
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [activeSection, setActiveSection] = useState<"examination" | "attendance" | "student-resource-book" | null>(null);
-  const [pyqs, setPyqs] = useState<any[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [subjects, setSubjects] = useState<string[]>([]);
-  const [isLoadingPyqs, setIsLoadingPyqs] = useState(false);
 
-  const loadPYQs = useCallback(async () => {
-    setIsLoadingPyqs(true);
-    try {
-      // Load branches first (fast, lightweight)
-      const branchesRes = await fetch("/api/pyqs?action=branches");
-      const branchesData = await branchesRes.json();
-      setBranches(branchesData.branches || []);
-
-      // Don't load all PYQs upfront - let the component handle filtering
-      // This makes initial load much faster
-      setPyqs([]);
-      setSubjects([]);
-    } catch (error) {
-      console.error("Error loading PYQs:", error);
-    } finally {
-      setIsLoadingPyqs(false);
-    }
-  }, []);
-
+  // Deep-link support for SNEHA voice commands (?section=attendance|results|...)
   useEffect(() => {
-    loadPYQs();
-  }, [loadPYQs]);
+    const section = searchParams.get("section");
+    if (!section) return;
 
+    if (section === "attendance") {
+      setActiveSection("attendance");
+    } else if (section === "examination-policy" || section === "examination" || section === "policy") {
+      setActiveSection("examination");
+    } else if (section === "student-resource-book" || section === "srb") {
+      setActiveSection("student-resource-book");
+    }
+
+    if (section === "results" && resultsRef.current) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       <MainNav />
-      
+
       <main className="container mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 relative z-20 max-w-full">
         <div className="max-w-4xl mx-auto w-full">
           <motion.div
@@ -75,7 +67,6 @@ function AcademicsPageContent() {
             </div>
           </motion.div>
 
-          {/* Policy Selection Buttons */}
           <motion.div
             className="mb-6"
             initial={{ opacity: 0, y: 20 }}
@@ -110,7 +101,6 @@ function AcademicsPageContent() {
             </div>
           </motion.div>
 
-          {/* Examination Policy Chat */}
           {activeSection === "examination" && (
             <motion.div
               className="mb-6"
@@ -122,7 +112,6 @@ function AcademicsPageContent() {
             </motion.div>
           )}
 
-          {/* Attendance Tracker */}
           {activeSection === "attendance" && (
             <motion.div
               className="mb-6"
@@ -134,7 +123,6 @@ function AcademicsPageContent() {
             </motion.div>
           )}
 
-          {/* Student Resource Book Chat */}
           {activeSection === "student-resource-book" && (
             <motion.div
               className="mb-6"
@@ -146,31 +134,12 @@ function AcademicsPageContent() {
             </motion.div>
           )}
 
-          {/* PYQ Solver Section */}
           <motion.div
+            ref={resultsRef}
             className="mt-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            {isLoadingPyqs ? (
-              <Card variant="glass">
-                <CardContent className="p-12 text-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-4" />
-                  <p className="text-[#D4D4D8]">Loading PYQs...</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <PYQSolver pyqs={pyqs} branches={branches} subjects={subjects} />
-            )}
-          </motion.div>
-
-          {/* Result Viewer and Analyser */}
-          <motion.div
-            className="mt-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
           >
             <ResultViewerAnalyzer />
           </motion.div>
@@ -183,7 +152,15 @@ function AcademicsPageContent() {
 export default function AcademicsPage() {
   return (
     <ProtectedRoute>
-      <AcademicsPageContent />
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-black flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+          </div>
+        }
+      >
+        <AcademicsPageContent />
+      </Suspense>
     </ProtectedRoute>
   );
 }

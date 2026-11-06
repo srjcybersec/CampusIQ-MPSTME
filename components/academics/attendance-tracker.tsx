@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, MessageSquare, Calculator, AlertCircle, CheckCircle, XCircle } from "lucide-react";
-import { academicEngine } from "@/lib/gemini/client";
+import { getFriendlyAiError } from "@/lib/ai/client-gemini-guard";
 import { useAuth } from "@/lib/auth/context";
+import { authedFetch } from "@/lib/auth/authed-fetch";
 import { TimetableEntry } from "@/lib/data/timetable";
 
 interface Subject {
@@ -136,7 +137,7 @@ export function AttendanceTracker() {
 
     setIsLoadingSubjects(true);
     try {
-      const response = await fetch(`/api/schedule/get?userId=${user.uid}`);
+      const response = await authedFetch(`/api/schedule/get?userId=${user.uid}`);
       const data = await response.json();
       
       if (data.success && data.entries && data.entries.length > 0) {
@@ -225,12 +226,24 @@ export function AttendanceTracker() {
     ]);
 
     try {
-      const summary = await academicEngine.generateAttendanceSummary(results, subjects);
+      const res = await fetch("/api/academics/attendance/summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          results,
+          subjects,
+          userId: user?.uid,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || getFriendlyAiError(data));
+      }
       setChatMessages([
         {
           id: "1",
           role: "assistant",
-          content: summary,
+          content: data.summary,
         },
       ]);
     } catch (error: any) {
@@ -285,11 +298,20 @@ export function AttendanceTracker() {
     ]);
 
     try {
-      const response = await academicEngine.answerAttendanceQuestion(
-        chatInput.trim(),
-        results as any,
-        subjects as any
-      );
+      const res = await fetch("/api/academics/attendance/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: userMessage.content,
+          results,
+          subjects,
+          userId: user?.uid,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || getFriendlyAiError(data));
+      }
 
       setChatMessages((prev) =>
         prev
@@ -297,7 +319,7 @@ export function AttendanceTracker() {
           .concat({
             id: Date.now().toString(),
             role: "assistant",
-            content: response,
+            content: data.answer,
           })
       );
     } catch (error: any) {
@@ -307,7 +329,7 @@ export function AttendanceTracker() {
           .concat({
             id: Date.now().toString(),
             role: "assistant",
-            content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+            content: error.message || "Sorry, I couldn't answer that. Please try again.",
           })
       );
     } finally {

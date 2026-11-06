@@ -1,76 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { initializeApp, getApps, cert } from "firebase-admin/app";
-import { getFirestore, Firestore } from "firebase-admin/firestore";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { PYQFilter, Branch, Semester, PYQDocument } from "@/lib/types/pyqs";
 
-// Lazy initialization of Firebase Admin
-let adminDb: Firestore | null = null;
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-function getAdminDb(): Firestore | null {
-  if (adminDb) {
-    return adminDb;
-  }
-
-  try {
-    if (!getApps().length) {
-      const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-
-      if (projectId && clientEmail && privateKey) {
-        // Handle private key formatting
-        let formattedPrivateKey = privateKey;
-        
-        // Try to parse as JSON first
-        try {
-          const parsed = JSON.parse(privateKey);
-          if (typeof parsed === "string") {
-            formattedPrivateKey = parsed;
-          }
-        } catch {
-          // Not JSON, use as-is
-        }
-        
-        // Replace escaped newlines
-        formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, "\n");
-        formattedPrivateKey = formattedPrivateKey.replace(/\\\\n/g, "\n");
-
-        initializeApp({
-          credential: cert({
-            projectId,
-            clientEmail,
-            privateKey: formattedPrivateKey,
-          }),
-        });
-        adminDb = getFirestore();
-        return adminDb;
-      } else {
-        console.warn("Firebase Admin credentials not found.");
-        return null;
-      }
-    } else {
-      adminDb = getFirestore();
-      return adminDb;
-    }
-  } catch (error) {
-    console.error("Firebase Admin initialization error:", error);
-    return null;
-  }
-}
-
-// Server-side functions using Admin SDK
 async function getPYQDocumentsAdmin(filters: PYQFilter = {}): Promise<PYQDocument[]> {
-  const db = getAdminDb();
-  if (!db) {
-    throw new Error("Firebase Admin not initialized");
-  }
+  const db = await getAdminDb();
 
-  // Fetch all documents (or with minimal filters) to avoid composite index requirements
-  // We'll do filtering and sorting client-side
   let query: FirebaseFirestore.Query = db.collection("pyqs");
 
-  // Only apply one filter at a time to avoid composite index requirements
-  // If multiple filters are needed, we'll filter client-side
   if (filters.branch && !filters.semester && !filters.subject) {
     query = query.where("branch", "==", filters.branch);
   } else if (filters.semester && !filters.branch && !filters.subject) {
@@ -78,9 +17,7 @@ async function getPYQDocumentsAdmin(filters: PYQFilter = {}): Promise<PYQDocumen
   } else if (filters.subject && !filters.branch && !filters.semester) {
     query = query.where("subject", "==", filters.subject);
   }
-  // If multiple filters, fetch all and filter client-side
 
-  // Limit to reasonable number
   query = query.limit(5000);
 
   const snapshot = await query.get();
@@ -102,38 +39,24 @@ async function getPYQDocumentsAdmin(filters: PYQFilter = {}): Promise<PYQDocumen
     });
   });
 
-  // Apply client-side filters
   let filtered = pyqs;
+  if (filters.branch) filtered = filtered.filter((pyq) => pyq.branch === filters.branch);
+  if (filters.semester) filtered = filtered.filter((pyq) => pyq.semester === filters.semester);
+  if (filters.subject) filtered = filtered.filter((pyq) => pyq.subject === filters.subject);
 
-  if (filters.branch) {
-    filtered = filtered.filter((pyq) => pyq.branch === filters.branch);
-  }
-  if (filters.semester) {
-    filtered = filtered.filter((pyq) => pyq.semester === filters.semester);
-  }
-  if (filters.subject) {
-    filtered = filtered.filter((pyq) => pyq.subject === filters.subject);
-  }
-
-  // Apply client-side search filter if provided
   if (filters.searchQuery) {
-    const queryLower = filters.searchQuery.toLowerCase();
+    const q = filters.searchQuery.toLowerCase();
     filtered = filtered.filter(
       (pyq) =>
-        pyq.subject.toLowerCase().includes(queryLower) ||
-        pyq.fileName.toLowerCase().includes(queryLower) ||
-        pyq.branch.toLowerCase().includes(queryLower)
+        pyq.subject.toLowerCase().includes(q) ||
+        pyq.fileName.toLowerCase().includes(q) ||
+        pyq.branch.toLowerCase().includes(q)
     );
   }
 
-  // Sort client-side: branch, semester, then subject
   filtered.sort((a, b) => {
-    if (a.branch !== b.branch) {
-      return a.branch.localeCompare(b.branch);
-    }
-    if (a.semester !== b.semester) {
-      return a.semester.localeCompare(b.semester);
-    }
+    if (a.branch !== b.branch) return a.branch.localeCompare(b.branch);
+    if (a.semester !== b.semester) return a.semester.localeCompare(b.semester);
     return a.subject.localeCompare(b.subject);
   });
 
@@ -147,10 +70,7 @@ async function getPYQBranchesAdmin(): Promise<Branch[]> {
   return Array.from(branches).sort();
 }
 
-async function getPYQSubjectsAdmin(
-  branch?: Branch,
-  semester?: Semester
-): Promise<string[]> {
+async function getPYQSubjectsAdmin(branch?: Branch, semester?: Semester): Promise<string[]> {
   const filters: PYQFilter = {};
   if (branch) filters.branch = branch;
   if (semester) filters.semester = semester;
@@ -166,13 +86,11 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get("action");
 
-    // Get branches
     if (action === "branches") {
       const branches = await getPYQBranchesAdmin();
       return NextResponse.json({ branches });
     }
 
-    // Get subjects
     if (action === "subjects") {
       const branch = searchParams.get("branch") as Branch | null;
       const semester = searchParams.get("semester") as Semester | null;
@@ -180,7 +98,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ subjects });
     }
 
-    // Get PYQ documents with filters
     const filters: PYQFilter = {};
     const branch = searchParams.get("branch");
     const semester = searchParams.get("semester");
@@ -194,11 +111,7 @@ export async function GET(request: NextRequest) {
 
     const pyqs = await getPYQDocumentsAdmin(filters);
 
-    return NextResponse.json({
-      success: true,
-      pyqs,
-      count: pyqs.length,
-    });
+    return NextResponse.json({ success: true, pyqs, count: pyqs.length });
   } catch (error: any) {
     console.error("Error fetching PYQs:", error);
     return NextResponse.json(
